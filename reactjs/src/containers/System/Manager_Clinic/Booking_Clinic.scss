@@ -1,0 +1,52 @@
+.manage-bookings-container {
+    padding: 20px;
+
+    .m-b-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .bookings-list {
+        .booking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+
+            .booking-header {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+
+                .doctor-info, .patient-info {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+
+                    .avatar {
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 50%;
+                        margin-right: 15px;
+                    }
+
+                    div {
+                        font-size: 16px;
+                        margin: 5px 0;
+                    }
+                }
+            }
+
+            .booking-body {
+                font-size: 16px;
+                margin-top: 10px;
+                div {
+                    margin: 5px 0;
+                }
+            }
+        }
+    }
+}

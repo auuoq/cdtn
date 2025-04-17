@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#49bce2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffc10e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Vòng tròn nền -->
+  <circle cx="100" cy="100" r="90" fill="url(#grad1)" stroke="#ffffff" stroke-width="5"/>
+  
+  <!-- Biểu tượng chữ thập -->
+  <g stroke="#ffffff" stroke-width="15" stroke-linecap="round">
+    <line x1="60" y1="100" x2="140" y2="100"/>
+    <line x1="100" y1="60" x2="100" y2="140"/>
+  </g>
+  
+  <!-- Tên phòng khám (tuỳ chọn) -->
+
+  <text x="100" y="180" font-family="Arial, sans-serif" font-size="50" fill="#000000" text-anchor="middle ">
+    B CARE
+  </text>
+</svg>
