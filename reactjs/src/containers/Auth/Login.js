@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { push } from "connected-react-router";
 import * as actions from "../../store/actions";
 import { handleLoginApi } from '../../services/userService';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-// import bg from '../../asset/bg.jpg'; // Cập nhật đường dẫn nếu khác
+import { FaEye, FaEyeSlash, FaHome } from 'react-icons/fa';
+import bg from '../../../src/assets/images/bg.jpg';
 
 class Login extends Component {
   constructor(props) {
@@ -60,13 +60,37 @@ class Login extends Component {
       <div
         className="d-flex align-items-center justify-content-center"
         style={{
-        //   backgroundImage: `url(${bg})`,
+          backgroundImage: `url(${bg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           height: '100vh',
+          position: 'relative'
         }}
       >
+        <button
+          onClick={() => this.props.navigate('/home')}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            backgroundColor: '#75d5ca',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            zIndex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+            transition: 'all 0.3s ease',
+          }}
+        >
+          <FaHome />
+        </button>
+
         <div
           className="card shadow"
           style={{ width: '400px', padding: '30px', borderRadius: '10px' }}

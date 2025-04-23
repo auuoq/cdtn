@@ -1,6 +1,8 @@
 .user-register-container {
-    width: 80%;
-    max-width: 800px;
+    width: 100%;
+    max-width: 600px;
+    height: 80vh; 
+    overflow-y: auto;
     margin: 0 auto;
     padding: 2rem;
     background-color: #f9f9f9;
@@ -9,6 +11,7 @@
   
     .title {
       font-size: 2rem;
+      color: '#75d5ca';
       font-weight: bold;
       text-align: center;
       margin-bottom: 1.5rem;
@@ -29,7 +32,7 @@
         }
   
         label {
-          font-weight: 600;
+          font-weight: 400;
           margin-bottom: 0.5rem;
           display: block;
         }

@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import * as actions from "C:/hoctap/fullStack/reactjs/src/store/actions";
+import * as actions from "../../store/actions";
 import './Register.scss';
 import Lightbox from 'react-image-lightbox';
 import 'react-image-lightbox/style.css';
-import { getAllCodeService } from "C:/hoctap/fullStack/reactjs/src/services/userService";
-
+import { getAllCodeService } from "../../services/userService";
+import bg from '../../../src/assets/images/bg.jpg';
 class Register extends Component {
     constructor(props) {
         super(props);
@@ -127,110 +127,135 @@ class Register extends Component {
         let { email, password, confirmPassword, firstName, lastName, phoneNumber, address, previewImgURL, passwordMismatch, gender, genderArr } = this.state;
 
         return (
-            <div className='user-register-container'>
-                <div className='title'>Register</div>
-                <div className="user-register-body">
-                    <div className='row'>
-                        <div className='col-6'>
-                            <label>Email</label>
-                            <input className='form-control' type="email"
-                                value={email}
-                                onChange={(event) => this.onChangeInput(event, "email")}
-                            />
-                        </div>
-                        <div className='col-6'>
-                            <label>Password</label>
-                            <input className='form-control' type="password"
-                                value={password}
-                                onChange={(event) => this.onChangeInput(event, "password")}
-                            />
-                        </div>
-                        <div className='col-6'>
-                            <label>Confirm Password</label>
-                            <input className='form-control' type="password"
-                                value={confirmPassword}
-                                onChange={(event) => this.onChangeInput(event, "confirmPassword")}
-                            />
-                        </div>
-                        {passwordMismatch && (
-                            <div className="col-12 text-danger">
-                                Passwords do not match!
-                            </div>
-                        )}
-                        <div className='col-6'>
-                            <label>First Name</label>
-                            <input className='form-control' type="text"
-                                value={firstName}
-                                onChange={(event) => this.onChangeInput(event, "firstName")}
-                            />
-                        </div>
-                        <div className='col-6'>
-                            <label>Last Name</label>
-                            <input className='form-control' type="text"
-                                value={lastName}
-                                onChange={(event) => this.onChangeInput(event, "lastName")}
-                            />
-                        </div>
-                        <div className='col-6'>
-                            <label>Phone Number</label>
-                            <input className='form-control' type="text"
-                                value={phoneNumber}
-                                onChange={(event) => this.onChangeInput(event, "phoneNumber")}
-                            />
-                        </div>
-                        <div className='col-12'>
-                            <label>Address</label>
-                            <input className='form-control' type="text"
-                                value={address}
-                                onChange={(event) => this.onChangeInput(event, "address")}
-                            />
-                        </div>
-                        
-                        <div className='col-6'>
-                            <label>Gender</label>
-                            <select className="form-control"
-                                onChange={(event) => this.onChangeInput(event, 'gender')}
-                                value={gender}>
-                                {genderArr && genderArr.length > 0 &&
-                                    genderArr.map((item, index) => {
-                                        return (
-                                            <option key={index} value={item.keyMap}>{item.valueVi}</option>
-                                        )
-                                    })
-                                }
-                            </select>
-                        </div>
-
-                        <div className='col-12'>
-                            <label>Avatar</label>
-                            <div className="preview-img-container">
-                                <input id='previewImg' type="file" hidden
-                                    onChange={(event) => this.handleOnchangeImage(event)}
+            <div
+                className="d-flex align-items-center justify-content-center"
+                style={{
+                    backgroundImage: `url(${bg})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    height: '100vh',
+                    position: 'relative'
+                }}
+            >
+                <div className='user-register-container'>
+                <div className='text-center mb-3' 
+                    style={{
+                        color: '#75d5ca',
+                        fontSize: "24px",  
+                        fontWeight: 600,   
+                        paddingTop: "10px"
+                    }}>
+                    Đăng ký
+                </div>
+                    <div className="user-register-body">
+                        <div className='row'>
+                            <div className='col-6'>
+                                <label>Email</label>
+                                <input className='form-control' type="email"
+                                    value={email}
+                                    onChange={(event) => this.onChangeInput(event, "email")}
                                 />
-                                <label className="label-upload" htmlFor="previewImg">Upload Image <i className="fas fa-upload"></i></label>
-                                <div className="preview-image"
-                                    style={{ backgroundImage: `url(${previewImgURL})` }}
-                                    onClick={() => this.openPreviewImage()}
-                                >
+                            </div>
+                            <div className='col-6'>
+                                <label>Mật khẩu</label>
+                                <input className='form-control' type="password"
+                                    value={password}
+                                    onChange={(event) => this.onChangeInput(event, "password")}
+                                />
+                            </div>
+                            <div className='col-6'>
+                                <label>Xác nhận mật khẩu</label>
+                                <input className='form-control' type="password"
+                                    value={confirmPassword}
+                                    onChange={(event) => this.onChangeInput(event, "confirmPassword")}
+                                />
+                            </div>
+                            {passwordMismatch && (
+                                <div className="col-12 text-danger">
+                                    Mật khẩu không khớp!
+                                </div>
+                            )}
+                            <div className='col-6'>
+                                <label>Tên</label>
+                                <input className='form-control' type="text"
+                                    value={firstName}
+                                    onChange={(event) => this.onChangeInput(event, "firstName")}
+                                />
+                            </div>
+                            <div className='col-6'>
+                                <label>Họ</label>
+                                <input className='form-control' type="text"
+                                    value={lastName}
+                                    onChange={(event) => this.onChangeInput(event, "lastName")}
+                                />
+                            </div>
+                            <div className='col-6'>
+                                <label>Số điện thoại</label>
+                                <input className='form-control' type="text"
+                                    value={phoneNumber}
+                                    onChange={(event) => this.onChangeInput(event, "phoneNumber")}
+                                />
+                            </div>
+                            <div className='col-12'>
+                                <label>Địa chỉ</label>
+                                <input className='form-control' type="text"
+                                    value={address}
+                                    onChange={(event) => this.onChangeInput(event, "address")}
+                                />
+                            </div>
+                            
+                            <div className='col-6'>
+                                <label>Giới tính</label>
+                                <select className="form-control"
+                                    onChange={(event) => this.onChangeInput(event, 'gender')}
+                                    value={gender}>
+                                    {genderArr && genderArr.length > 0 &&
+                                        genderArr.map((item, index) => {
+                                            return (
+                                                <option key={index} value={item.keyMap}>{item.valueVi}</option>
+                                            )
+                                        })
+                                    }
+                                </select>
+                            </div>
+
+                            <div className='col-12'>
+                                <label>Ảnh đại diện</label>
+                                <div className="preview-img-container">
+                                    <input id='previewImg' type="file" hidden
+                                        onChange={(event) => this.handleOnchangeImage(event)}
+                                    />
+                                    <label className="label-upload" htmlFor="previewImg">Thêm ảnh <i className="fas fa-upload"></i></label>
+                                    <div className="preview-image"
+                                        style={{ backgroundImage: `url(${previewImgURL})` }}
+                                        onClick={() => this.openPreviewImage()}
+                                    >
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className='col-12 mt-3'>
-                            <button className="btn btn-primary"
-                                onClick={() => this.handleSaveUser()}>
-                                Register
-                            </button>
+                            <div className='col-12 mt-3'>
+                                <button className="btn w-100"
+                                        style={{
+                                            backgroundColor: '#75d5ca',
+                                            color: 'white'
+                                        }}
+                                    onClick={() => this.handleSaveUser()}>
+                                    Đăng ký
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {this.state.isOpen && 
-                    <Lightbox
-                        mainSrc={previewImgURL}
-                        onCloseRequest={() => this.setState({ isOpen: false })}
-                    />
-                }
+                    {this.state.isOpen && 
+                        <Lightbox
+                            mainSrc={previewImgURL}
+                            onCloseRequest={() => this.setState({ isOpen: false })}
+                        />
+                    }
+                </div>
             </div>
+
         );
     }
 }
