@@ -1,11 +1,17 @@
-.specialty-child {
-    cursor: pointer;
+@media (max-width: 768px) {
+    .section-share .section-container {
+        margin: 0 20px !important;
+        padding: 0;
+        /* Nếu có padding, cũng nên bỏ */
 
+    }
+    .section-share .section-body .section-customize .bg-image {
+        width: 180px !important;
+        height: 150px
+    }
+
+    /* Giảm kích thước của specialty name */
     .specialty-name {
-        padding-top: 10px 0;
-
-        &:hover {
-            color: #45c3d2;
-        }
+        font-size: 14px;
     }
 }

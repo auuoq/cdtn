@@ -69,3 +69,17 @@
         height: 50px;
     }
 }
+
+@media (max-width : 768px) {
+    .doctor-detail-container {
+        .intro-doctor {
+            display: flex;
+            margin : 0;
+        }
+        .schedule-doctor {
+            margin: 0;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    }
+}

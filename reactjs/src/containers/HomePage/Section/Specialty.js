@@ -32,6 +32,35 @@ class Specialty extends Component {
     render() {
         let { dataSpecialty } = this.state;
 
+        // Cấu hình cho Slider (cập nhật responsive)
+        const sliderSettings = {
+            dots: false,
+            infinite: true,
+            speed: 500,
+            slidesToShow: 4, // Mặc định hiển thị 4 slide
+            slidesToScroll: 1,
+            responsive: [
+                {
+                    breakpoint: 1024, // Màn hình <= 1024px
+                    settings: {
+                        slidesToShow: 3, // Hiển thị 3 slide
+                    }
+                },
+                {
+                    breakpoint: 768, // Màn hình <= 768px
+                    settings: {
+                        slidesToShow: 2, // Hiển thị 2 slide
+                    }
+                },
+                {
+                    breakpoint: 480, // Màn hình <= 480px
+                    settings: {
+                        slidesToShow: 2, // Hiển thị 1 slide
+                    }
+                }
+            ]
+        };
+
         return (
             <div className='section-share section-specialty'>
                 <div className='section-container'>
@@ -44,7 +73,7 @@ class Specialty extends Component {
                         </button>
                     </div>
                     <div className='section-body'>
-                        <Slider {...this.props.settings}>
+                        <Slider {...sliderSettings}> {/* Cập nhật props settings */}
                             {dataSpecialty && dataSpecialty.length > 0 &&
                                 dataSpecialty.map((item, index) => {
                                     return (
@@ -56,7 +85,7 @@ class Specialty extends Component {
                                             <div className="bg-image section-specialty"
                                                 style={{ backgroundImage: `url(${item.image})` }}
                                             />
-                                            <div className="specialty-name">{item.name}</div>
+                                            <div className="specialty-name text-center">{item.name}</div>
                                         </div>
                                     )
                                 })
@@ -67,7 +96,6 @@ class Specialty extends Component {
             </div>
         );
     }
-
 }
 
 const mapStateToProps = state => {
