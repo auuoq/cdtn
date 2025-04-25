@@ -1,4 +1,3 @@
-import { promises } from "nodemailer/lib/xoauth2";
 import db from "../models/index"
 
 
@@ -321,6 +320,83 @@ let getUserBookingsByManager = (userId) => {
     });
 };
 
+let getAllClinicManager = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let clinicManager = await db.User.findAll({
+                where: { roleId: 'R4' },
+                attributes: {
+                    exclude: ['password', 'image']
+                },
+                include: [
+                    {
+                        model: db.Clinic_Manager,
+                        as: 'managedClinics',
+                        attributes: ['clinicId'], // Lấy clinicId từ bảng Clinic_Manager
+                        include: [
+                            {
+                                model: db.Clinic,
+                                as: 'clinic',
+                                attributes: ['name', 'address'] // Lấy tên và địa chỉ phòng khám nếu cần
+                            }
+                        ]
+                    }
+                ]
+            })
+            resolve({
+                errCode: 0,
+                data: clinicManager
+            });
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
+let assignClinicToManager = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Kiểm tra dữ liệu đầu vào
+            if (!data.userId || !data.clinicId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing parameter'
+                });
+                return;
+            }
+
+            // Kiểm tra xem quản lý này đã được gán phòng khám chưa
+            let existingManager = await db.Clinic_Manager.findOne({
+                where: { userId: data.userId }
+            });
+
+            if (existingManager) {
+                // Nếu đã có người quản lý, thay đổi phòng khám hiện tại
+                existingManager.clinicId = data.clinicId;  // Cập nhật phòng khám mới
+                await existingManager.save();  // Lưu thay đổi
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Clinic updated for the manager successfully'
+                });
+                return;
+            }
+
+            // Nếu chưa có người quản lý, tạo mới bản ghi
+            await db.Clinic_Manager.create({
+                userId: data.userId,
+                clinicId: data.clinicId
+            });
+
+            resolve({
+                errCode: 0,
+                errMessage: 'Assign clinic to manager successfully'
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
 
 
 
@@ -329,5 +405,7 @@ module.exports = {
     getDetailClinicByManagerUserId: getDetailClinicByManagerUserId,
     getClinicByManager: getClinicByManager,
     getAllDoctorsByMagager: getAllDoctorsByMagager,
-    getUserBookingsByManager: getUserBookingsByManager
+    getUserBookingsByManager: getUserBookingsByManager,
+    getAllClinicManager: getAllClinicManager,
+    assignClinicToManager: assignClinicToManager
 };

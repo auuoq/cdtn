@@ -1,16 +1,9 @@
 'use strict';
-const {
-    Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
     class ExamPackage extends Model {
-        /**
-         * Helper method for defining associations.
-         * This method is not a part of Sequelize lifecycle.
-         * The `models/index` file will call this method automatically.
-         */
         static associate(models) {
-            // Định nghĩa các mối quan hệ
             ExamPackage.belongsTo(models.Allcode, { foreignKey: 'provinceId', targetKey: 'keyMap', as: 'provinceTypeData' });
             ExamPackage.belongsTo(models.Allcode, { foreignKey: 'paymentId', targetKey: 'keyMap', as: 'paymentTypeData' });
             ExamPackage.belongsTo(models.Allcode, { foreignKey: 'categoryId', targetKey: 'keyMap', as: 'categoryTypeData' });
@@ -19,38 +12,42 @@ module.exports = (sequelize, DataTypes) => {
     };
 
     ExamPackage.init({
+        name: {
+            type: DataTypes.STRING, // Tên gói khám
+            allowNull: false, // Giới hạn tên gói khám phải có
+        },
         categoryId: {
             type: DataTypes.INTEGER,
-            allowNull: false, // Giới hạn categoryId phải có
+            allowNull: false,
         },
         clinicId: {
             type: DataTypes.INTEGER,
-            allowNull: false, // Giới hạn clinicId phải có
+            allowNull: false,
         },
         price: {
-            type: DataTypes.DECIMAL(10, 2), // Thay đổi từ STRING sang DECIMAL cho giá
-            allowNull: false, // Giới hạn price phải có
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false,
         },
         provinceId: {
             type: DataTypes.STRING,
-            allowNull: false, // Giới hạn provinceId phải có
+            allowNull: false,
         },
         paymentId: {
             type: DataTypes.STRING,
-            allowNull: false, // Giới hạn paymentId phải có
+            allowNull: false,
         },
         descriptionMarkdown: DataTypes.TEXT,
         descriptionHTML: DataTypes.TEXT,
         image: DataTypes.TEXT,
         note: {
             type: DataTypes.STRING,
-            allowNull: true, // Ghi chú có thể để trống
+            allowNull: true,
         },
     }, {
         sequelize,
         modelName: 'ExamPackage',
-        freezeTableName: true, // Giữ nguyên tên bảng
-        timestamps: true, // Thêm createdAt và updatedAt
+        freezeTableName: true,
+        timestamps: true,
     });
 
     return ExamPackage;

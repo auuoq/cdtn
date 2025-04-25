@@ -1,4 +1,4 @@
-import examPackageService from '../services/examPackageService';
+import examPackageService from '../services/examPackage';
 
 let createExamPackage = async (req, res) => {
     try {

@@ -2,12 +2,16 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('ExamPackages', {
+    await queryInterface.createTable('ExamPackage', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false, 
       },
       categoryId: {
         type: Sequelize.INTEGER,
@@ -30,13 +34,13 @@ module.exports = {
         allowNull: false,
       },
       descriptionMarkdown: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       descriptionHTML: {
-          type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       image: {
-          type: Sequelize.BLOB('long'),
+        type: Sequelize.BLOB('long'),
       },
       note: {
         type: Sequelize.STRING,
@@ -54,6 +58,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('ExamPackages');
+    await queryInterface.dropTable('ExamPackage');
   },
 };
