@@ -13,8 +13,8 @@ module.exports = (sequelize, DataTypes) => {
 
     ExamPackage.init({
         name: {
-            type: DataTypes.STRING, // Tên gói khám
-            allowNull: false, // Giới hạn tên gói khám phải có
+            type: DataTypes.STRING,
+            allowNull: false,
         },
         categoryId: {
             type: DataTypes.INTEGER,

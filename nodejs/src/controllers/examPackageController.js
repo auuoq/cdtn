@@ -28,7 +28,8 @@ let updateExamPackage = async (req, res) => {
 
 let deleteExamPackage = async (req, res) => {
     try {
-        let result = await examPackageService.deleteExamPackage(req.query);
+        let packageId = req.query.packageId;
+        let result = await examPackageService.deleteExamPackage(packageId);
         return res.status(200).json(result);
     } catch (e) {
         console.log(e);
@@ -54,7 +55,7 @@ let getAllExamPackages = async (req, res) => {
 
 let getExamPackageDetailByClinic = async (req, res) => {
     try {
-        let infor = await examPackageService.getExamPackageDetailByClinic(req.query.id);
+        let infor = await examPackageService.getExamPackagesDetailByClinic(req.query.id);
         return res.status(200).json(infor);
     } catch (e) {
         console.log(e);

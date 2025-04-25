@@ -188,11 +188,7 @@ const updateExamPackage = (data) => {
     return axios.put('/api/update-exam-package', data);
 }
 const deleteExamPackage = (examPackageId) => {
-    return axios.delete('/api/delete-exam-package', {
-        data: {
-            id: examPackageId
-        }
-    });
+    return axios.delete(`/api/delete-exam-package?packageId=${examPackageId}`);
 }
 const getAllExamPackages = () => {
     return axios.get('/api/get-all-exam-packages');

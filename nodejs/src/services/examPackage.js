@@ -1,6 +1,6 @@
 import db from "../models/index";
 
-const createExamPackage = (data) => {
+let createExamPackage = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!data.name || !data.categoryId || !data.clinicId || !data.price || !data.provinceId || !data.paymentId) {
@@ -12,17 +12,17 @@ const createExamPackage = (data) => {
             }
 
             // Kiểm tra quyền quản lý phòng khám
-            const clinicManager = await db.Clinic_Manager.findOne({
-                where: { userId: data.userId, clinicId: data.clinicId }
-            });
+            // const clinicManager = await db.Clinic_Manager.findOne({
+            //     where: { userId: data.userId, clinicId: data.clinicId }
+            // });
 
-            if (!clinicManager) {
-                resolve({
-                    errCode: 2,
-                    errMessage: 'You are not authorized to create an exam package for this clinic'
-                });
-                return;
-            }
+            // if (!clinicManager) {
+            //     resolve({
+            //         errCode: 2,
+            //         errMessage: 'You are not authorized to create an exam package for this clinic'
+            //     });
+            //     return;
+            // }
 
             let examPackage = await db.ExamPackage.create({
                 name: data.name,
@@ -48,7 +48,7 @@ const createExamPackage = (data) => {
     });
 };
 
-const updateExamPackage = (data) => {
+let updateExamPackage = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!data.packageId || !data.name || !data.clinicId || !data.price || !data.provinceId || !data.paymentId) {
@@ -59,16 +59,16 @@ const updateExamPackage = (data) => {
                 return;
             }
 
-            const clinicManager = await db.Clinic_Manager.findOne({
-                where: { clinicId: data.clinicId, userId: data.userId }
-            });
+            // const clinicManager = await db.Clinic_Manager.findOne({
+            //     where: { clinicId: data.clinicId, userId: data.userId }
+            // });
 
-            if (!clinicManager) {
-                return resolve({
-                    errCode: 2,
-                    errMessage: 'You do not have permission to manage this clinic'
-                });
-            }
+            // if (!clinicManager) {
+            //     return resolve({
+            //         errCode: 2,
+            //         errMessage: 'You do not have permission to manage this clinic'
+            //     });
+            // }
 
             let examPackage = await db.ExamPackage.findOne({
                 where: { id: data.packageId, clinicId: data.clinicId },
@@ -108,51 +108,47 @@ const updateExamPackage = (data) => {
     });
 };
 
-const deleteExamPackage = (data) => {
-    return new Promise(async (resolve, reject) => {
+let deleteExamPackage = (packageId) =>{
+    return new Promise(async(resolve, reject) =>{
         try {
-            if (!data.packageId || !data.clinicId) {
-                resolve({
+            console.log(packageId)
+            if(!packageId){
+                return resolve({
                     errCode: 1,
-                    errMessage: 'Missing parameter'
-                });
-                return;
+                    errMessage: 'Missing required parameter'
+                })
             }
-
-            const clinicManager = await db.Clinic_Manager.findOne({
-                where: { clinicId: data.clinicId, userId: data.userId }
-            });
-
-            if (!clinicManager) {
+            
+            let idpackage = await db.ExamPackage.findOne({
+                where: {id: packageId}
+            })
+    
+            if(!idpackage){
                 return resolve({
                     errCode: 2,
-                    errMessage: 'You do not have permission to manage this clinic'
-                });
+                    errMessage: 'Clinic not found'
+                })
             }
-
-            let examPackage = await db.ExamPackage.findOne({
-                where: { id: data.packageId, clinicId: data.clinicId }
-            });
-
-            if (examPackage) {
-                await examPackage.destroy();
-                resolve({
+    
+            else{
+                await db.ExamPackage.destroy({
+                    where: {id: packageId}
+                })
+                return resolve({
                     errCode: 0,
-                    errMessage: 'Delete exam package succeed!'
-                });
-            } else {
-                resolve({
-                    errCode: 3,
-                    errMessage: 'Exam package not found'
-                });
-            }
-        } catch (error) {
-            reject(error);
+                    errMessage: 'Clinic deleted successfully!'
+                })
+    
+            }            
+        } catch (e) {
+            reject(e)
+            
         }
-    });
-};
+        
+    })
+}
 
-const getAllExamPackages = () => {
+let getAllExamPackages = () => {
     return new Promise(async (resolve, reject) => {
         try {
             let packages = await db.ExamPackage.findAll();
@@ -166,7 +162,7 @@ const getAllExamPackages = () => {
                 });
             }
 
-            resolve({
+            resolve({   
                 errCode: 0,
                 errMessage: 'ok',
                 data: packages
@@ -177,7 +173,7 @@ const getAllExamPackages = () => {
     });
 };
 
-const getExamPackagesDetailByClinic = (clinicId) => {
+let getExamPackagesDetailByClinic = (clinicId) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!clinicId) {
