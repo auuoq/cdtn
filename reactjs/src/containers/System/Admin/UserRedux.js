@@ -249,7 +249,6 @@ class UserRedux extends Component {
                     fontSize: "24px",
                     fontWeight: "600",
                     color: "#333",
-                    marginBottom: "30px",
                     paddingBottom: "15px",
                     borderBottom: "1px solid #eee",
                     display: "flex",

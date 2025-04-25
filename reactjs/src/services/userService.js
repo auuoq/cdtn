@@ -106,6 +106,13 @@ const createNewSpecialty = (data) => {
 const getAllSpecialty = () => {
     return axios.get(`/api/get-specialty`);
 }
+const updateSpecialty = (data) => {
+    return axios.put('/api/update-specialty', data);
+}
+
+const deleteSpecialty = (specialtyId) => {
+    return axios.delete(`/api/delete-specialty?id=${specialtyId}`);
+}
 
 const getAllDetailSpecialtyById = (data) => {
     return axios.get(`/api/get-detail-specialty-by-id?id=${data.id}&location=${data.location}`);
@@ -181,5 +188,5 @@ export {
     getAllPatientForDoctor, postSendRemedy,getAllPatientsWithStatusS3,
     getUserInfoByEmail,getUserBookings,deleteAppointment,getDepositInfo,
     sendPasswordResetEmail,resetPassword,getDetailClinicByManager,getClinicByManager,getAllDoctorsByMagager,
-    getUserBookingsByManager
+    getUserBookingsByManager,deleteSpecialty,updateSpecialty
 }

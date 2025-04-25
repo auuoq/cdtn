@@ -5,7 +5,7 @@ import './ManageSpecialty.scss'
 import MarkdownIt from 'markdown-it';
 import MdEditor from 'react-markdown-editor-lite';
 import { CommonUtils } from '../../../utils'
-import { createNewSpecialty } from '../../../services/userService';
+import { createNewSpecialty, getAllSpecialty, updateSpecialty, deleteSpecialty } from '../../../services/userService';
 import { toast } from 'react-toastify';
 
 const mdParser = new MarkdownIt(/* Markdown-it options */);
@@ -19,31 +19,54 @@ class ManageSpecialty extends Component {
             imageBase64: '',
             descriptionHTML: '',
             descriptionMarkdown: '',
+            
+            specialties: [],
+            isOpenModal: false,
+            isCreateMode: true,
+            currentSpecialty: {
+                id: '',
+                name: '',
+                imageBase64: '',
+                descriptionHTML: '',
+                descriptionMarkdown: '',
+            },
+            isOpenDeleteModal: false,
+            specialtyToDelete: null
         }
     }
 
     async componentDidMount() {
-
+        this.fetchSpecialties();
     }
 
-    async componentDidUpdate(prevProps, prevState, snapShot) {
-        if (this.props.language !== prevProps.language) {
-
+    fetchSpecialties = async () => {
+        try {
+            let res = await getAllSpecialty();
+            if (res && res.errCode === 0) {
+                this.setState({
+                    specialties: res.data || []
+                });
+            }
+        } catch (e) {
+            console.error('Error fetching specialties:', e);
         }
     }
 
     handleOnChangeInput = (event, id) => {
-        let stateCopy = { ...this.state };
+        let stateCopy = { ...this.state.currentSpecialty };
         stateCopy[id] = event.target.value;
         this.setState({
-            ...stateCopy
+            currentSpecialty: stateCopy
         })
     }
 
     handleEditorChange = ({ html, text }) => {
         this.setState({
-            descriptionHTML: html,
-            descriptionMarkdown: text,
+            currentSpecialty: {
+                ...this.state.currentSpecialty,
+                descriptionHTML: html,
+                descriptionMarkdown: text,
+            }
         })
     }
 
@@ -53,78 +76,285 @@ class ManageSpecialty extends Component {
         if (file) {
             let base64 = await CommonUtils.getBase64(file);
             this.setState({
-                imageBase64: base64,
+                currentSpecialty: {
+                    ...this.state.currentSpecialty,
+                    imageBase64: base64,
+                }
             })
         }
     }
-    handleSaveNewSpecialty = async () => {
-        let res = await createNewSpecialty(this.state);
-        if (res && res.errCode === 0) {
-            toast.success('Add new specialty succeed!');
-            this.setState({
+
+    handleOpenCreateModal = () => {
+        this.setState({
+            isOpenModal: true,
+            isCreateMode: true,
+            currentSpecialty: {
+                id: '',
                 name: '',
                 imageBase64: '',
                 descriptionHTML: '',
                 descriptionMarkdown: '',
-            })
-        } else {
-            toast.error('Something wrongs....');
-            console.log(">>>> check res: ", res);
+            }
+        })
+    }
+
+    handleOpenEditModal = (specialty) => {
+        this.setState({
+            isOpenModal: true,
+            isCreateMode: false,
+            currentSpecialty: {
+                ...specialty,
+                imageBase64: specialty.image
+            }
+        });
+    }
+
+    handleCloseModal = () => {
+        this.setState({
+            isOpenModal: false
+        });
+    }
+
+    handleSaveSpecialty = async () => {
+        try {
+            let res;
+            if (this.state.isCreateMode) {
+                res = await createNewSpecialty(this.state.currentSpecialty);
+            } else {
+                res = await updateSpecialty(this.state.currentSpecialty);
+            }
+
+            if (res && res.errCode === 0) {
+                toast.success(this.state.isCreateMode ? 'Thêm mới thành công!' : 'Cập nhật thành công!');
+                this.handleCloseModal();
+                this.fetchSpecialties();
+            } else {
+                toast.error('Đã xảy ra lỗi...');
+            }
+        } catch (e) {
+            console.error('Error saving specialty:', e);
+            toast.error('Đã xảy ra lỗi khi lưu');
+        }
+    }
+
+    handleDeleteSpecialty = (specialty) => {
+        this.setState({
+            isOpenDeleteModal: true,
+            specialtyToDelete: specialty
+        });
+    }
+
+    handleCloseDeleteModal = () => {
+        this.setState({
+            isOpenDeleteModal: false,
+            specialtyToDelete: null
+        });
+    }
+
+    handleConfirmDelete = async () => {
+        try {
+            let res = await deleteSpecialty(this.state.specialtyToDelete.id);
+            if (res && res.errCode === 0) {
+                toast.success('Xóa chuyên khoa thành công!');
+                this.handleCloseDeleteModal();
+                this.fetchSpecialties();
+            } else {
+                toast.error('Đã xảy ra lỗi khi xóa...');
+            }
+        } catch (e) {
+            console.error('Error deleting specialty:', e);
+            toast.error('Đã xảy ra lỗi khi xóa');
         }
     }
 
     render() {
+        let { specialties, currentSpecialty, isCreateMode, specialtyToDelete } = this.state;
         return (
-            <div className="managa-specialty-container "  style={
-                {
-                    maxWidth: "1200px",
-                    margin: "0 auto",
-                    padding: "30px",
-                    marginTop: "60px",
-                    backgroundColor: "#fff",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
-                }
-            }>
-                <div className="" style={{
-                          fontSize: "24px",
-                          fontWeight: "600",
-                          color: "#333",
-                          marginBottom: "30px",
-                          paddingBottom: "15px",
-                          borderBottom: "1px solid #eee",
-                }}>Quản lý chuyên khoa</div>
-                <div className="add-new-specialty row">
-                    <div className='col-6 form-group'>
-                        <label>Tên chuyên khoa</label>
-                        <input className="form-control" type="text" value={this.state.name}
-                            onChange={(event) => this.handleOnChangeInput(event, 'name')}
-                        />
+            <div className="managa-specialty-container" style={{
+                maxWidth: "1200px",
+                margin: "0 auto",
+                padding: "30px",
+                marginTop: "60px",
+                backgroundColor: "#fff",
+                borderRadius: "12px",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+            }}>
+                <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    color: "#333",
+                    marginBottom: "30px",
+                    paddingBottom: "15px",
+                    borderBottom: "1px solid #eee",
+                }}>
+                    <p style={{
+                        fontSize: "24px",
+                        fontWeight: "600"
+                    }}>Quản lý chuyên khoa</p>
+                    <div>
+                        <button 
+                            className="btn btn-primary"
+                            onClick={this.handleOpenCreateModal}
+                            style={{ fontSize: "14px", fontWeight: "normal" }}
+                        >
+                            <i className="fas fa-plus"></i> Thêm mới 
+                        </button>
                     </div>
-                    <div className='col-6 form-group'>
-                        <label>Ảnh chuyên khoa</label>
-                        <input className="form-control-file" type="file"
-                            onChange={(event) => this.handleOnchangeImage(event)}
-                        />
-                    </div>
-                    <div className='col-12'>
-                        <MdEditor
-                            style={{ height: '300px' }}
-                            renderHTML={text => mdParser.render(text)}
-                            onChange={this.handleEditorChange}
-                            value={this.state.descriptionMarkdown}
-                        />
-                    </div>
-                    <div className="col-12">
-                        <button className="btn btn-primary mt-2"
-                            style={{
-                                minWidth : "100px"
-                            }}
-                            onClick={() => this.handleSaveNewSpecialty()}
-                        >Lưu</button>
+                </div>
+                
+                {/* Specialty List Table */}
+                <div className="mt-3">
+                    <div style={{ maxHeight: "600px", overflowY: "auto" }}>
+                        <table className="table table-bordered table-hover">
+                            <thead  style={{ backgroundColor: "#0379ff", color: "#fff" }}>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Tên chuyên khoa</th>
+                                    <th className='text-center'>Hình ảnh</th>
+                                    <th className='text-center'>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {specialties && specialties.length > 0 ?
+                                    specialties.map((item, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>{item.name}</td>
+                                            <td style={{
+                                                display : "flex",
+                                                justifyContent: "center"
+                                            }}>
+                                                {item.image &&
+                                                    <img 
+                                                        src={item.image} 
+                                                        alt="specialty" 
+                                                        style={{ width: '80px', height: '40px', objectFit: 'cover' }}
+                                                    />
+                                                }
+                                            </td>
+                                            <td>
+                                                <div className='action-buttons' style={{
+                                                    display: 'flex',
+                                                    justifyContent: "center"
+                                                }}>
+                                                    <button
+                                                        onClick={() => this.handleOpenEditModal(item)}
+                                                        className="btn-edit"
+                                                        title="Edit"
+                                                    >
+                                                        <i className="fas fa-edit"></i>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => this.handleDeleteSpecialty(item)}
+                                                        className="btn-delete"
+                                                        title="Delete"
+                                                    >
+                                                        <i className="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                    :
+                                    <tr>
+                                        <td colSpan="4" className="text-center">Không có dữ liệu</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
+                {/* Modal chung cho cả thêm mới và chỉnh sửa */}
+                {this.state.isOpenModal && (
+                    <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1050 }}>
+                        <div className="modal-dialog modal-lg" style={{ maxWidth: '90%', margin: '1.75rem auto' }}>
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">
+                                        {isCreateMode ? 'Thêm mới chuyên khoa' : 'Chỉnh sửa chuyên khoa'}
+                                    </h5>
+                                    <button type="button" className="close" onClick={this.handleCloseModal}>
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <div className="row">
+                                        <div className='col-6 form-group'>
+                                            <label>Tên chuyên khoa</label>
+                                            <input 
+                                                className="form-control" 
+                                                type="text" 
+                                                value={currentSpecialty.name}
+                                                onChange={(event) => this.handleOnChangeInput(event, 'name')}
+                                            />
+                                        </div>
+                                        <div className='col-6 form-group'>
+                                            <label>Ảnh chuyên khoa</label>
+                                            <input 
+                                                className="form-control-file" 
+                                                type="file"
+                                                onChange={(event) => this.handleOnchangeImage(event)}
+                                            />
+                                            {currentSpecialty.imageBase64 &&
+                                                <img 
+                                                    src={currentSpecialty.imageBase64} 
+                                                    alt="specialty" 
+                                                    style={{ width: '100px', height: '60px', objectFit: 'cover', marginTop: '10px' }}
+                                                />
+                                            }
+                                        </div>
+
+                                        <div className='col-12 mt-3'>
+                                            <label>Mô tả chi tiết</label>
+                                            <MdEditor
+                                                style={{ height: '400px' }}
+                                                renderHTML={text => mdParser.render(text)}
+                                                onChange={this.handleEditorChange}
+                                                value={currentSpecialty.descriptionMarkdown}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={this.handleCloseModal}>
+                                        Đóng
+                                    </button>
+                                    <button type="button" className="btn btn-primary" onClick={this.handleSaveSpecialty}>
+                                        {isCreateMode ? 'Thêm mới' : 'Lưu thay đổi'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal xác nhận xóa */}
+                {this.state.isOpenDeleteModal && (
+                    <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1050 }}>
+                        <div className="modal-dialog" style={{ maxWidth: '500px', margin: '1.75rem auto' }}>
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Xác nhận xóa</h5>
+                                    <button type="button" className="close" onClick={this.handleCloseDeleteModal}>
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <p>Bạn có chắc chắn muốn xóa chuyên khoa <strong>{specialtyToDelete?.name}</strong>?</p>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={this.handleCloseDeleteModal}>
+                                        Hủy
+                                    </button>
+                                    <button type="button" className="btn btn-danger" onClick={this.handleConfirmDelete}>
+                                        Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
@@ -136,10 +366,4 @@ const mapStateToProps = state => {
     };
 };
 
-const mapDispatchToProps = dispatch => {
-    return {
-
-    };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(ManageSpecialty);
+export default connect(mapStateToProps)(ManageSpecialty);
