@@ -75,8 +75,25 @@ class ManageSpecialty extends Component {
 
     render() {
         return (
-            <div className="managa-specialty-container">
-                <div className="ms-title">Quản lý chuyên khoa</div>
+            <div className="managa-specialty-container "  style={
+                {
+                    maxWidth: "1200px",
+                    margin: "0 auto",
+                    padding: "30px",
+                    marginTop: "60px",
+                    backgroundColor: "#fff",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+                }
+            }>
+                <div className="" style={{
+                          fontSize: "24px",
+                          fontWeight: "600",
+                          color: "#333",
+                          marginBottom: "30px",
+                          paddingBottom: "15px",
+                          borderBottom: "1px solid #eee",
+                }}>Quản lý chuyên khoa</div>
                 <div className="add-new-specialty row">
                     <div className='col-6 form-group'>
                         <label>Tên chuyên khoa</label>
@@ -99,9 +116,12 @@ class ManageSpecialty extends Component {
                         />
                     </div>
                     <div className="col-12">
-                        <button className="btn-save-specialty"
+                        <button className="btn btn-primary mt-2"
+                            style={{
+                                minWidth : "100px"
+                            }}
                             onClick={() => this.handleSaveNewSpecialty()}
-                        >Save</button>
+                        >Lưu</button>
                     </div>
                 </div>
 

@@ -140,7 +140,7 @@ class Login extends Component {
           {errMessage && <div className="text-danger mb-3">{errMessage}</div>}
 
           <button
-            className="btn w-100"
+            className="btn w-100 login-btn"
             style={{
               backgroundColor: '#75d5ca',
               color: 'white'

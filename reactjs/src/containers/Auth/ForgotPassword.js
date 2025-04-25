@@ -83,7 +83,7 @@ class ForgotPassword extends Component {
           {message && <div className="text-success mb-3">{message}</div>}
 
           <button
-            className="btn w-100"
+            className="btn w-100 login-btn"
             style={{
               backgroundColor: '#75d5ca',
               color: 'white'

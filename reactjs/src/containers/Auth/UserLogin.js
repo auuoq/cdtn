@@ -7,7 +7,6 @@ import './Login.scss';
 import { handleLoginApi } from '../../services/userService';
 import bg from '../../../src/assets/images/bg.jpg';
 import { FaEye, FaEyeSlash, FaHome } from 'react-icons/fa';
-
 class UserLogin extends Component {
     constructor(props) {
         super(props);
@@ -163,7 +162,7 @@ class UserLogin extends Component {
                     )}
 
                     <button
-                        className="btn w-100"
+                        className="btn w-100 login-btn"
                         style={{ backgroundColor: '#75d5ca', color: 'white' }}
                         onClick={this.handleLogin}
                     >

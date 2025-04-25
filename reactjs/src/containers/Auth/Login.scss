@@ -99,3 +99,17 @@
         }
     }
 }
+.login-btn {
+    background-color: #75d5ca;
+    color: white;
+    border: none;
+    padding: 8px;
+    width: 100%;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  
+    &:hover {
+      background-color: #5fc5b8 !important;
+    }
+}

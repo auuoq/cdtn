@@ -1,27 +1,9 @@
 import React, { Component } from 'react';
-import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import './TableManageUser.scss';
 import * as actions from "../../../store/actions";
 
-import MarkdownIt from 'markdown-it';
-// import MdEditor from 'react-markdown-editor-lite';
-// import style manually
-import 'react-markdown-editor-lite/lib/index.css';
-
-// Register plugins if required
-// MdEditor.use(YOUR_PLUGINS_HERE);
-
-// Initialize a markdown parser
-const mdParser = new MarkdownIt(/* Markdown-it options */);
-
-// Finish!
-function handleEditorChange({ html, text }) {
-    console.log('handleEditorChange', html, text);
-}
-
 class TableManageUser extends Component {
-
     constructor(props) {
         super(props);
         this.state = {
@@ -33,16 +15,18 @@ class TableManageUser extends Component {
         this.props.fetchUserRedux();
     }
 
-    componentDidUpdate(prevProps, prevState, snapShot) {
+    componentDidUpdate(prevProps) {
         if (prevProps.listUsers !== this.props.listUsers) {
             this.setState({
                 usersRedux: this.props.listUsers
-            })
+            });
         }
     }
 
     handleDeleteUser = (user) => {
-        this.props.deleteAUserRedux(user.id);
+        if (window.confirm(`Are you sure you want to delete user ${user.email}?`)) {
+            this.props.deleteAUserRedux(user.id);
+        }
     }
 
     handleEditUser = (user) => {
@@ -51,46 +35,66 @@ class TableManageUser extends Component {
 
     render() {
         let arrUsers = this.state.usersRedux;
+
         return (
-            <React.Fragment>
-                <table id="TableManageUser">
-                    <tbody>
-                        <tr>
-                            <th>Email</th>
-                            <th>First name</th>
-                            <th>Last name</th>
-                            <th>Address</th>
-                            <th>Actions</th>
-                        </tr>
-                        {arrUsers && arrUsers.length > 0 &&
-                            arrUsers.map((item, index) => {
-                                return (
+            <div className="user-management-container">
+                <div className="user-table-wrapper">
+                    <table className="user-management-table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Address</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {arrUsers && arrUsers.length > 0 ? (
+                                arrUsers.map((item, index) => (
                                     <tr key={index}>
-                                        <td>{item.email}</td>
-                                        <td>{item.firstName}</td>
-                                        <td>{item.lastName}</td>
-                                        <td>{item.address}</td>
-                                        <td>
-                                            <button
-                                                onClick={() => this.handleEditUser(item)}
-                                                className="btn-edit" ><i className="fas fa-pencil-alt"></i></button>
-                                            <button
-                                                onClick={() => this.handleDeleteUser(item)}
-                                                className="btn-delete" ><i className="fas fa-trash"></i></button>
+                                        <td data-label="Email">{item.email}</td>
+                                        <td data-label="First Name">{item.firstName}</td>
+                                        <td data-label="Last Name">{item.lastName}</td>
+                                        <td data-label="Address">{item.address}</td>
+                                        <td data-label="Phone">{item.phonenumber}</td>
+                                        <td data-label="Actions">
+                                            <div className='action-buttons'>
+                                                <button
+                                                    onClick={() => this.handleEditUser(item)}
+                                                    className="btn-edit"
+                                                    title="Edit"
+                                                >
+                                                    <i className="fas fa-edit"></i>
+                                                </button>
+                                                <button
+                                                    onClick={() => this.handleDeleteUser(item)}
+                                                    className="btn-delete"
+                                                    title="Delete"
+                                                >
+                                                    <i className="fas fa-trash-alt"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
-                                )
-                            })
-                        }
-
-                    </tbody>
-                </table>
-
-                {/* <MdEditor style={{ height: '500px' }} renderHTML={text => mdParser.render(text)} onChange={handleEditorChange} /> */}
-            </React.Fragment>
+                                ))
+                            ) : (
+                                <tr className="no-data">
+                                    <td colSpan="6">
+                                        <div className="no-data-content">
+                                            <i className="fas fa-user-slash no-data-icon"></i>
+                                            <p>No users found</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         );
     }
-
 }
 
 const mapStateToProps = state => {
