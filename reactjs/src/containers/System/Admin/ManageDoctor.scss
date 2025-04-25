@@ -1,57 +1,191 @@
+// File: ManageDoctor.scss
+
 .manage-doctor-container {
-    padding: 5px;
-
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px;
+    margin-top: 60px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  
     .manage-doctor-title {
-        text-align    : center;
-        margin        : 15px 0;
-        font-size     : 20px;
-        text-transform: uppercase;
-        font-weight   : 600;
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
     }
-
-    .save-content-doctor {
-        margin-top   : 20px;
-        margin-bottom: 30px;
-        border-radius: 3px;
-        outline      : none;
-        border       : none;
-        padding      : 5px;
-        background   : orange;
-        cursor       : pointer;
-
-        &:hover {
-            opacity: 0.9;
-        }
-    }
-
-    .create-content-doctor {
-        margin-top   : 20px;
-        margin-bottom: 30px;
-        border-radius: 3px;
-        outline      : none;
-        border       : none;
-        padding      : 5px;
-        background   : rgb(11, 93, 216);
-        cursor       : pointer;
-        color        : white;
-
-        &:hover {
-            opacity: 0.9;
-        }
-    }
-
+  
     .more-infor {
-        display       : flex;
-        gap           : 15px;
-        padding-bottom: 15px;
-
-        .content-left {
-            width: 35%;
+      display: flex;
+      gap: 20px;
+      margin-bottom: 25px;
+  
+      .content-left {
+        flex: 1;
+      }
+  
+      .content-right {
+        flex: 1;
+  
+        textarea {
+          height: 100px;
+          resize: vertical;
         }
-
-        .content-right {
-            width: 65%;
-        }
+      }
+  
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #555;
+      }
     }
-
-}
+  
+    .more-infor-extra {
+      margin-bottom: 25px;
+  
+      .form-group {
+        margin-bottom: 20px;
+  
+        label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: 500;
+          color: #555;
+        }
+  
+        input {
+          width: 100%;
+        }
+      }
+    }
+  
+    .manage-doctor-editor {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 25px;
+  
+      .rc-md-editor {
+        border: none;
+        min-height: 300px;
+  
+        .editor-container {
+          .sec-md {
+            padding: 15px;
+            background-color: #f9f9f9;
+          }
+  
+          .sec-html {
+            padding: 15px;
+            background-color: #fff;
+          }
+        }
+      }
+    }
+  
+    button {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+  
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+  
+      &:active {
+        transform: translateY(0);
+      }
+  
+      &.save-content-doctor {
+        background-color: #4caf50;
+        color: white;
+  
+        &:hover {
+          background-color: darken(#4caf50, 8%);
+        }
+      }
+  
+      &.create-content-doctor {
+        background-color: #2196f3;
+        color: white;
+  
+        &:hover {
+          background-color: darken(#2196f3, 8%);
+        }
+      }
+    }
+  
+    // Style for react-select components
+    .react-select-container {
+      .react-select__control {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        min-height: 42px;
+        box-shadow: none;
+  
+        &:hover {
+          border-color: #bdbdbd;
+        }
+  
+        &.react-select__control--is-focused {
+          border-color: #2196f3;
+          box-shadow: 0 0 0 1px #2196f3;
+        }
+      }
+  
+      .react-select__value-container {
+        padding: 2px 12px;
+      }
+  
+      .react-select__indicator {
+        padding: 6px;
+      }
+  
+      .react-select__menu {
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+  
+      .react-select__option {
+        padding: 10px 12px;
+      }
+    }
+  
+    // Responsive styles
+    @media (max-width: 992px) {
+      padding: 20px;
+  
+      .more-infor {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+  
+    @media (max-width: 768px) {
+      padding: 15px;
+  
+      .more-infor-extra {
+        .form-group {
+          padding-left: 0;
+          padding-right: 0;
+        }
+      }
+  
+      .manage-doctor-title {
+        font-size: 20px;
+      }
+    }
+  }

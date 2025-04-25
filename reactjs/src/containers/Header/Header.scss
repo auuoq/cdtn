@@ -1,13 +1,17 @@
 @import "../../styles/common.scss";
 
 .header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; // để nằm trên các thành phần khác
     z-index         : 99;
     display         : flex;
     justify-content : space-between;
     background-color: $colormain;
     color           : $common-text-color;
     height          : 40px;
-    position        : relative;
 
     .btn-logout {
         color      : $common-text-color;

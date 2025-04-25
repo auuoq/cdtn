@@ -154,8 +154,25 @@ class ManageSchedule extends Component {
         let yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 
         return (
-            <div className="manage-schedule-container">
-                <div className="m-s-title">
+            <div className="manage-schedule-container" style={
+                {
+                    maxWidth: "1200px",
+                    margin: "0 auto",
+                    padding: "30px",
+                    marginTop: "60px",
+                    backgroundColor: "#fff",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+                }
+            }>
+                <div className="" style={{
+                          fontSize: "24px",
+                          fontWeight: "600",
+                          color: "#333",
+                          marginBottom: "30px",
+                          paddingBottom: "15px",
+                          borderBottom: "1px solid #eee",
+                }}>
                     <FormattedMessage id="manage-schedule.title" />
                 </div>
                 <div className="container">
@@ -182,7 +199,8 @@ class ManageSchedule extends Component {
                                 rangeTime.map((item, index) => {
                                     return (
                                         <button
-                                            className={item.isSelected === true ? "btn btn-schedule active" : "btn btn-schedule"}
+                                            className={item.isSelected === true ? "btn btn-schedule btn-primary" : "btn btn-schedule"}
+                                            style={{ minWidth: '120px' }}
                                             key={index}
                                             onClick={() => this.handleClickBtnTime(item)}
                                         >

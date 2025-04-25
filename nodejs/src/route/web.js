@@ -80,6 +80,12 @@ let initWebRoutes = (app) => {
     router.get('/api/get-all-doctors-by-manager', clinicManagerController.getAllDoctorsByMagager);
     router.get('/api/get-user-bookings-by-manager', clinicManagerController.getUserBookingsByManager);
 
+    //Exam Package
+    router.post('/api/create-new-exam-package', examPackageController.createExamPackage);  // Tạo mới gói khám
+    router.put('/api/update-exam-package', examPackageController.updateExamPackage);       // Cập nhật gói khám
+    router.delete('/api/delete-exam-package', examPackageController.deleteExamPackage);    // Xóa gói khám
+    router.get('/api/get-all-exam-packages', examPackageController.getAllExamPackages);    // Lấy tất cả gói khám
+    router.get('/api/get-exam-package-detail', examPackageController.getExamPackageDetailByClinic); // Lấy chi tiết gói khám theo phòng khám
 
 
 

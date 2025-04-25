@@ -277,12 +277,12 @@ class ManageDoctor extends Component {
         // console.log("check state render: ", this.state);
         let { hasOldData } = this.state;
         return (
-            <div className="manage-doctor-container">
+            <div className="manage-doctor-container" style={{padding : "0 20px"}}>
                 <div className="manage-doctor-title">
-                    <FormattedMessage id="admin.manage-doctor.title" />
+                    Thêm mới bác sĩ
                 </div>
                 <div className="more-infor">
-                    <div className="content-left form-group">
+                    <div className="content-left form-group" style={{paddingRight: "15px"}}>
                         <label>
                             <FormattedMessage id="admin.manage-doctor.select-doctor" />
                         </label>
@@ -399,7 +399,7 @@ class ManageDoctor extends Component {
 
                 <div className="manage-doctor-editor">
                     <MdEditor
-                        style={{ height: '300px' }}
+                        style={{ height: '200px' }}
                         renderHTML={text => mdParser.render(text)}
                         onChange={this.handleEditorChange}
                         value={this.state.contentMarkdown}

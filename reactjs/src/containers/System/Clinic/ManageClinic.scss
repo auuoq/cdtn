@@ -1,23 +1,252 @@
-.managa-specialty-container {
-    padding: 0 15px;
+.manage-clinic-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 
-    .ms-title {
-        text-align    : center;
-        margin        : 10px 0;
-        text-transform: uppercase;
-        font-size     : 17px;
-        font-weight   : 600;
+    .clinic-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+
+        .clinic-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .clinic-subtitle {
+            color: #718096;
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
     }
 
-    .add-new-specialty {
-        .btn-save-specialty {
-            border       : none;
-            background   : orange;
-            padding      : 8px 5px;
-            min-width    : 75px;
-            border-radius: 3px;
-            margin       : 15px 0;
+    .clinic-form-container {
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -0.75rem;
 
+            .form-group {
+                padding: 0 0.75rem;
+                margin-bottom: 1.5rem;
+                flex: 1 0 0%;
+            }
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 0.875rem;
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #4a5568;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+            &:focus {
+                color: #4a5568;
+                background-color: #fff;
+                border-color: #667eea;
+                outline: 0;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+        }
+
+        .image-upload-wrapper {
+            .image-upload-label {
+                display: block;
+                cursor: pointer;
+                margin-bottom: 1rem;
+            }
+
+            .image-upload-input {
+                display: none;
+            }
+
+            .image-upload-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+                border: 2px dashed #e2e8f0;
+                border-radius: 8px;
+                background-color: #f8fafc;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    border-color: #667eea;
+                    background-color: #f0f4ff;
+                }
+
+                .upload-icon {
+                    font-size: 2rem;
+                    color: #667eea;
+                    margin-bottom: 0.5rem;
+                }
+
+                .upload-text {
+                    color: #4a5568;
+                    font-size: 0.875rem;
+                }
+            }
+
+            .image-preview {
+                margin-top: 1rem;
+                img {
+                    max-width: 100%;
+                    max-height: 200px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                }
+            }
+        }
+
+        .markdown-editor-wrapper {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+
+            .rc-md-editor {
+                border: none;
+            }
+        }
+
+        .form-actions {
+            margin-top: 2rem;
+            text-align: right;
+
+            .submit-button {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+                font-weight: 500;
+                line-height: 1.5;
+                color: #fff;
+                background-color: #667eea;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                min-width: 120px;
+
+                &:hover {
+                    background-color: darken(#667eea, 10%);
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+                }
+
+                &:active {
+                    transform: translateY(0);
+                }
+
+                &:disabled {
+                    background-color: #a0aec0;
+                    cursor: not-allowed;
+                    transform: none;
+                    box-shadow: none;
+                }
+            }
+        }
+    }
+}
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    
+    button {
+        border: none;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        
+        i {
+            font-size: 15px;
+            transition: transform 0.2s ease;
+        }
+        
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+            
+            i {
+                transform: scale(1.1);
+            }
+        }
+        
+        &:active {
+            transform: translateY(0);
+        }
+    }
+    
+    .btn-edit {
+        background-color: #4caf50;
+        color: white;
+        
+        &:hover {
+            background-color: darken(#4caf50, 8%);
+        }
+    }
+    
+    .btn-delete {
+        background-color: #f44336;
+        color: white;
+        
+        &:hover {
+            background-color: red !important;
+            color: white;
+            
+        }
+    }
+}
+
+
+@media (max-width: 768px) {
+    .manage-clinic-container {
+        margin: 1rem;
+        padding: 1.5rem;
+
+        .clinic-header {
+            .clinic-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        .clinic-form-container {
+            .form-row {
+                flex-direction: column;
+                margin: 0;
+
+                .form-group {
+                    padding: 0;
+                    margin-bottom: 1rem;
+                }
+            }
         }
     }
 }
