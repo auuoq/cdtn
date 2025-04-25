@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import { FormattedMessage } from 'react-intl';
 import './Clinic_By_Manager.scss';
 import { getClinicByManager, updateClinic } from '../../../services/userService'; // Thêm API update phòng khám
 import MarkdownIt from 'markdown-it';

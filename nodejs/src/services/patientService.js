@@ -3,17 +3,27 @@ require('dotenv').config();
 import emailService from './emailService'
 import { v4 as uuidv4 } from 'uuid';
 
-let buildUrlEmail = (doctorId, token) => {
-    let result = `${process.env.URL_REACT}/verify-booking?token=${token}&doctorId=${doctorId}`
+let buildUrlEmail = (doctorId, packageId, token) => {
+    let result = '';
+    
+    if (doctorId) {
+        result = `${process.env.URL_REACT}/verify-booking?token=${token}&doctorId=${doctorId}`;
+    }
+    
+    if (packageId) {
+        result = `${process.env.URL_REACT}/verify-booking?token=${token}&packageId=${packageId}`;
+    }
+
     return result;
 }
+
 
 let postBookAppointment = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.email || !data.doctorId || !data.timeType
+            if (!data.email || (!data.doctorId && !data.packageId) || !data.timeType
                 || !data.date || !data.fullName || !data.selectedGender
-                || !data.address || !data.reason) {  // Check for the reason
+                || !data.address || !data.reason) {  // Check for the reason and either doctorId or packageId
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing parameter'
@@ -26,9 +36,9 @@ let postBookAppointment = (data) => {
                     time: data.timeString,
                     doctorName: data.doctorName,
                     language: data.language,
-                    redirectLink: buildUrlEmail(data.doctorId, token)
+                    // Thay doctorId bằng packageId nếu người dùng chọn gói khám
+                    redirectLink: buildUrlEmail(data.doctorId, data.packageId, token)
                 });
-
                 // Upsert patient    
                 let user = await db.User.findOrCreate({
                     where: { email: data.email },
@@ -47,6 +57,7 @@ let postBookAppointment = (data) => {
                         where: {
                             patientId: user[0].id,
                             doctorId: data.doctorId,
+                            packageId: data.packageId, // Include packageId if provided
                             token: token
                         },
                         defaults: {
@@ -56,11 +67,12 @@ let postBookAppointment = (data) => {
                             date: data.date,
                             timeType: data.timeType,
                             token: token,
-                            reason: data.reason   // Save the reason in the booking record
+                            reason: data.reason, // Save the reason in the booking record
+                            packageId: data.packageId // Save packageId if the booking is for an exam package
                         }
                     });
 
-                    // Nếu booking thành công, tăng currentNumber trong bảng Schedule
+                    // If booking is created, increase the current number for the schedule
                     if (booking && booking[1] === true) {  // Check if a new booking was created
                         let schedule = await db.Schedule.findOne({
                             where: {
@@ -71,15 +83,15 @@ let postBookAppointment = (data) => {
                         });
 
                         if (schedule) {
-                            schedule.currentNumber += 1; // Tăng currentNumber
-                            await schedule.save(); // Lưu thay đổi vào database
+                            schedule.currentNumber += 1; // Increment currentNumber
+                            await schedule.save(); // Save the change to the database
                         }
                     }
                 }
 
                 resolve({
                     errCode: 0,
-                    errMessage: 'Save infor patient succeed!'
+                    errMessage: 'Save info patient succeed!'
                 });
             }
         } catch (e) {
@@ -90,10 +102,11 @@ let postBookAppointment = (data) => {
 
 
 
+
 let postVerifyBookAppointment = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.token || !data.doctorId) {
+            if (!data.token || (!data.doctorId && !data.packageId)) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing parameter'
@@ -101,7 +114,8 @@ let postVerifyBookAppointment = (data) => {
             } else {
                 let appointment = await db.Booking.findOne({
                     where: {
-                        doctorId: data.doctorId,
+                        ...(data.doctorId ? { doctorId: data.doctorId } : {}),
+                        ...(data.packageId ? { packageId: data.packageId } : {}),
                         token: data.token,
                         statusId: 'S1'
                     },

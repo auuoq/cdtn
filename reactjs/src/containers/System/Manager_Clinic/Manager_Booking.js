@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import { FormattedMessage } from 'react-intl';
 import './Manager_Booking.scss';
 import { getDetailClinicByManager } from '../../../services/userService'; // API mới
 import ProfileDoctor from '../../Patient/Doctor/ProfileDoctor'; // Import ProfileDoctor component

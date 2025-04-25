@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import { FormattedMessage } from 'react-intl';
 import './RemedyModal.scss'
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { toast } from 'react-toastify';
-import moment from 'moment';
+import { Button, Modal, ModalBody, ModalFooter } from 'reactstrap';
 import { CommonUtils } from '../../../utils';
 
 class RemedyModal extends Component {
@@ -56,7 +53,7 @@ class RemedyModal extends Component {
 
 
     render() {
-        let { isOpenModal, closeRemedyModal, dataModal, sendRemedy } = this.props;
+        let { isOpenModal, closeRemedyModal} = this.props;
 
         return (
             <Modal

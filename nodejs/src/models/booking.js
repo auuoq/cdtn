@@ -31,18 +31,36 @@ module.exports = (sequelize, DataTypes) => {
             Booking.belongsTo(models.Doctor_Infor,
                 {
                     foreignKey: 'doctorId', targetKey: 'doctorId', as: 'doctorBooking'
-                })  
-
+                })
+            Booking.belongsTo(models.ExamPackage, 
+                {
+                    foreignKey: 'packageId', targetKey: 'id', as: 'examPackageData' // Link to ExamPackage
+                })
         }
     };
     Booking.init({
         statusId: DataTypes.STRING,
-        doctorId: DataTypes.INTEGER,
+        doctorId: {
+            type: DataTypes.INTEGER,
+            allowNull: true, // doctorId can be null for exam packages
+        },
         patientId: DataTypes.INTEGER,
         date: DataTypes.STRING,
         timeType: DataTypes.STRING,
         reason: DataTypes.STRING,
         token: DataTypes.STRING,
+        packageId: {
+            type: DataTypes.INTEGER,
+            allowNull: true, // packageId can be null for doctor appointments
+        },
+        feedback: {
+            type: DataTypes.STRING,
+            allowNull: true, // Feedback from patient after appointment
+        },
+        diagnosis: {
+            type: DataTypes.STRING,
+            allowNull: true, // Diagnosis from doctor after appointment
+        },
     }, {
         sequelize,
         modelName: 'Booking',

@@ -42,11 +42,14 @@ class ManageClinic extends Component {
     }
 
     handleEditorChange = ({ html, text }) => {
+        // Replace the <p> tag with center-aligned style in the html
+        let styledHTML = html.replace(/<p>/g, '<p style="text-align: center;">');
         this.setState({
-            descriptionHTML: html,
+            descriptionHTML: styledHTML,
             descriptionMarkdown: text,
-        })
-    }
+        });
+    };
+    
 
     handleOnchangeImage = async (event) => {
         let data = event.target.files;

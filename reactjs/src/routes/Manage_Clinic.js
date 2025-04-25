@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import { Redirect, Route, Switch } from 'react-router';
+import { Route, Switch } from 'react-router';
 import Header from '../containers/Header/Header';
 import Manager_Booking from '../containers/System/Manager_Clinic/Manager_Booking';
 import Clinic_By_Manager from '../containers/System/Manager_Clinic/Clinic_By_Manager';
