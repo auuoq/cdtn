@@ -13,10 +13,9 @@ export const adminMenu = [
 
             {
                 name: 'menu.admin.manage-doctor', link: '/system/manage-doctor',
-                // subMenus: [
-                //     { name: 'menu.system.system-administrator.user-manage', link: '/system/user-manage' },
-                //     { name: 'menu.system.system-administrator.user-redux', link: '/system/user-redux' },
-                // ]
+            },
+            {
+                name: 'menu.admin.manage-clinicManager', link: '/system/manage-clinicManager',
             },
 
             // {
@@ -74,14 +73,6 @@ export const manager_clinicMenu = [
             name: 'menu.manage.manage-booking', link: '/manage/manage-booking'
 
         },
-        // { //Quản lí bệnh nhân khám bệnh của bác sĩ
-        //     name: 'menu.managa.manage-patient', link: '/doctor/manage-patient'
-
-        // },
-        // { //Quản lí bệnh nhân đã khám của bác sĩ 
-        //     name: 'menu.manage.manage-record', link: '/doctor/manage-record'
-
-        // },
 
     ]
     },
@@ -106,6 +97,14 @@ export const manager_clinicMenu = [
         menus: [
             {
                 name: 'menu.manage.manage-bookingbooking', link: '/manage/booking',
+            },
+        ]
+    },
+    { //Quản lí gói khám
+        name: 'menu.manage.manage-package',
+        menus: [
+            {
+                name: 'menu.manage.manage-package', link: '/manage/manage-package',
             },
         ]
     }

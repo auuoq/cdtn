@@ -173,6 +173,30 @@ const getUserBookingsByManager = (userId) => {
     return axios.get(`/api/get-user-bookings-by-manager?userId=${userId}`);
 }
 
+const getAllClinicManager = async () => {
+    return axios.get(`/api/get-all-clinic-manager`);
+}
+const assignClinicToManager = async (data) => {
+    return axios.post('/api/assign-clinic-to-manager', data);
+}
+
+//ExamPackage
+const createExamPackage = (data) => {
+    return axios.post('/api/create-new-exam-package', data);
+}
+const updateExamPackage = (data) => {
+    return axios.put('/api/update-exam-package', data);
+}
+const deleteExamPackage = (examPackageId) => {
+    return axios.delete(`/api/delete-exam-package?packageId=${examPackageId}`);
+}
+const getAllExamPackages = () => {
+    return axios.get('/api/get-all-exam-packages');
+}
+const getDetailExamPackageByClinic = (clinicId) => {
+    return axios.get(`/api/get-exam-package-detail-by-clinic?id=${clinicId}`);
+}
+
 
 export {
     handleLoginApi, getAllUsers,
@@ -188,5 +212,6 @@ export {
     getAllPatientForDoctor, postSendRemedy,getAllPatientsWithStatusS3,
     getUserInfoByEmail,getUserBookings,deleteAppointment,getDepositInfo,
     sendPasswordResetEmail,resetPassword,getDetailClinicByManager,getClinicByManager,getAllDoctorsByMagager,
-    getUserBookingsByManager,deleteSpecialty,updateSpecialty
+    getUserBookingsByManager,deleteSpecialty,updateSpecialty,getAllClinicManager,assignClinicToManager,getAllExamPackages,
+    createExamPackage,updateExamPackage,deleteExamPackage,getDetailExamPackageByClinic,
 }

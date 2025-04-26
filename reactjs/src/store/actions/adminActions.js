@@ -3,7 +3,7 @@ import {
     getAllCodeService, createNewUserService, getAllUsers,
     deleteUserService, editUserService, getTopDoctorHomeService,
     getAllDoctors, saveDetailDoctorService, getAllSpecialty,
-    getAllClinic, getAllDoctorsByMagager
+    getAllClinic, getAllDoctorsByMagager,getAllClinicManager
 } from "../../services/userService";
 import { toast } from 'react-toastify';
 
@@ -242,6 +242,29 @@ export const fetchAllDoctors = () => {
             console.log("FETCH_ALL_DOCTORS_FAILED: ", e);
             dispatch({
                 type: actionTypes.FETCH_ALL_DOCTORS_FAILED,
+            })
+        }
+    }
+}
+
+export const fetchAllClinicMagager = () => {
+    return async (dispatch, getState) => {
+        try {
+            let res = await getAllClinicManager();
+            if (res && res.errCode === 0) {
+                dispatch({
+                    type: actionTypes.FETCH_ALL_CLICICMANGER_SUCCESS,
+                    dataCMgr: res.data
+                })
+            } else {
+                dispatch({
+                    type: actionTypes.FETCH_ALL_CLICICMANGER_FAILED,
+                })
+            }
+        } catch (e) {
+            console.log("FETCH_ALL_CLICICMANGER_FAILED: ", e);
+            dispatch({
+                type: actionTypes.FETCH_ALL_CLICICMANGER_FAILED,
             })
         }
     }

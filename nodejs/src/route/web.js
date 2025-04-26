@@ -6,6 +6,7 @@ import patientController from "../controllers/patientController";
 import specialtyController from "../controllers/specialtyController";
 import clinicController from "../controllers/clinicController";
 import clinicManagerController from "../controllers/manage_clinicController"
+import examPackageController from "../controllers/examPackageController";
 
 let router = express.Router();
 
@@ -79,7 +80,16 @@ let initWebRoutes = (app) => {
     router.get('/api/get-clinic-by-manager', clinicManagerController.getClinicByManager);
     router.get('/api/get-all-doctors-by-manager', clinicManagerController.getAllDoctorsByMagager);
     router.get('/api/get-user-bookings-by-manager', clinicManagerController.getUserBookingsByManager);
+    router.get('/api/get-all-clinic-manager', clinicManagerController.getAllClinicManager);
+    router.post('/api/assign-clinic-to-manager', clinicManagerController.assignClinicToManager);
 
+
+    //Exam Package
+    router.post('/api/create-new-exam-package', examPackageController.createExamPackage);  // Tạo mới gói khám
+    router.put('/api/update-exam-package', examPackageController.updateExamPackage);       // Cập nhật gói khám
+    router.delete('/api/delete-exam-package', examPackageController.deleteExamPackage);    // Xóa gói khám
+    router.get('/api/get-all-exam-packages', examPackageController.getAllExamPackages);    // Lấy tất cả gói khám
+    router.get('/api/get-exam-package-detail-by-clinic', examPackageController.getExamPackageDetailByClinic); // Lấy chi tiết gói khám theo phòng khám
 
 
 

@@ -122,13 +122,13 @@ class ScheduleByManager extends Component {
         if (rangeTime && rangeTime.length > 0) {
             let selectedTime = rangeTime.filter(item => item.isSelected === true);
             if (selectedTime && selectedTime.length > 0) {
-                selectedTime.map((schedule, index) => {
+                selectedTime.forEach((schedule) => {
                     let object = {};
                     object.doctorId = selectedDoctor.value;
                     object.date = formatedDate;
                     object.timeType = schedule.keyMap;
                     result.push(object);
-                })
+                });
 
             } else {
                 toast.error("Invalid selected time!");

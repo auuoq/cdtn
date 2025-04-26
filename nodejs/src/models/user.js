@@ -35,9 +35,11 @@ module.exports = (sequelize, DataTypes) => {
     roleId: DataTypes.STRING,
     positionId: DataTypes.STRING,
     resetPasswordToken: DataTypes.STRING,
-    resetPasswordExpires: DataTypes.BIGINT
-
-
+    resetPasswordExpires: DataTypes.BIGINT,
+    insuranceCode: { type: DataTypes.STRING, allowNull: true },  // Mã BHYT
+    idCardNumber: { type: DataTypes.STRING, allowNull: true }, // Số CMND/CCCD
+    occupation: { type: DataTypes.STRING, allowNull: true },  // Nghề nghiệp
+    birthDate: { type: DataTypes.DATE, allowNull: true },  // Ngày sinh
   }, {
     sequelize,
     modelName: 'User',
