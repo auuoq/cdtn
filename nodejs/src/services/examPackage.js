@@ -31,8 +31,9 @@ let createExamPackage = (data) => {
                 price: data.price,
                 provinceId: data.provinceId,
                 paymentId: data.paymentId,
-                descriptionMarkdown: data.descriptionMarkdown,
-                descriptionHTML: data.descriptionHTML,
+                contentMarkdown: data.contentMarkdown,
+                contentHTML: data.contentHTML,
+                description: data.description,
                 image: data.imageBase64,
                 note: data.note
             });
@@ -81,8 +82,9 @@ let updateExamPackage = (data) => {
                 examPackage.price = data.price;
                 examPackage.provinceId = data.provinceId;
                 examPackage.paymentId = data.paymentId;
-                examPackage.descriptionMarkdown = data.descriptionMarkdown;
-                examPackage.descriptionHTML = data.descriptionHTML;
+                examPackage.contentMarkdown = data.contentMarkdown;
+                examPackage.contentHTML = data.contentHTML;
+                examPackage.description = data.description;
                 examPackage.note = data.note;
 
                 if (data.imageBase64) {

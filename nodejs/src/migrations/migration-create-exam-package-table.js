@@ -33,11 +33,17 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      descriptionMarkdown: {
-        type: Sequelize.TEXT,
+      contentHTML: {
+        allowNull: false,
+        type: Sequelize.TEXT('long')
       },
-      descriptionHTML: {
-        type: Sequelize.TEXT,
+      contentMarkdown: {
+          allowNull: false,
+          type: Sequelize.TEXT('long')
+      },
+      description: {
+          allowNull: true,
+          type: Sequelize.TEXT('long')
       },
       image: {
         type: Sequelize.BLOB('long'),

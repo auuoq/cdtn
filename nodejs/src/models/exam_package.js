@@ -36,8 +36,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        descriptionMarkdown: DataTypes.TEXT,
-        descriptionHTML: DataTypes.TEXT,
+        contentHTML: DataTypes.TEXT('long'),
+        contentMarkdown: DataTypes.TEXT('long'),
+        description: DataTypes.TEXT('long'),
         image: DataTypes.TEXT,
         note: {
             type: DataTypes.STRING,
