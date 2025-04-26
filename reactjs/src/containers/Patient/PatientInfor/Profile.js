@@ -4,6 +4,7 @@ import './Profile.scss';
 import HomeHeader from '../../HomePage/HomeHeader';
 import { getUserInfoByEmail, editUserService, getAllCodeService } from '../../../services/userService';
 import { withRouter } from 'react-router';
+import { FormattedMessage } from 'react-intl'; // For internationalization
 
 class Profile extends Component {
     constructor(props) {
@@ -14,6 +15,7 @@ class Profile extends Component {
             isEditing: false,
             editedData: {},
             genders: [],
+            isSaving: false
         };
     }
 
@@ -22,13 +24,15 @@ class Profile extends Component {
 
         if (userInfo && userInfo.email) {
             try {
-                let response = await getUserInfoByEmail(userInfo.email);
-                let genderResponse = await getAllCodeService('GENDER'); // Fetch gender options
+                let [userResponse, genderResponse] = await Promise.all([
+                    getUserInfoByEmail(userInfo.email),
+                    getAllCodeService('GENDER')
+                ]);
 
-                if (response && response.errCode === 0 && genderResponse && genderResponse.errCode === 0) {
+                if (userResponse?.errCode === 0 && genderResponse?.errCode === 0) {
                     this.setState({
-                        userData: response.data,
-                        editedData: { ...response.data },
+                        userData: userResponse.data,
+                        editedData: { ...userResponse.data },
                         genders: genderResponse.data,
                         loading: false,
                     });
@@ -36,7 +40,7 @@ class Profile extends Component {
                     this.setState({ loading: false });
                 }
             } catch (error) {
-                console.log('Error fetching user info:', error);
+                console.error('Error fetching user info:', error);
                 this.setState({ loading: false });
             }
         }
@@ -46,146 +50,235 @@ class Profile extends Component {
         this.setState({ isEditing: true });
     };
 
+    handleCancel = () => {
+        this.setState({ 
+            isEditing: false,
+            editedData: { ...this.state.userData }
+        });
+    };
+
     handleInputChange = (event, field) => {
-        let updatedData = { ...this.state.editedData };
-        updatedData[field] = event.target.value;
-        this.setState({ editedData: updatedData });
+        this.setState(prevState => ({
+            editedData: {
+                ...prevState.editedData,
+                [field]: event.target.value
+            }
+        }));
     };
 
     handleSave = async () => {
         const { editedData } = this.state;
+        const { userInfo } = this.props;
+
+        this.setState({ isSaving: true });
 
         try {
             let response = await editUserService({
-                id: this.props.userInfo.id,
+                id: userInfo.id,
                 email: editedData.email,
                 firstName: editedData.firstName,
                 lastName: editedData.lastName,
                 address: editedData.address,
                 phonenumber: editedData.phonenumber,
                 gender: editedData.gender,
-                roleId: this.props.userInfo.roleId,
-                positionId: this.props.userInfo.positionId,
+                roleId: userInfo.roleId,
+                positionId: userInfo.positionId,
             });
 
-            if (response && response.errCode === 0) {
+            if (response?.errCode === 0) {
                 this.setState({
                     userData: editedData,
                     isEditing: false,
                 });
-                alert('Cập nhật thông tin thành công!');
+                alert(<FormattedMessage id="profile.update-success" defaultMessage="Profile updated successfully!" />);
             } else {
-                alert('Cập nhật thất bại!');
+                alert(<FormattedMessage id="profile.update-failed" defaultMessage="Update failed. Please try again." />);
             }
         } catch (error) {
-            console.log('Error updating user data:', error);
-            alert('Đã xảy ra lỗi, vui lòng thử lại sau.');
+            console.error('Error updating user data:', error);
+            alert(<FormattedMessage id="profile.update-error" defaultMessage="An error occurred. Please try again later." />);
+        } finally {
+            this.setState({ isSaving: false });
         }
     };
 
-    handleGenderChange = (event) => {
-        let updatedData = { ...this.state.editedData };
-        updatedData.gender = event.target.value;
-        this.setState({ editedData: updatedData });
-    };
-
-    // Navigate to changePassword page
     handleChangePassword = () => {
-        this.props.history.push('/changePassword'); // Navigate to the changePassword page
+        this.props.history.push('/changePassword');
     };
 
     render() {
-        const { userData, loading, isEditing, editedData, genders } = this.state;
-        const { language } = this.props; // Lấy ngôn ngữ từ props
-    
+        const { userData, loading, isEditing, editedData, genders, isSaving } = this.state;
+        const { language } = this.props;
+
         if (loading) {
-            return <p>Loading...</p>;
+            return (
+                <div className="loading-container">
+                    <div className="spinner"></div>
+                    <p>Loading profile...</p>
+                </div>
+            );
         }
-    
+
         if (!userData) {
-            return <p>Không tìm thấy thông tin người dùng</p>;
+            return (
+                <div className="error-container">
+                    <p>User information not found</p>
+                </div>
+            );
         }
-    
-        // Lấy giá trị giới tính hiện tại dựa trên keyMap và hiển thị tên
+
         const currentGender = genders.find(gender => gender.keyMap === userData.gender);
-    
+
         return (
             <>
                 <HomeHeader />
                 <div className="profile-container">
-                    <h1>Thông tin cá nhân</h1>
-                    {isEditing ? (
-                        <>
-                            <p>
-                                <strong>Email: </strong>
+                    <h1>
+                        Thông tin cá nhân
+                    </h1>
+                    
+                    <div className="profile-info">
+                        <div className="info-item">
+                            <label>
+                                <FormattedMessage id="profile.email" defaultMessage="Email" />
+                            </label>
+                            {isEditing ? (
                                 <input
                                     type="email"
-                                    value={editedData.email}
-                                    onChange={(event) => this.handleInputChange(event, 'email')}
+                                    value={editedData.email || ''}
+                                    onChange={(e) => this.handleInputChange(e, 'email')}
                                 />
-                            </p>
-                            <p>
-                                <strong>Họ và tên: </strong>
+                            ) : (
+                                <div className="info-value">{userData.email}</div>
+                            )}
+                        </div>
+
+                        <div className="info-item">
+                            <label>
+                                Họ và tên
+                            </label>
+                            {isEditing ? (
+                                <div className="name-inputs">
+                                    <input
+                                        type="text"
+                                        placeholder="First name"
+                                        value={editedData.firstName || ''}
+                                        onChange={(e) => this.handleInputChange(e, 'firstName')}
+                                    />
+                                    <input
+                                        type="text"
+                                        style={{marginLeft : "4px"}}
+                                        placeholder="Last name"
+                                        value={editedData.lastName || ''}
+                                        onChange={(e) => this.handleInputChange(e, 'lastName')}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="info-value">{`${userData.firstName} ${userData.lastName}`}</div>
+                            )}
+                        </div>
+
+                        <div className="info-item">
+                            <label>
+                                Địa chỉ
+                            </label>
+                            {isEditing ? (
                                 <input
                                     type="text"
-                                    value={editedData.firstName}
-                                    onChange={(event) => this.handleInputChange(event, 'firstName')}
+                                    value={editedData.address || ''}
+                                    onChange={(e) => this.handleInputChange(e, 'address')}
                                 />
-                                <input
-                                    type="text"
-                                    value={editedData.lastName}
-                                    onChange={(event) => this.handleInputChange(event, 'lastName')}
-                                />
-                            </p>
-                            <p>
-                                <strong>Địa chỉ: </strong>
-                                <input
-                                    type="text"
-                                    value={editedData.address}
-                                    onChange={(event) => this.handleInputChange(event, 'address')}
-                                />
-                            </p>
-                            <p>
-                                <strong>Giới tính: </strong>
-                                <select value={editedData.gender} onChange={this.handleGenderChange}>
+                            ) : (
+                                <div className="info-value">{userData.address || '-'}</div>
+                            )}
+                        </div>
+
+                        <div className="info-item">
+                            <label>
+                                Giới tính
+                            </label>
+                            {isEditing ? (
+                                <select 
+                                    value={editedData.gender || ''} 
+                                    onChange={(e) => this.handleInputChange(e, 'gender')}
+                                >
                                     {genders.map((gender) => (
                                         <option key={gender.keyMap} value={gender.keyMap}>
-                                            {gender.valueVi}
+                                            {language === 'vi' ? gender.valueVi : gender.valueEn}
                                         </option>
                                     ))}
                                 </select>
-                            </p>
-                            <p>
-                                <strong>Số điện thoại: </strong>
+                            ) : (
+                                <div className="info-value">
+                                    {currentGender ? (language === 'vi' ? currentGender.valueVi : currentGender.valueEn) : userData.gender}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="info-item">
+                            <label>
+                                Số điện thoại
+                            </label>
+                            {isEditing ? (
                                 <input
                                     type="text"
-                                    value={editedData.phonenumber}
-                                    onChange={(event) => this.handleInputChange(event, 'phonenumber')}
+                                    value={editedData.phonenumber || ''}
+                                    onChange={(e) => this.handleInputChange(e, 'phonenumber')}
                                 />
-                            </p>
-                            <button onClick={this.handleSave}>Lưu</button>
-                        </>
-                    ) : (
-                        <>
-                            <p><strong>Email: </strong>{userData.email}</p>
-                            <p><strong>Họ và tên: </strong>{userData.firstName} {userData.lastName}</p>
-                            <p><strong>Địa chỉ: </strong>{userData.address}</p>
-                            <p><strong>Giới tính: </strong>{userData.gender}</p>
-                            <p><strong>Số điện thoại: </strong>{userData.phonenumber}</p>
-                            <button onClick={this.handleEdit}>Sửa thông tin</button>
-                            <button onClick={this.handleChangePassword}>Đổi mật khẩu</button>
-                        </>
-                    )}
+                            ) : (
+                                <div className="info-value">{userData.phonenumber || '-'}</div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="button-group">
+                        {isEditing ? (
+                            <>
+                                <button 
+                                    className="save-btn" 
+                                    onClick={this.handleSave}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? (
+                                        <FormattedMessage id="profile.saving" defaultMessage="Đang lưu" />
+                                    ) : (
+                                        <FormattedMessage id="profile.save" defaultMessage="Lưu" />
+                                    )}
+                                </button>
+                                <button 
+                                    className="edit-btn" 
+                                    onClick={this.handleCancel}
+                                    disabled={isSaving}
+                                >
+                                    Hủy
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button 
+                                    className="edit-btn" 
+                                    onClick={this.handleEdit}
+                                >
+                                    <FormattedMessage id="profile.edit" defaultMessage="Sửa" />
+                                </button>
+                                <button 
+                                    className="change-password-btn " 
+                                    onClick={this.handleChangePassword}
+                                >
+                                    <FormattedMessage id="profile.change-password" defaultMessage="Đổi mật khẩu" />
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </>
         );
     }
-}    
+}
 
-const mapStateToProps = (state) => {
-    return {
-        userInfo: state.user.userInfo, // Thông tin của người dùng đã đăng nhập
-    };
-};
+const mapStateToProps = (state) => ({
+    userInfo: state.user.userInfo,
+    language: state.app.language,
+});
 
-export default withRouter(connect(mapStateToProps)(Profile)); // Use withRouter HOC
+export default withRouter(connect(mapStateToProps)(Profile));
