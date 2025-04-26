@@ -207,55 +207,62 @@ let deleteUser = (userId) => {
 }
 
 let updateUserData = (data) => {
-    /**
-     * editUser if you don't edit the raw: false,
-     * you can do the same as destroy function in deleteUser with db.User.update({ field ...}, {where: {id : data.id}})
-     */
     return new Promise(async (resolve, reject) => {
         try {
+            // Kiểm tra các tham số yêu cầu
             if (!data.id || !data.roleId || !data.gender) {
                 resolve({
                     errCode: 2,
                     errMessage: 'Missing required parameters'
-                })
+                });
+                return;
             }
 
+            // Tìm người dùng theo ID
             let user = await db.User.findOne({
                 where: { id: data.id },
-                raw: false
-            })
+                raw: false  // Để có thể chỉnh sửa các thuộc tính
+            });
+
+            // Kiểm tra nếu người dùng tồn tại
             if (user) {
-                user.firstName = data.firstName;
-                user.lastName = data.lastName;
-                user.address = data.address;
-                user.roleId = data.roleId;
-                user.positionId = data.positionId;
-                user.gender = data.gender;
-                user.phonenumber = data.phonenumber;
+                user.firstName = data.firstName || user.firstName;
+                user.lastName = data.lastName || user.lastName;
+                user.address = data.address || user.address;
+                user.roleId = data.roleId || user.roleId;
+                user.positionId = data.positionId || user.positionId;
+                user.gender = data.gender || user.gender;
+                user.phonenumber = data.phonenumber || user.phonenumber;
+                user.insuranceCode = data.insuranceCode || user.insuranceCode;
+                user.idCardNumber = data.idCardNumber || user.idCardNumber;
+                user.occupation = data.occupation || user.occupation;
+                user.birthDate = data.birthDate || user.birthDate;
+
+                // Cập nhật ảnh người dùng nếu có
                 if (data.avatar) {
-                    user.image = data.avatar;
+                    user.image = data.avatar || user.image;
                 }
 
-
+                // Lưu lại các thay đổi vào cơ sở dữ liệu
                 await user.save();
 
                 resolve({
                     errCode: 0,
-                    message: 'Update the user succeeds!'
-                })
-            }
-            else {
+                    errMessage: 'Update the user succeeded!'
+                });
+            } else {
                 resolve({
                     errCode: 1,
-                    errMessage: `User's not found!`
+                    errMessage: `User not found!`
                 });
             }
 
         } catch (e) {
             reject(e);
         }
-    })
-}
+    });
+};
+
 
 let getAllCodeService = (typeInput) => {
     return new Promise(async (resolve, reject) => {
