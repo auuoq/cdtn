@@ -32,6 +32,15 @@ module.exports = {
                 type: Sequelize.TEXT,
                 allowNull: true,
             },
+            feedback: {
+                type: Sequelize.STRING,
+                allowNull: true,  // Được phép null nếu chưa có đánh giá
+            },
+          
+            diagnosis: {
+                type: Sequelize.STRING,
+                allowNull: true,  // Được phép null nếu bác sĩ chưa điền chẩn đoán
+            },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE
