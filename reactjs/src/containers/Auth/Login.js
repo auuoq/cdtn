@@ -42,9 +42,13 @@ class Login extends Component {
       if (data && data.errCode !== 0) {
         this.setState({ errMessage: data.message });
       }
-      if (data && data.errCode === 0) {
+      if (data.errCode === 0) {
         this.props.userLoginSuccess(data.user);
-        this.props.navigate('/system/user-redux');
+        if (data.user.roleId === "R4") {
+          this.props.navigate('/manage/manage-package');
+        } else {
+          this.props.navigate('/system/user-redux');
+        }
       }
     } catch (error) {
       if (error.response && error.response.data) {

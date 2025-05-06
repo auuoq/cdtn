@@ -21,3 +21,59 @@
         }
     }
 }
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    
+    button {
+        border: none;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        
+        i {
+            font-size: 15px;
+            transition: transform 0.2s ease;
+        }
+        
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+            
+            i {
+                transform: scale(1.1);
+            }
+        }
+        
+        &:active {
+            transform: translateY(0);
+        }
+    }
+    
+    .btn-edit {
+        background-color: #4caf50 !important;
+        color: white;
+        
+        &:hover {
+            background-color: darken(#4caf50, 8%);
+            color: white !important;
+        }
+    }
+    
+    .btn-delete {
+        background-color: #f44336 !important;
+        color: white;
+        
+        &:hover {
+            background-color: red !important;
+            color: white;
+            
+        }
+    }
+}

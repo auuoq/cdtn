@@ -16,21 +16,6 @@
         color: #333;
     }
 
-    .btn-primary {
-        background-color: #0379ff;
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: normal;
-        border-radius: 5px;
-
-        &:hover {
-            background-color: #0366cc;
-        }
-    }
-
     .table {
         width: 100%;
         border-collapse: collapse;
@@ -51,163 +36,228 @@
         td {
             font-size: 14px;
             color: #333;
+            .action-buttons {
+                display: flex;
+                gap: 8px;
+                
+                button {
+                    border: none;
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+                    
+                    i {
+                        font-size: 15px;
+                        transition: transform 0.2s ease;
+                    }
+                    
+                    &:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+                        
+                        i {
+                            transform: scale(1.1);
+                        }
+                    }
+                    
+                    &:active {
+                        transform: translateY(0);
+                    }
+                }
+                
+                .btn-edit {
+                    background-color: #4caf50 !important;
+                    color: white;
+                    
+                    &:hover {
+                        background-color: darken(#4caf50, 8%);
+                        color: white !important;
+                    }
+                }
+                
+                .btn-delete {
+                    background-color: #f44336 !important;
+                    color: white;
+                    
+                    &:hover {
+                        background-color: red !important;
+                        color: white;
+                        
+                    }
+                }
+            }
         }
 
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-
-            .btn-edit, .btn-delete {
-                background-color: #f1f1f1;
-                padding: 5px 10px;
-                border: none;
-                cursor: pointer;
-                border-radius: 5px;
-                transition: background-color 0.3s;
-
-                &:hover {
-                    background-color: #ddd;
-                }
-
-                i {
-                    font-size: 16px;
-                }
-            }
-
-            .btn-edit {
-                color: #ffa500;
-            }
-
-            .btn-delete {
-                color: #ff0000;
-            }
-        }
     }
 
-    .modal {
-        display: block;
+    .modal-backdrop {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
         background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1050;
+        display: flex;
         justify-content: center;
         align-items: center;
+        z-index: 1051;
+        padding: 20px;
 
-        .modal-dialog {
-            background-color: #fff;
+        .modal-content {
+            background-color: white;
             border-radius: 8px;
+            width: 100%;
             max-width: 800px;
-            margin: 1.75rem auto;
-            padding: 20px;
-        }
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ddd;
-        }
+            .modal-header {
+                padding: 15px 20px;
+                border-bottom: 1px solid #e0e0e0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
 
-        .modal-footer {
-            padding-top: 10px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
+                .modal-title {
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #2c3e50;
+                }
 
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-        }
+                .close {
+                    background: none;
+                    border: none;
+                    font-size: 24px;
+                    color: #7f8c8d;
+                    cursor: pointer;
+                    padding: 0;
+                    line-height: 1;
 
-        .close {
-            cursor: pointer;
-            font-size: 20px;
-            border: none;
-            background: transparent;
-            color: #333;
-        }
+                    &:hover {
+                        color: #e74c3c;
+                    }
+                }
+            }
 
-        .btn-secondary {
-            background-color: #aaa;
-            color: #fff;
-            border: none;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
-        }
+            .modal-body {
+                padding: 20px;
 
-        .btn-danger {
-            background-color: #ff4d4d;
-            color: #fff;
-            border: none;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
+                .form-group {
+                    margin-bottom: 20px;
 
-            &:hover {
-                background-color: #e60000;
+                    label {
+                        display: block;
+                        margin-bottom: 8px;
+                        font-weight: 500;
+                        color: #34495e;
+
+                        .text-danger {
+                            color: #e74c3c;
+                        }
+                    }
+
+                    .form-control {
+                        width: 100%;
+                        padding: 0px 12px;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                        font-size: 14px;
+                        transition: border-color 0.3s;
+
+                        &:focus {
+                            border-color: #3498db;
+                            outline: none;
+                            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+                        }
+
+                        &-file {
+                            padding: 5px 0;
+                        }
+                    }
+
+                    textarea.form-control {
+                        min-height: 80px;
+                        resize: vertical;
+                    }
+
+                    .preview-image {
+                        margin-top: 10px;
+
+                        img {
+                            border-radius: 4px;
+                            border: 1px solid #eee;
+                        }
+                    }
+                }
+
+                .row {
+                    display: flex;
+                    margin-left: -10px;
+                    margin-right: -10px;
+
+                    .col-md-6 {
+                        flex: 0 0 50%;
+                        max-width: 50%;
+                        padding-left: 10px;
+                        padding-right: 10px;
+                    }
+                }
+            }
+
+            .modal-footer {
+                padding: 15px 20px;
+                border-top: 1px solid #e0e0e0;
+                display: flex;
+                justify-content: flex-end;
+
+                .btn {
+                    padding: 8px 15px;
+                    margin-left: 10px;
+                    font-size: 14px;
+                    border-radius: 4px;
+                    transition: all 0.3s;
+
+                    &-primary {
+                        background-color: #3498db;
+                        border-color: #3498db;
+
+                        &:hover {
+                            background-color: #2980b9;
+                            border-color: #2980b9;
+                        }
+                    }
+
+                    &-secondary {
+                        background-color: #95a5a6;
+                        border-color: #95a5a6;
+
+                        &:hover {
+                            background-color: #7f8c8d;
+                            border-color: #7f8c8d;
+                        }
+                    }
+
+                    &-danger {
+                        background-color: #e74c3c;
+                        border-color: #e74c3c;
+
+                        &:hover {
+                            background-color: #c0392b;
+                            border-color: #c0392b;
+                        }
+                    }
+                }
             }
         }
     }
-
-    .modal-body {
-        margin-bottom: 20px;
-
-        label {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        textarea {
-            width: 100%;
-            padding: 8px;
-            font-size: 14px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 15px;
-        }
-
-        textarea {
-            height: 100px;
-            resize: vertical;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-control-file {
-            width: 100%;
-            padding: 10px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-    }
-
-    .modal-footer button {
-        font-size: 14px;
-        padding: 8px 16px;
-    }
-
-    .text-center {
-        text-align: center;
-    }
-
-    .btn {
-        cursor: pointer;
-    }
 }
+
 

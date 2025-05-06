@@ -171,7 +171,8 @@
                 color: white;
                 
                 &:hover {
-                    background-color: darken(#4caf50, 8%);
+                    background-color: darken(#4caf50, 8%) !important;
+                    color: white !important;
                 }
             }
             
