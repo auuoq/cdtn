@@ -93,8 +93,25 @@ class AssignClinicToManager extends Component {
         const { clinics, managers, selectedManager, selectedClinic, loading } = this.state;
 
         return (
-            <div className="assign-clinic-container">
-                <h3>Gán phòng khám cho người quản lý</h3>
+            <div className="assign-clinic-container" style={{
+                maxWidth: "1200px",
+                margin: "0 auto",
+                padding: "30px",
+                marginTop: "60px",
+                backgroundColor: "#fff",
+                borderRadius: "12px",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+            }}>
+                <div  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    color: "#333",
+                    marginBottom: "30px",
+                    paddingBottom: "15px",
+                    borderBottom: "1px solid #eee",
+                    fontSize : "24px",
+                    fontWeight: "600"
+                }}>Gán phòng khám cho người quản lý</div>
                 {loading ? (
                     <div>Loading...</div>
                 ) : (
