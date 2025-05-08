@@ -24,7 +24,7 @@ class ScheduleByManager extends Component {
 
     componentDidMount() {
         let { userInfo } = this.props;
-        console.log('User Info11:', userInfo);
+        // console.log('User Info11:', userInfo);
         this.props.fetchAllDoctorsByMagager(userInfo.id);
         this.props.fetchAllScheduleTime();
     }
@@ -68,8 +68,8 @@ class ScheduleByManager extends Component {
         if (inputData && inputData.length > 0) {
             inputData.forEach((item, index) => {
                 let object = {};
-                let labelVi = `${item.User.lastName} ${item.User.firstName}`;
-                let labelEn = `${item.User.firstName} ${item.User.lastName}`;
+                let labelVi = `${item.lastName} ${item.firstName}`;
+                let labelEn = `${item.firstName} ${item.lastName}`;
                 object.label = language === LANGUAGES.VI ? labelVi : labelEn;
                 object.value = item.id;
                 result.push(object);
@@ -124,6 +124,8 @@ class ScheduleByManager extends Component {
             if (selectedTime && selectedTime.length > 0) {
                 selectedTime.forEach((schedule) => {
                     let object = {};
+                    console.log("selectedDoctor: " + selectedDoctor.value);
+                    console.log("selectedDoctor123: " );
                     object.doctorId = selectedDoctor.value;
                     object.date = formatedDate;
                     object.timeType = schedule.keyMap;

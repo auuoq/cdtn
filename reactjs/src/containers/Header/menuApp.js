@@ -96,7 +96,7 @@ export const manager_clinicMenu = [
         name: 'menu.manage.bookingbooking',
         menus: [
             {
-                name: 'menu.manage.manage-bookingbooking', link: '/manage/booking',
+                name: 'menu.manage.manage-booking', link: '/manage/booking',
             },
         ]
     },
@@ -105,6 +105,9 @@ export const manager_clinicMenu = [
         menus: [
             {
                 name: 'menu.manage.manage-package', link: '/manage/manage-package',
+            },
+            {
+                name: 'menu.manage.manage-schedule-package', link: '/manage/schedule-package',
             },
         ]
     }

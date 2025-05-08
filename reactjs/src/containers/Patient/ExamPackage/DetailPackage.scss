@@ -1,0 +1,44 @@
+// DetailExamPackage.scss
+.exam-package-detail-container {
+    padding: 0 100px;
+
+    .intro-package {
+        display: flex;
+        margin-top: 30px;
+
+        .content-left {
+            width: 120px;
+            height: 120px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+        }
+
+        .content-right {
+            flex: 1;
+            padding-left: 20px;
+
+            .up {
+                font-size: 24px;
+                font-weight: 600;
+            }
+
+            .down {
+                margin-top: 10px;
+                font-style: italic;
+            }
+        }
+    }
+
+    .info-package {
+        margin: 20px 0;
+        p {
+            margin: 5px 0;
+        }
+    }
+
+    .detail-content {
+        margin-top: 30px;
+        line-height: 1.6;
+    }
+}

@@ -2,7 +2,7 @@ import examPackageService from '../services/examPackage';
 
 let createExamPackage = async (req, res) => {
     try {
-        let infor = await examPackageService.createExamPackage(req.body);
+        let infor = await examPackageService.createExamPackage(req.body, req.query.id);
         return res.status(200).json(infor);
     } catch (e) {
         console.log(e);
@@ -12,6 +12,7 @@ let createExamPackage = async (req, res) => {
         });
     }
 };
+
 
 let updateExamPackage = async (req, res) => {
     try {
@@ -53,9 +54,9 @@ let getAllExamPackages = async (req, res) => {
     }
 };
 
-let getExamPackageDetailByClinic = async (req, res) => {
+let getExamPackagesDetailByManager = async (req, res) => {
     try {
-        let infor = await examPackageService.getExamPackagesDetailByClinic(req.query.id);
+        let infor = await examPackageService.getExamPackagesDetailByManager(req.query.id);
         return res.status(200).json(infor);
     } catch (e) {
         console.log(e);
@@ -66,10 +67,40 @@ let getExamPackageDetailByClinic = async (req, res) => {
     }
 };
 
+let bulkCreateScheduleForPackage = async (req, res) => {
+    try {
+        let infor = await examPackageService.bulkCreateScheduleForPackage(req.body);
+        return res.status(200).json(infor);
+
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
+
+let getDetailExamPackageById = async (req, res) => {
+    try {
+        let result = await examPackageService.getDetailExamPackageById(req.query.id);
+        return res.status(200).json(result);
+    } catch (e) {
+        console.log('Error getDetailExamPackageById: ', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server',
+        });
+    }
+};
+
+
 module.exports = {
     createExamPackage,
     updateExamPackage,
     deleteExamPackage,
     getAllExamPackages,
-    getExamPackageDetailByClinic
+    getExamPackagesDetailByManager,
+    bulkCreateScheduleForPackage,
+    getDetailExamPackageById,
 };

@@ -1,9 +1,17 @@
 import db from "../models/index";
+require('dotenv').config();
+import _ from 'lodash';
 
-let createExamPackage = (data) => {
+const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
+
+let createExamPackage = (data, userId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.name || !data.categoryId || !data.clinicId || !data.price || !data.provinceId || !data.paymentId) {
+            const Clinic_Manager = await db.Clinic_Manager.findOne({
+                where: { userId },
+                attributes: ['clinicId']
+            });
+            if (!Clinic_Manager || !data.name || !data.categoryId || !data.price || !data.provinceId || !data.paymentId) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing parameter'
@@ -11,23 +19,10 @@ let createExamPackage = (data) => {
                 return;
             }
 
-            // Kiểm tra quyền quản lý phòng khám
-            // const clinicManager = await db.Clinic_Manager.findOne({
-            //     where: { userId: data.userId, clinicId: data.clinicId }
-            // });
-
-            // if (!clinicManager) {
-            //     resolve({
-            //         errCode: 2,
-            //         errMessage: 'You are not authorized to create an exam package for this clinic'
-            //     });
-            //     return;
-            // }
-
             let examPackage = await db.ExamPackage.create({
                 name: data.name,
                 categoryId: data.categoryId,
-                clinicId: data.clinicId,
+                clinicId: Clinic_Manager.clinicId,
                 price: data.price,
                 provinceId: data.provinceId,
                 paymentId: data.paymentId,
@@ -49,7 +44,7 @@ let createExamPackage = (data) => {
     });
 };
 
-let updateExamPackage = (data) => {
+let updateExamPackage = (data, userId) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!data.packageId || !data.name || !data.clinicId || !data.price || !data.provinceId || !data.paymentId) {
@@ -57,20 +52,7 @@ let updateExamPackage = (data) => {
                     errCode: 1,
                     errMessage: 'Missing parameter'
                 });
-                return;
             }
-
-            // const clinicManager = await db.Clinic_Manager.findOne({
-            //     where: { clinicId: data.clinicId, userId: data.userId }
-            // });
-
-            // if (!clinicManager) {
-            //     return resolve({
-            //         errCode: 2,
-            //         errMessage: 'You do not have permission to manage this clinic'
-            //     });
-            // }
-
             let examPackage = await db.ExamPackage.findOne({
                 where: { id: data.packageId, clinicId: data.clinicId },
                 raw: false
@@ -175,41 +157,175 @@ let getAllExamPackages = () => {
     });
 };
 
-let getExamPackagesDetailByClinic = (clinicId) => {
+let getExamPackagesDetailByManager = (userId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!clinicId) {
+            if (!userId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Missing parameter'
+                    errMessage: 'Missing userId parameter'
                 });
                 return;
             }
 
-            let data = await db.ExamPackage.findAll({
-                where: { clinicId: clinicId }
+            // Lấy clinicId mà user đang quản lý
+            let manager = await db.Clinic_Manager.findOne({
+                where: { userId },
+                attributes: ['clinicId']
             });
 
-            if (data && data.length > 0) {
-                data.forEach(item => {
+            if (!manager) {
+                resolve({
+                    errCode: 2,
+                    errMessage: 'No clinic found for this manager'
+                });
+                return;
+            }
+
+            let packages = await db.ExamPackage.findAll({
+                where: { clinicId: manager.clinicId }
+            });
+
+            if (packages && packages.length > 0) {
+                packages = packages.map(item => {
                     if (item.image) {
                         item.image = new Buffer(item.image, 'base64').toString('binary');
                     }
+                    return item;
                 });
+            }
+
+            resolve({
+                errCode: 0,
+                errMessage: 'ok',
+                data: packages
+            });
+
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+
+
+
+let bulkCreateScheduleForPackage = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.arrSchedule || !data.packageId || !data.formatedDate) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameter!'
+                });
+            } else {
+                let schedule = data.arrSchedule;
+                if (schedule && schedule.length > 0) {
+                    schedule = schedule.map(item => {
+                        item.currentNumber = 0;
+                        item.maxNumber = MAX_NUMBER_SCHEDULE;
+                        return item;
+                    });
+                }
+
+                // Lấy tất cả các lịch khám đã tồn tại
+                let existing = await db.SchedulePackage.findAll({
+                    where: { packageId: data.packageId, date: data.formatedDate },
+                    attributes: ['id', 'timeType', 'date', 'packageId', 'maxNumber'],
+                    raw: true
+                });
+
+                // Lấy các lịch cần tạo mới (những lịch không tồn tại trong DB)
+                let toCreate = _.differenceWith(schedule, existing, (a, b) => {
+                    return a.timeType === b.timeType && +a.date === +b.date;
+                });
+
+                // Lấy các lịch cần xóa (những lịch đã tồn tại nhưng không có trong lần chọn mới)
+                let toDelete = _.differenceWith(existing, schedule, (a, b) => {
+                    return a.timeType === b.timeType && +a.date === +b.date;
+                });
+
+                // Xóa những lịch cũ không còn trong lần chọn hiện tại
+                if (toDelete && toDelete.length > 0) {
+                    let idsToDelete = toDelete.map(item => item.id);
+                    await db.SchedulePackage.destroy({
+                        where: { id: idsToDelete }
+                    });
+                }
+
+                // Tạo những lịch khám mới
+                if (toCreate && toCreate.length > 0) {
+                    await db.SchedulePackage.bulkCreate(toCreate);
+                }
 
                 resolve({
                     errCode: 0,
-                    errMessage: 'ok',
-                    data
+                    errMessage: 'OK'
+                });
+            }
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+let getDetailExamPackageById = (packageId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!packageId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameter: packageId',
+                });
+                return;
+            }
+
+            let data = await db.ExamPackage.findOne({
+                where: { id: packageId },
+                include: [
+                    {
+                        model: db.Allcode,
+                        as: 'provinceTypeData',
+                        attributes: ['valueEn', 'valueVi'],
+                    },
+                    {
+                        model: db.Allcode,
+                        as: 'paymentTypeData',
+                        attributes: ['valueEn', 'valueVi'],
+                    },
+                    {
+                        model: db.Allcode,
+                        as: 'categoryTypeData',
+                        attributes: ['valueEn', 'valueVi'],
+                    },
+                    {
+                        model: db.Clinic,
+                        as: 'clinicInfo',
+                        attributes: ['name', 'address'],
+                    }
+                ],
+                raw: false,
+                nest: true
+            });
+
+            if (data && data.image) {
+                data.image = new Buffer(data.image, 'base64').toString('binary');
+            }
+
+            if (!data) {
+                resolve({
+                    errCode: 2,
+                    errMessage: 'Exam package not found',
                 });
             } else {
                 resolve({
-                    errCode: 2,
-                    errMessage: 'No exam packages found for this clinic'
+                    errCode: 0,
+                    errMessage: 'ok',
+                    data,
                 });
             }
-        } catch (error) {
-            reject(error);
+        } catch (e) {
+            reject(e);
         }
     });
 };
@@ -219,5 +335,7 @@ module.exports = {
     updateExamPackage,
     deleteExamPackage,
     getAllExamPackages,
-    getExamPackagesDetailByClinic
+    getExamPackagesDetailByManager,
+    bulkCreateScheduleForPackage,
+    getDetailExamPackageById
 };

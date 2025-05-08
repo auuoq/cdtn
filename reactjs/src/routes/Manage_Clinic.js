@@ -7,6 +7,7 @@ import Clinic_By_Manager from '../containers/System/Manager_Clinic/Clinic_By_Man
 import Schedule_By_Manager from '../containers/System/Manager_Clinic/Schedule_By_Manager';
 import Booking_Clinic from '../containers/System/Manager_Clinic/Booking_Clinic';
 import ExamPackage from '../containers/System/Manager_Clinic/ExamPackage';
+import Schedule_Package from '../containers/System/Manager_Clinic/Schedule_Package';
 
 
 class ManageClinic extends Component {
@@ -24,6 +25,7 @@ class ManageClinic extends Component {
                             <Route path="/manage/schedule-by-manager" component={Schedule_By_Manager} />
                             <Route path="/manage/booking" component={Booking_Clinic} />
                             <Route path="/manage/manage-package" component={ExamPackage} />
+                            <Route path="/manage/schedule-package" component={Schedule_Package} />
                         </Switch>
                     </div>
                 </div>

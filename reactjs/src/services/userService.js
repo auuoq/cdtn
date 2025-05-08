@@ -181,20 +181,30 @@ const assignClinicToManager = async (data) => {
 }
 
 //ExamPackage
-const createExamPackage = (data) => {
-    return axios.post('/api/create-new-exam-package', data);
-}
-const updateExamPackage = (data) => {
+const createExamPackage = (data, userId) => {
+    return axios.post(`/api/create-new-exam-package?id=${userId}`, data);
+
+};
+
+const updateExamPackage = (data, userId) => {
     return axios.put('/api/update-exam-package', data);
-}
-const deleteExamPackage = (examPackageId) => {
-    return axios.delete(`/api/delete-exam-package?packageId=${examPackageId}`);
-}
+};
+
+const deleteExamPackage = (packageId, userId) => {
+    return axios.delete(`/api/delete-exam-package?packageId=${packageId}&userId=${userId}`);
+};
+
 const getAllExamPackages = () => {
     return axios.get('/api/get-all-exam-packages');
 }
-const getDetailExamPackageByClinic = (clinicId) => {
-    return axios.get(`/api/get-exam-package-detail-by-clinic?id=${clinicId}`);
+const getExamPackagesDetailByManager = (userId) => {
+    return axios.get(`/api/get-exam-package-detail-by-manager?id=${userId}`);
+}
+const bulkCreateScheduleForPackage = (data) => {
+    return axios.post('/api/bulk-create-schedule-for-package', data);
+}
+const getDetailExamPackageById = (packageId) => {
+    return axios.get(`/api/get-detail-exam-package-by-id?id=${packageId}`);
 }
 
 
@@ -213,5 +223,5 @@ export {
     getUserInfoByEmail,getUserBookings,deleteAppointment,getDepositInfo,
     sendPasswordResetEmail,resetPassword,getDetailClinicByManager,getClinicByManager,getAllDoctorsByMagager,
     getUserBookingsByManager,deleteSpecialty,updateSpecialty,getAllClinicManager,assignClinicToManager,getAllExamPackages,
-    createExamPackage,updateExamPackage,deleteExamPackage,getDetailExamPackageByClinic,
+    createExamPackage,updateExamPackage,deleteExamPackage,getExamPackagesDetailByManager,bulkCreateScheduleForPackage,getDetailExamPackageById
 }

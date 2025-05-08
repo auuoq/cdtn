@@ -28,6 +28,7 @@ import changePassword from './Patient/PatientInfor/changePassword.js';
 import ManageClinic from './System/Clinic/ManageClinic.js';
 import Manager_Booking from './System/Manager_Clinic/Manager_Booking.js';
 import Manage_Clinic from '../routes/Manage_Clinic.js';
+import DetailPackage from './Patient/ExamPackage/DetailPackage.js';
 
 class App extends Component {
 
@@ -72,6 +73,7 @@ class App extends Component {
                                     <Route path="/deposit/:appointmentId" component={userIsAuthenticated(Deposit)} />
                                     <Route path={path.HOMEPAGE} component={HomePage} />
                                     <Route path={path.DETAIL_DOCTOR} component={DetailDoctor} />
+                                    <Route path={path.DETAIL_EXAM_PACKAGE} component={DetailPackage} />
                                     <Route path={path.DETAIL_SPECIALTY} component={DetailSpecialty} />
                                     <Route path={path.DETAIL_CLINIC} component={DetailClinic} />
                                     <Route path={path.VERIFY_EMAIL_BOOKING} component={VerifyEmail} />

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import { connect } from "react-redux";
 import { toast } from 'react-toastify';
-import { getAllExamPackages, createExamPackage, updateExamPackage, deleteExamPackage, getAllClinic } from '../../../services/userService';
+import { getExamPackagesDetailByManager, createExamPackage, updateExamPackage, deleteExamPackage, getAllClinic,getAllCodeService } from '../../../services/userService';
 import './ExamPackage.scss';
 import CommonUtils from '../../../utils/CommonUtils';
 import MarkdownIt from 'markdown-it';
@@ -42,24 +43,34 @@ class ManageExamPackage extends Component {
     }
 
     async componentDidMount() {
+        await this.fetchAllDropdownData();
         this.fetchExamPackages();
         this.fetchClinics()
-        // In a real app, you would fetch these from your API
-        this.setState({
-            categories: [
-                { id: 1, name: 'Tổng quát' },
-                { id: 2, name: 'Chuyên khoa' }
-            ],
-            provinces: [
-                { id: 'P01', name: 'Hà Nội' },
-                { id: 'P02', name: 'TP.HCM' }
-            ],
-            paymentMethods: [
-                { id: 'PAY01', name: 'Tiền mặt' },
-                { id: 'PAY02', name: 'Chuyển khoản' }
-            ]
-        });
     }
+
+    fetchAllDropdownData = async () => {
+        try {
+            const [categoryRes, provinceRes, paymentRes] = await Promise.all([
+                getAllCodeService("CATEGORY"),
+                getAllCodeService("PROVINCE"),
+                getAllCodeService("PAYMENT")
+            ]);
+    
+            if (categoryRes.errCode === 0 && provinceRes.errCode === 0 && paymentRes.errCode === 0) {
+                this.setState({
+                    categories: categoryRes.data,
+                    provinces: provinceRes.data,
+                    paymentMethods: paymentRes.data
+                });
+            } else {
+                toast.error("Lỗi khi tải danh sách danh mục / tỉnh / thanh toán");
+            }
+        } catch (error) {
+            console.error("fetchAllDropdownData error:", error);
+            toast.error("Có lỗi xảy ra khi tải dữ liệu danh mục!");
+        }
+    };
+    
     // Thêm hàm fetchClinics
     fetchClinics = async () => {
         try {
@@ -79,7 +90,9 @@ class ManageExamPackage extends Component {
 
     fetchExamPackages = async () => {
         try {
-            const res = await getAllExamPackages();
+            const { userId } = this.props; // Lấy userId từ props (có thể lấy từ redux hoặc props)
+            const res = await getExamPackagesDetailByManager(userId.id);
+            //const res = await getAllExamPackages();
             if (res && res.errCode === 0) {
                 this.setState({
                     examPackages: res.data || []
@@ -160,6 +173,8 @@ class ManageExamPackage extends Component {
             isCreateMode: false,
             currentExamPackage: {
                 ...examPackage,
+                clinicId: examPackage.clinicId || '',
+                packageId: examPackage.id,
                 imageBase64: examPackage.image || ''
             }
         });
@@ -174,20 +189,27 @@ class ManageExamPackage extends Component {
     handleSaveExamPackage = async () => {
         try {
             const { currentExamPackage, isCreateMode } = this.state;
-
-            // Validate required fields
+            const { userId } = this.props;
+    
+            // Validate
             if (!currentExamPackage.name || !currentExamPackage.price || !currentExamPackage.description) {
                 toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
                 return;
             }
-
+    
+            // ✅ Gán clinicId từ user đang đăng nhập
+            const payload = {
+                ...currentExamPackage,
+                //clinicId: userId.clinicId // Hoặc lấy từ userInfo chứa clinic
+            };
+    
             let res;
             if (isCreateMode) {
-                res = await createExamPackage(currentExamPackage);
+                res = await createExamPackage(payload, userId.id);
             } else {
-                res = await updateExamPackage(currentExamPackage);
+                res = await updateExamPackage(payload);
             }
-
+    
             if (res && res.errCode === 0) {
                 toast.success(isCreateMode ? 'Thêm mới gói khám thành công!' : 'Cập nhật gói khám thành công!');
                 this.handleCloseModal();
@@ -200,6 +222,7 @@ class ManageExamPackage extends Component {
             toast.error('Đã xảy ra lỗi khi lưu');
         }
     };
+    
 
     handleDeleteExamPackage = (examPackage) => {
         this.setState({
@@ -357,26 +380,13 @@ class ManageExamPackage extends Component {
                                         >
                                             <option value="">Chọn danh mục</option>
                                             {categories.map((cat) => (
-                                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                <option key={cat.keyMap} value={cat.keyMap}>{cat.valueVi}</option>
                                             ))}
                                         </select>
                                     </div>
                                 </div>
 
                                 <div className="row">
-                                    <div className="col-md-6 form-group">
-                                        <label>Phòng khám</label>
-                                        <select
-                                            className="form-control"
-                                            value={currentExamPackage.clinicId}
-                                            onChange={(e) => this.handleOnChangeSelect(e, 'clinicId')}
-                                        >
-                                            <option value="">Chọn phòng khám</option>
-                                            {clinics.map((clinic) => (
-                                                <option key={clinic.id} value={clinic.id}>{clinic.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
                                     <div className="col-md-6 form-group">
                                         <label>Tỉnh/Thành phố</label>
                                         <select
@@ -385,7 +395,7 @@ class ManageExamPackage extends Component {
                                             onChange={(e) => this.handleOnChangeSelect(e, 'provinceId')}
                                         >
                                             {provinces.map((province) => (
-                                                <option key={province.id} value={province.id}>{province.name}</option>
+                                                <option key={province.keyMap} value={province.keyMap}>{province.valueVi}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -400,11 +410,11 @@ class ManageExamPackage extends Component {
                                             onChange={(e) => this.handleOnChangeSelect(e, 'paymentId')}
                                         >
                                             {paymentMethods.map((method) => (
-                                                <option key={method.id} value={method.id}>{method.name}</option>
+                                                <option key={method.keyMap} value={method.keyMap}>{method.valueVi}</option>
                                             ))}
                                         </select>
                                     </div>
-                                    <div className="col-md-6 form-group">
+                                    <div className="col-md-6 form-group">   
                                         <label>Hình ảnh</label>
                                         <input
                                             type="file"
@@ -506,4 +516,9 @@ class ManageExamPackage extends Component {
     }
 }
 
-export default ManageExamPackage;
+const mapStateToProps = state => ({
+    isLoggedIn: state.user.isLoggedIn,
+    userId: state.user.userInfo
+});
+
+export default connect(mapStateToProps)(ManageExamPackage);

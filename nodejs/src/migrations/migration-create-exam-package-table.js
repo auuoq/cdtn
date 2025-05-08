@@ -14,7 +14,7 @@ module.exports = {
         allowNull: false, 
       },
       categoryId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       clinicId: {

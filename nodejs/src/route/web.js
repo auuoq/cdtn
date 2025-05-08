@@ -89,8 +89,9 @@ let initWebRoutes = (app) => {
     router.put('/api/update-exam-package', examPackageController.updateExamPackage);       // Cập nhật gói khám
     router.delete('/api/delete-exam-package', examPackageController.deleteExamPackage);    // Xóa gói khám
     router.get('/api/get-all-exam-packages', examPackageController.getAllExamPackages);    // Lấy tất cả gói khám
-    router.get('/api/get-exam-package-detail-by-clinic', examPackageController.getExamPackageDetailByClinic); // Lấy chi tiết gói khám theo phòng khám
-
+    router.get('/api/get-exam-package-detail-by-manager', examPackageController.getExamPackagesDetailByManager); // Lấy chi tiết gói khám theo phòng khám
+    router.post('/api/bulk-create-schedule-for-package', examPackageController.bulkCreateScheduleForPackage); // Tạo lịch khám cho gói khám
+    router.get('/api/get-detail-exam-package-by-id', examPackageController.getDetailExamPackageById);
 
 
     return app.use("/", router);

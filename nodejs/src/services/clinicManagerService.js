@@ -186,13 +186,6 @@ let getAllDoctorsByMagager = (userId) => {
             // Lấy thông tin phòng khám
             const doctorData = await db.Doctor_Infor.findAll({
                 where: { clinicId },
-                include: [
-                    {
-                        model: db.User,
-                        as: 'User',
-                        attributes: ['id', 'firstName', 'lastName', 'email', 'address', 'phoneNumber'],
-                    },
-                ]
             });
 
             if (!doctorData) {
@@ -203,12 +196,16 @@ let getAllDoctorsByMagager = (userId) => {
                 });
             }
 
-            
+            const doctorIds = doctorData.map(doctor => doctor.doctorId);
+            const doctorDetails = await db.User.findAll({
+                where: { id: doctorIds },
+                exclude: ['password', 'image'],
+            });           
 
             return resolve({
                 errCode: 0,
                 errMessage: 'ok',
-                data: doctorData
+                data: doctorDetails
             });
         } catch (e) {
             reject(e)
