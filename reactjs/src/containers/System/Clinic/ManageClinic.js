@@ -268,76 +268,108 @@ class ManageClinic extends Component {
 
                 {/* Modal chung cho cả thêm mới và chỉnh sửa */}
                 {this.state.isOpenModal && (
-                    <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1050 }}>
-                        <div className="modal-dialog modal-lg" style={{ maxWidth: '90%', margin: '1.75rem auto' }}>
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">
-                                        {isCreateMode ? 'Thêm mới phòng khám' : 'Chỉnh sửa phòng khám'}
-                                    </h5>
-                                    <button type="button" className="close" onClick={this.handleCloseModal}>
-                                        <span>&times;</span>
-                                    </button>
-                                </div>
-                                <div className="modal-body">
-                                    <div className="row">
-                                        <div className='col-6 form-group'>
-                                            <label>Tên phòng khám</label>
-                                            <input 
-                                                className="form-control" 
-                                                type="text" 
-                                                value={currentClinic.name}
-                                                onChange={(event) => this.handleOnChangeInput(event, 'name')}
-                                            />
-                                        </div>
-                                        <div className='col-6 form-group'>
-                                            <label>Ảnh phòng khám</label>
-                                            <input 
-                                                className="form-control-file" 
-                                                type="file"
-                                                onChange={(event) => this.handleOnchangeImage(event)}
-                                            />
-                                            {currentClinic.imageBase64 &&
-                                                <img 
-                                                    src={currentClinic.imageBase64} 
-                                                    alt="clinic" 
-                                                    style={{ width: '100px', height: '60px', objectFit: 'cover', marginTop: '10px' }}
-                                                />
-                                            }
-                                        </div>
-                                        <div className="col-6 form-group">
-                                            <label>Địa chỉ phòng khám</label>
-                                            <input 
-                                                className="form-control" 
-                                                type="text" 
-                                                value={currentClinic.address}
-                                                onChange={(event) => this.handleOnChangeInput(event, 'address')}
-                                            />
-                                        </div>
-
-                                        <div className='col-12 mt-3'>
-                                            <label>Mô tả chi tiết</label>
-                                            <MdEditor
-                                                style={{ height: '300px' }}
-                                                renderHTML={text => mdParser.render(text)}
-                                                onChange={this.handleEditorChange}
-                                                value={currentClinic.descriptionMarkdown}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" onClick={this.handleCloseModal}>
-                                        Đóng
-                                    </button>
-                                    <button type="button" className="btn btn-primary" onClick={this.handleSaveClinic}>
-                                        {isCreateMode ? 'Thêm mới' : 'Lưu thay đổi'}
-                                    </button>
-                                </div>
+                <div
+                    className="modal"
+                    style={{
+                    display: 'block',
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 1050,
+                    }}
+                >
+                    <div
+                    className="modal-dialog modal-lg modal-dialog-scrollable"
+                    style={{
+                            // rộng 90% viewport width
+                        maxHeight: '95vh',     // cao tối đa 95% viewport height
+                        margin: '1.75rem auto',
+                        overflowX: 'hidden',   // ẩn thanh cuộn ngang
+                    }}
+                    >
+                    <div
+                        className="modal-content"
+                        style={{ overflowX: 'hidden' }}  // ẩn thanh cuộn ngang nội dung
+                    >
+                        <div className="modal-header">
+                        <h5 className="modal-title">
+                            {isCreateMode ? 'Thêm mới phòng khám' : 'Chỉnh sửa phòng khám'}
+                        </h5>
+                        <button type="button" className="close" onClick={this.handleCloseModal}>
+                            <span>&times;</span>
+                        </button>
+                        </div>
+                        <div className="modal-body" style={{ overflowX: 'hidden' }}>
+                        <div className="row" style={{ overflowX: 'hidden' }}>
+                            <div className="col-6 form-group">
+                            <label>Tên phòng khám</label>
+                            <input
+                                className="form-control"
+                                type="text"
+                                value={currentClinic.name}
+                                onChange={(e) => this.handleOnChangeInput(e, 'name')}
+                            />
+                            </div>
+                            <div className="col-6 form-group">
+                            <label>Ảnh phòng khám</label>
+                            <input
+                                className="form-control-file"
+                                type="file"
+                                onChange={this.handleOnchangeImage}
+                            />
+                            {currentClinic.imageBase64 && (
+                                <img
+                                src={currentClinic.imageBase64}
+                                alt="clinic"
+                                style={{ width: '100px', height: '60px', objectFit: 'cover', marginTop: '10px' }}
+                                />
+                            )}
+                            </div>
+                            <div className="col-6 form-group">
+                            <label>Địa chỉ phòng khám</label>
+                            <input
+                                className="form-control"
+                                type="text"
+                                value={currentClinic.address}
+                                onChange={(e) => this.handleOnChangeInput(e, 'address')}
+                            />
+                            </div>
+                            <div className="col-12 mt-3" style={{ overflowX: 'hidden' }}>
+                            <label>Mô tả chi tiết</label>
+                            <div
+                                style={{
+                                height: '300px',
+                                overflowY: 'auto',    // cuộn dọc riêng
+                                overflowX: 'hidden',  // ẩn cuộn ngang
+                                whiteSpace: 'normal', // wrap text dài
+                                }}
+                            >
+                                <MdEditor
+                                value={currentClinic.descriptionMarkdown}
+                                renderHTML={(text) => mdParser.render(text)}
+                                onChange={this.handleEditorChange}
+                                style={{ height: '100%' }}
+                                />
+                            </div>
                             </div>
                         </div>
+                        </div>
+                        <div className="modal-footer">
+                        <button type="button" className="btn btn-secondary" onClick={this.handleCloseModal}>
+                            Đóng
+                        </button>
+                        <button type="button" className="btn btn-primary" onClick={this.handleSaveClinic}>
+                            {isCreateMode ? 'Thêm mới' : 'Lưu thay đổi'}
+                        </button>
+                        </div>
                     </div>
+                    </div>
+                </div>
                 )}
+
 
                 {/* Modal xác nhận xóa */}
                 {this.state.isOpenDeleteModal && (

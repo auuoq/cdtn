@@ -263,69 +263,102 @@ class ManageSpecialty extends Component {
                         </table>
                     </div>
                 </div>
-
                 {/* Modal chung cho cả thêm mới và chỉnh sửa */}
                 {this.state.isOpenModal && (
-                    <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1050 }}>
-                        <div className="modal-dialog modal-lg" style={{ maxWidth: '90%', margin: '1.75rem auto' }}>
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">
-                                        {isCreateMode ? 'Thêm mới chuyên khoa' : 'Chỉnh sửa chuyên khoa'}
-                                    </h5>
-                                    <button type="button" className="close" onClick={this.handleCloseModal}>
-                                        <span>&times;</span>
-                                    </button>
-                                </div>
-                                <div className="modal-body">
-                                    <div className="row">
-                                        <div className='col-6 form-group'>
-                                            <label>Tên chuyên khoa</label>
-                                            <input 
-                                                className="form-control" 
-                                                type="text" 
-                                                value={currentSpecialty.name}
-                                                onChange={(event) => this.handleOnChangeInput(event, 'name')}
-                                            />
-                                        </div>
-                                        <div className='col-6 form-group'>
-                                            <label>Ảnh chuyên khoa</label>
-                                            <input 
-                                                className="form-control-file" 
-                                                type="file"
-                                                onChange={(event) => this.handleOnchangeImage(event)}
-                                            />
-                                            {currentSpecialty.imageBase64 &&
-                                                <img 
-                                                    src={currentSpecialty.imageBase64} 
-                                                    alt="specialty" 
-                                                    style={{ width: '100px', height: '60px', objectFit: 'cover', marginTop: '10px' }}
-                                                />
-                                            }
-                                        </div>
-
-                                        <div className='col-12 mt-3'>
-                                            <label>Mô tả chi tiết</label>
-                                            <MdEditor
-                                                style={{ height: '400px' }}
-                                                renderHTML={text => mdParser.render(text)}
-                                                onChange={this.handleEditorChange}
-                                                value={currentSpecialty.descriptionMarkdown}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" onClick={this.handleCloseModal}>
-                                        Đóng
-                                    </button>
-                                    <button type="button" className="btn btn-primary" onClick={this.handleSaveSpecialty}>
-                                        {isCreateMode ? 'Thêm mới' : 'Lưu thay đổi'}
-                                    </button>
-                                </div>
+                <div
+                    className="modal"
+                    style={{
+                    display: 'block',
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 1050,
+                    }}
+                >
+                    <div
+                    className="modal-dialog modal-lg modal-dialog-scrollable"
+                    style={{
+                        maxHeight: '95vh',      // Giới hạn chiều cao
+                        overflowX: 'hidden',    // Ẩn thanh cuộn ngang ở dialog
+                        margin: '1.75rem auto',
+                    }}
+                    >
+                    <div
+                        className="modal-content"
+                        style={{ overflowX: 'hidden' }}  // Ẩn thanh cuộn ngang ở nội dung
+                    >
+                        <div className="modal-header">
+                        <h5 className="modal-title">
+                            {isCreateMode ? 'Thêm mới chuyên khoa' : 'Chỉnh sửa chuyên khoa'}
+                        </h5>
+                        <button type="button" className="close" onClick={this.handleCloseModal}>
+                            <span>&times;</span>
+                        </button>
+                        </div>
+                        <div
+                        className="modal-body"
+                        style={{ overflowX: 'hidden' }}  // Ẩn thanh cuộn ngang ở body
+                        >
+                        <div className="row" style={{ overflowX: 'hidden' }}>
+                            <div className="col-6 form-group">
+                            <label>Tên chuyên khoa</label>
+                            <input
+                                className="form-control"
+                                type="text"
+                                value={currentSpecialty.name}
+                                onChange={(e) => this.handleOnChangeInput(e, 'name')}
+                            />
+                            </div>
+                            <div className="col-6 form-group">
+                            <label>Ảnh chuyên khoa</label>
+                            <input
+                                className="form-control-file"
+                                type="file"
+                                onChange={this.handleOnchangeImage}
+                            />
+                            {currentSpecialty.imageBase64 && (
+                                <img
+                                src={currentSpecialty.imageBase64}
+                                alt="specialty"
+                                style={{ width: '100px', height: '60px', objectFit: 'cover', marginTop: '10px' }}
+                                />
+                            )}
+                            </div>
+                            <div className='col-12 mt-3' style={{ overflowX: 'hidden' }}>
+                            <label>Mô tả chi tiết</label>
+                            {/* Wrapper để cuộn riêng cho editor */}
+                            <div
+                                style={{
+                                height: '400px',
+                                overflowY: 'auto',    // Cuộn dọc riêng
+                                overflowX: 'hidden',  // Ẩn cuộn ngang
+                                whiteSpace: 'normal', // Wrap text dài
+                                }}
+                            >
+                                <MdEditor
+                                value={currentSpecialty.descriptionMarkdown}
+                                renderHTML={(text) => mdParser.render(text)}
+                                onChange={this.handleEditorChange}
+                                style={{ height: '100%' }}
+                                />
+                            </div>
                             </div>
                         </div>
+                        </div>
+                        <div className="modal-footer">
+                        <button type="button" className="btn btn-secondary" onClick={this.handleCloseModal}>
+                            Đóng
+                        </button>
+                        <button type="button" className="btn btn-primary" onClick={this.handleSaveSpecialty}>
+                            {isCreateMode ? 'Thêm mới' : 'Lưu thay đổi'}
+                        </button>
+                        </div>
                     </div>
+                    </div>
+                </div>
                 )}
 
                 {/* Modal xác nhận xóa */}

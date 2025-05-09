@@ -29,6 +29,7 @@ import ManageClinic from './System/Clinic/ManageClinic.js';
 import Manager_Booking from './System/Manager_Clinic/Manager_Booking.js';
 import Manage_Clinic from '../routes/Manage_Clinic.js';
 import DetailPackage from './Patient/ExamPackage/DetailPackage.js';
+import AllPackage from './Patient/ExamPackage/AllPackage.js';
 
 class App extends Component {
 
@@ -77,6 +78,7 @@ class App extends Component {
                                     <Route path={path.DETAIL_SPECIALTY} component={DetailSpecialty} />
                                     <Route path={path.DETAIL_CLINIC} component={DetailClinic} />
                                     <Route path={path.VERIFY_EMAIL_BOOKING} component={VerifyEmail} />
+                                    <Route path={"/allPacket"} component={AllPackage} />
 
                                 </Switch>
                             </CustomScrollbars>

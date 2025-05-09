@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './AssignClinicToManager.scss';
-import { toast } from 'react-toastify'; 
+import { toast } from 'react-toastify';
 import { getAllClinic, getAllClinicManager, assignClinicToManager } from '../../../services/userService'; // Đảm bảo bạn đã import từ userService
 
 class AssignClinicToManager extends Component {
@@ -33,10 +33,10 @@ class AssignClinicToManager extends Component {
                     managers: managerResponse.data,
                     loading: false
                 });
-                
+
             }
-            
-            
+
+
         } catch (error) {
             console.error("Error fetching data:", error);
             this.setState({ loading: false });
@@ -45,22 +45,22 @@ class AssignClinicToManager extends Component {
 
     // Cập nhật phòng khám dựa trên người quản lý đã chọn
     handleManagerChange = async (e) => {
-      const selectedManager = e.target.value;
-      this.setState({ selectedManager });
-      console.log("Selected manager:", selectedManager);
+        const selectedManager = e.target.value;
+        this.setState({ selectedManager });
+        console.log("Selected manager:", selectedManager);
 
-      // Tìm phòng khám mà người quản lý này đang phụ trách
-      if (selectedManager) {
-          const manager = this.state.managers.find(manager => manager.id === Number(selectedManager));
-          const clinics = this.state.clinics.find(clinic => clinic.id === manager.managedClinics[0].clinicId);
-          if (manager && manager.managedClinics[0].clinicId) {
-              this.setState({ selectedClinic: clinics.id });
-          } else {
-              this.setState({ selectedClinic: '' });
-          }
-      } else {
-          this.setState({ selectedClinic: '' });
-      }
+        // Tìm phòng khám mà người quản lý này đang phụ trách
+        if (selectedManager) {
+            const manager = this.state.managers.find(manager => manager.id === Number(selectedManager));
+            const clinics = this.state.clinics.find(clinic => clinic.id === manager.managedClinics[0].clinicId);
+            if (manager && manager.managedClinics[0].clinicId) {
+                this.setState({ selectedClinic: clinics.id });
+            } else {
+                this.setState({ selectedClinic: '' });
+            }
+        } else {
+            this.setState({ selectedClinic: '' });
+        }
     };
 
     handleSubmit = async () => {
@@ -77,16 +77,16 @@ class AssignClinicToManager extends Component {
         };
 
         try {
-          const response = await assignClinicToManager(data);
-          if (response.errCode === 0) {
-              toast.success(response.errMessage); // Thông báo thành công
-          } else {
-              toast.error(response.errMessage); // Thông báo lỗi
-          }
-      } catch (error) {
-          console.error("Error assigning clinic:", error);
-          toast.error("Gán phòng khám thất bại!");
-      }
+            const response = await assignClinicToManager(data);
+            if (response.errCode === 0) {
+                toast.success(response.errMessage); // Thông báo thành công
+            } else {
+                toast.error(response.errMessage); // Thông báo lỗi
+            }
+        } catch (error) {
+            console.error("Error assigning clinic:", error);
+            toast.error("Gán phòng khám thất bại!");
+        }
     };
 
     render() {
@@ -102,14 +102,14 @@ class AssignClinicToManager extends Component {
                 borderRadius: "12px",
                 boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
             }}>
-                <div  style={{
+                <div style={{
                     display: "flex",
                     justifyContent: "space-between",
                     color: "#333",
                     marginBottom: "30px",
                     paddingBottom: "15px",
                     borderBottom: "1px solid #eee",
-                    fontSize : "24px",
+                    fontSize: "24px",
                     fontWeight: "600"
                 }}>Gán phòng khám cho người quản lý</div>
                 {loading ? (

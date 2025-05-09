@@ -288,7 +288,7 @@ class ManageExamPackage extends Component {
 
                 <div className="exam-package-table mt-4">
                     <table className="table table-bordered table-hover">
-                        <thead className="thead-dark">
+                        <thead className="">
                             <tr>
                                 <th>STT</th>
                                 <th>Tên gói khám</th>

@@ -7,6 +7,7 @@ import { LANGUAGES } from '../../utils';
 import { withRouter } from 'react-router';
 import { changeLanguageApp } from "../../store/actions";
 import * as actions from "../../store/actions";
+import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 
 class HomeHeader extends Component {
     constructor(props) {
@@ -93,10 +94,10 @@ class HomeHeader extends Component {
                                 <div><b><FormattedMessage id="homeheader.speciality" /> </b></div>
                                 <div className='subs-title'><FormattedMessage id="homeheader.searchdoctor" /></div>
                             </div>
-                            <div className='child-content' onClick={() => this.scrollToSection('health-facility-section')}>
-                                <div><b><FormattedMessage id="homeheader.health-facility" /> </b></div>
-                                <div className='subs-title'><FormattedMessage id="homeheader.select-room" /></div>
-                            </div>
+                            <Link to="/AllPacket"className='child-content' style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}> 
+                                <div><b>Gói khám</b></div>
+                                <div className='subs-title'>Lựa chọn gói khám</div>
+                            </Link>
                             <div className='child-content' onClick={() => this.scrollToSection('doctor-section')}>
                                 <div><b><FormattedMessage id="homeheader.doctor" /> </b></div>
                                 <div className='subs-title'><FormattedMessage id="homeheader.select-doctor" /></div>

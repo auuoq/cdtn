@@ -149,7 +149,7 @@ class Profile extends Component {
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const year = date.getFullYear();
             
-            return `${month}/${day}/${year}`;
+            return `${day}/${month}/${year}`;
         } catch (e) {
             console.error('Error formatting date:', e);
             return '';
