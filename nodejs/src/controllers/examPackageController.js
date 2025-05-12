@@ -96,7 +96,7 @@ let getDetailExamPackageById = async (req, res) => {
 
 let getSchedulePackageByDate = async (req, res) => {
     try {
-        let infor = await examPackageService.getSchedulePackageByDate(req.query.date, req.query.packageId);
+        let infor = await examPackageService.getSchedulePackageByDate(req.query.packageId,req.query.date);
         return res.status(200).json(infor);
     } catch (e) {
         console.log(e);

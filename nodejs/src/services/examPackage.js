@@ -360,7 +360,6 @@ let getSchedulePackageByDate = (packageId, date) => {
                     raw: false,
                     nest: true
                 });
-
                 if (!dataSchedule) dataSchedule = [];
 
                 resolve({
