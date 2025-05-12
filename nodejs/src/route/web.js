@@ -33,9 +33,13 @@ let initWebRoutes = (app) => {
     router.get('/api/get-user-booking', userController.getUserBookings);
     router.delete('/api/delete-appointment', userController.deleteAppointment);
     router.get('/api/get-deposit-info', userController.getDepositInfo);
+    router.get('/api/get-user-package-booking', userController.handleGetUserPackageBookings);
+    router.delete('/api/delete-package-appointment', userController.handleDeletePackageAppointment);
+    router.get('/api/get-package-deposit-info', userController.handleGetDepositInfoPackage);
     router.post('/api/send-password-reset-email', userController.handleSendPasswordResetEmail);
     router.post('/api/reset-password/:token', userController.handleResetPassword);
     app.post('/api/change-password', userController.handleChangePassword);
+
 
 
     //doctors
@@ -59,6 +63,8 @@ let initWebRoutes = (app) => {
     //patient
     router.post('/api/patient-book-appointment', patientController.postBookAppointment);
     router.post('/api/verify-book-appointment', patientController.postVerifyBookAppointment);
+    router.post('/api/patient-book-exam-package-appointment', patientController.postBookExamPackageAppointment); // Đặt lịch khám cho gói khám
+    router.post('/api/verify-book-exam-package-appointment', patientController.postVerifyBookExamPackageAppointment); // Xác nhận lịch khám cho gói khám
 
     //specialty
     router.post('/api/create-new-specialty', specialtyController.createSpecialty);
@@ -80,6 +86,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-clinic-by-manager', clinicManagerController.getClinicByManager);
     router.get('/api/get-all-doctors-by-manager', clinicManagerController.getAllDoctorsByMagager);
     router.get('/api/get-user-bookings-by-manager', clinicManagerController.getUserBookingsByManager);
+    router.get('/api/get-package-bookings-by-manager', clinicManagerController.getPackageBookingsByManager);
     router.get('/api/get-all-clinic-manager', clinicManagerController.getAllClinicManager);
     router.post('/api/assign-clinic-to-manager', clinicManagerController.assignClinicToManager);
 
@@ -92,7 +99,8 @@ let initWebRoutes = (app) => {
     router.get('/api/get-exam-package-detail-by-manager', examPackageController.getExamPackagesDetailByManager); // Lấy chi tiết gói khám theo phòng khám
     router.post('/api/bulk-create-schedule-for-package', examPackageController.bulkCreateScheduleForPackage); // Tạo lịch khám cho gói khám
     router.get('/api/get-detail-exam-package-by-id', examPackageController.getDetailExamPackageById);
-
+    router.get('/api/get-schedule-package-by-date', examPackageController.getSchedulePackageByDate); // Lấy lịch khám theo ngày cho gói khá
+    router.get('/api/get-list-all-exam-package-patients-with-status-s3', examPackageController.getListAllExamPackagePatientWithStatusS3); // Lấy danh sách bệnh nhân theo gói khám với trạng thái S3
 
     return app.use("/", router);
 }

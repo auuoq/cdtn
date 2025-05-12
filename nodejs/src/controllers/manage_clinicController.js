@@ -78,11 +78,25 @@ let assignClinicToManager = async (req, res) => {
     }
 }
 
+let getPackageBookingsByManager = async (req, res) => {
+    try {
+        let response = await clinicManagerService.getPackageBookingsByManager(req.query.userId);
+        return res.status(200).json(response);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Server error'
+        });
+    }
+}
+
 module.exports = {
     getDetailClinicByManagerUserId: getDetailClinicByManagerUserId,
     getClinicByManager: getClinicByManager,
     getAllDoctorsByMagager: getAllDoctorsByMagager,
     getUserBookingsByManager: getUserBookingsByManager,
     getAllClinicManager: getAllClinicManager,
-    assignClinicToManager: assignClinicToManager
+    assignClinicToManager: assignClinicToManager,
+    getPackageBookingsByManager: getPackageBookingsByManager
 };

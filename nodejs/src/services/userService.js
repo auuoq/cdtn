@@ -329,28 +329,53 @@ let getUserBookings = (userId) => {
     });
 };
 
+
+
 let deleteAppointment = (appointmentId) => {
     return new Promise(async (resolve, reject) => {
-        let foundAppointment = await db.Booking.findOne({
-            where: { id: appointmentId }
-        })
-        if (!foundAppointment) {
+        try {
+            // 1. Tìm booking
+            let foundAppointment = await db.Booking.findOne({
+                where: { id: appointmentId }
+            });
+            if (!foundAppointment) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: `The Appointment isn't exist`
+                });
+            }
+
+            // 2. Tìm schedule liên quan
+            let schedule = await db.Schedule.findOne({
+                where: {
+                    doctorId: foundAppointment.doctorId,
+                    date: foundAppointment.date,
+                    timeType: foundAppointment.timeType
+                }
+            });
+
+            // 3. Giảm số lượng hiện tại nếu tìm thấy
+            if (schedule && schedule.currentNumber > 0) {
+                schedule.currentNumber -= 1;
+                await schedule.save();
+            }
+
+            // 4. Xóa booking
+            await db.Booking.destroy({
+                where: { id: appointmentId }
+            });
+
+            // 5. Trả về kết quả
             resolve({
-                errCode: 2,
-                errMessage: `The Appointment isn't exist`
-            })
+                errCode: 0,
+                message: `The appointment is deleted`
+            });
+        } catch (e) {
+            reject(e);
         }
+    });
+};
 
-        await db.Booking.destroy({
-            where: { id: appointmentId }
-        })
-
-        resolve({
-            errCode: 0,
-            message: `The appointment is deleted`
-        })
-    })
-}
 
 // userService.js
 
@@ -401,6 +426,142 @@ const getDepositInfo = async (appointmentId) => {
         throw error; // Đảm bảo lỗi được ném ra để hàm API có thể xử lý
     }
 };
+
+
+// 1️⃣ Lấy tất cả các lịch hẹn gói khám của bệnh nhân
+let getUserPackageBookings = (userId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let bookings = await db.BookingPackage.findAll({
+        where: { patientId: userId },
+        include: [
+          {
+            model: db.ExamPackage,
+            as: 'packageData',
+            attributes: ['id', 'name', 'price', 'description'],
+            include: [
+              {
+                model: db.Clinic,
+                as: 'clinicInfo',
+                attributes: ['name', 'address']
+              }
+            ]
+          },
+          {
+            model: db.Allcode,
+            as: 'timeTypeData',
+            attributes: ['valueEn', 'valueVi']
+          },
+          {
+            model: db.Allcode,
+            as: 'statusData',
+            attributes: ['valueEn', 'valueVi']
+          }
+        ],
+        raw: false,
+        nest: true
+      });
+
+      resolve({
+        errCode: 0,
+        errMessage: 'OK',
+        data: bookings
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+// 2️⃣ Xóa một cuộc hẹn gói khám
+let deletePackageAppointment = (appointmentId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let found = await db.BookingPackage.findOne({
+        where: { id: appointmentId }
+      });
+      if (!found) {
+        return resolve({
+          errCode: 2,
+          errMessage: `AppointmentPackage không tồn tại`
+        });
+      }
+
+        // Tìm lịch liên quan  
+      let schedule = await db.SchedulePackage.findOne({
+        where: {
+          packageId: found.packageId,
+          date: found.date,
+          timeType: found.timeType
+        }
+      });
+
+        // Giảm số lượng hiện tại nếu tìm thấy
+      if (schedule && schedule.currentNumber > 0) {
+          schedule.currentNumber -= 1;
+          await schedule.save();
+      }
+        // Xóa cuộc hẹn
+      await db.BookingPackage.destroy({
+        where: { id: appointmentId }
+      });
+      resolve({
+        errCode: 0,
+        errMessage: 'Xóa cuộc hẹn gói khám thành công'
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+// 3️⃣ Lấy thông tin “đặt cọc” (deposit) cho cuộc hẹn gói khám
+let getDepositInfoPackage = async (appointmentId) => {
+  try {
+    let bookings = await db.BookingPackage.findAll({
+      where: { id: appointmentId },
+      include: [
+        {
+          model: db.ExamPackage,
+          as: 'packageData',
+          attributes: ['id', 'name', 'price', 'note'],
+          include: [
+            {
+              model: db.Allcode,
+              as: 'paymentTypeData',    // hình thức thanh toán
+              attributes: ['valueEn', 'valueVi']
+            },
+            {
+              model: db.Clinic,
+              as: 'clinicInfo',
+              attributes: ['name', 'address']
+            }
+          ]
+        },
+        {
+          model: db.User,
+          as: 'patientData',
+          attributes: ['firstName', 'lastName', 'email']
+        }
+      ],
+      raw: false,
+      nest: true
+    });
+
+    // không cần convert image ở đây vì gói khám không lưu image trong BookingPackage
+
+    return {
+      errCode: 0,
+      errMessage: 'OK',
+      data: bookings
+    };
+  } catch (error) {
+    console.error('Error in getDepositInfoPackage service:', error);
+    throw error;
+  }
+};
+
+
 
 let handleSendPasswordResetEmail = (email) => {
     return new Promise(async (resolve, reject) => {
@@ -558,5 +719,8 @@ module.exports = {
     getDepositInfo: getDepositInfo,
     handleResetPassword: handleResetPassword,
     handleSendPasswordResetEmail: handleSendPasswordResetEmail,
-    handleChangePassword: handleChangePassword
+    handleChangePassword: handleChangePassword,
+    getUserPackageBookings: getUserPackageBookings,
+    deletePackageAppointment: deletePackageAppointment,
+    getDepositInfoPackage: getDepositInfoPackage,
 }

@@ -317,6 +317,123 @@ let getUserBookingsByManager = (userId) => {
     });
 };
 
+let getPackageBookingsByManager = (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!userId) {
+                return resolve({
+                    errCode: 1,
+                    errMessage: 'Missing userId',
+                    data: []
+                });
+            }
+
+            // Tìm clinicId mà người quản lý phụ trách
+            const clinicManager = await db.Clinic_Manager.findOne({
+                where: { userId },
+                attributes: ['clinicId']
+            });
+
+            if (!clinicManager) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Clinic manager not found',
+                    data: []
+                });
+            }
+
+            // Lấy các package thuộc clinic này
+            const packages = await db.ExamPackage.findAll({
+                where: { clinicId: clinicManager.clinicId },
+                attributes: ['id']
+            });
+
+            const packageIds = packages.map(p => p.id);
+
+            if (packageIds.length === 0) {
+                return resolve({
+                    errCode: 3,
+                    errMessage: 'No exam packages found for this clinic',
+                    data: []
+                });
+            }
+
+            // Lấy danh sách lịch đặt gói khám
+            const bookings = await db.BookingPackage.findAll({
+                where: {
+                    packageId: packageIds
+                },
+                attributes: ['id', 'packageId', 'patientId', 'date', 'timeType', 'statusId', 'reason'],
+                order: [['createdAt', 'DESC']],
+                include: [
+                    {
+                        model: db.ExamPackage,
+                        as: 'packageData',
+                        attributes: ['name', 'price', 'image'],
+                        include: [
+                            {
+                                model: db.Clinic,
+                                as: 'clinicInfo',
+                                attributes: ['name', 'address']
+                            },
+                            {
+                                model: db.Allcode,
+                                as: 'provinceTypeData',
+                                attributes: ['valueVi', 'valueEn']
+                            }
+                        ]
+                    },
+                    {
+                        model: db.User,
+                        as: 'patientData',
+                        attributes: ['email', 'firstName', 'lastName', 'gender', 'address', 'image'],
+                        include: [
+                            {
+                                model: db.Allcode,
+                                as: 'genderData',
+                                attributes: ['valueVi', 'valueEn']
+                            }
+                        ]
+                    },
+                    {
+                        model: db.Allcode,
+                        as: 'timeTypeData',
+                        attributes: ['valueVi', 'valueEn']
+                    },
+                    {
+                        model: db.Allcode,
+                        as: 'statusData',
+                        attributes: ['valueVi', 'valueEn']
+                    }
+                ],
+                raw: false,
+                nest: true
+            });
+
+            // Chuyển đổi ảnh base64 sang binary nếu có
+            const bookingsWithImage = bookings.map(item => {
+                if (item.packageData && item.packageData.image) {
+                    item.packageData.image = new Buffer(item.packageData.image, 'base64').toString('binary');
+                }
+                if (item.patientData && item.patientData.image) {
+                    item.patientData.image = new Buffer(item.patientData.image, 'base64').toString('binary');
+                }
+                return item;
+            });
+
+            return resolve({
+                errCode: 0,
+                errMessage: 'OK',
+                data: bookingsWithImage
+            });
+
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+
 let getAllClinicManager = () => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -404,5 +521,6 @@ module.exports = {
     getAllDoctorsByMagager: getAllDoctorsByMagager,
     getUserBookingsByManager: getUserBookingsByManager,
     getAllClinicManager: getAllClinicManager,
-    assignClinicToManager: assignClinicToManager
+    assignClinicToManager: assignClinicToManager,
+    getPackageBookingsByManager: getPackageBookingsByManager
 };

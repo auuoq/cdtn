@@ -95,79 +95,82 @@ let getAllCode = async (req, res) => {
 
 let getUserBookings = async (req, res) => {
     try {
-        let userId = req.query.userId; // Lấy userId từ query params
-        if (!userId) {
-            return res.status(500).json({
-                errCode: 1,
-                errMessage: "Missing required parameter!"
-            });
-        }
-
-        let bookings = await userService.getUserBookings(userId);
-        return res.status(200).json({
-            errCode: bookings.errCode,
-            errMessage: bookings.errMessage,
-            data: bookings.data ? bookings.data : []
-        });
+        // gọi thẳng service, service sẽ trả về { errCode, errMessage, data }
+        let result = await userService.getUserBookings(req.query.userId);
+        return res.status(200).json(result);
     } catch (e) {
-        console.error('Error in getUserBookings:', e); // Thêm thông báo lỗi chi tiết vào console
+        console.error('Error in getUserBookings:', e);
         return res.status(500).json({
             errCode: -1,
-            errMessage: "Error from server"
-        });
-    }
-}
-
-// Cập nhật hàm deleteAppointment trong userController
-// Cập nhật hàm deleteAppointment trong userController
-let deleteAppointment = async (req, res) => {
-    const { appointmentId } = req.query;
-
-    if (!appointmentId) {
-        return res.status(400).json({
-            errCode: 1,
-            errMessage: "Thiếu tham số cần thiết"
-        });
-    }
-
-    try {
-        let message = await userService.deleteAppointment(appointmentId);
-        return res.status(200).json(message);
-    } catch (error) {
-        return res.status(500).json({
-            errCode: 3,
-            errMessage: "Lỗi khi xóa lịch hẹn"
+            errMessage: 'Error from server',
         });
     }
 };
 
-const getDepositInfo = async (req, res) => {
+let deleteAppointment = async (req, res) => {
     try {
-        let appointmentId = req.query.appointmentId; // Lấy từ query params
-        
-        if (!appointmentId) {
-            return res.status(400).json({
-                errCode: 1,
-                errMessage: 'Missing required parameter: appointmentId'
-            });
-        }
-
-        let depositInfo = await userService.getDepositInfo(appointmentId);
-
-        return res.status(200).json({
-            errCode: 0,
-            errMessage: 'OK',
-            data: depositInfo
-        });
-
-    } catch (error) {
-        console.error('Error in getDepositInfo:', error);
+        let result = await userService.deleteAppointment(req.query.appointmentId);
+        return res.status(200).json(result);
+    } catch (e) {
+        console.error('Error in deleteAppointment:', e);
         return res.status(500).json({
             errCode: -1,
-            errMessage: "Error from server"
+            errMessage: 'Error from server',
         });
     }
-}
+};
+
+let getDepositInfo = async (req, res) => {
+    try {
+        let result = await userService.getDepositInfo(req.query.appointmentId);
+        return res.status(200).json(result);
+    } catch (e) {
+        console.error('Error in getDepositInfo:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server',
+        });
+    }
+};
+
+let handleGetUserPackageBookings = async (req, res) => {
+    try {
+        let result = await userService.getUserPackageBookings(req.query.userId);
+        return res.status(200).json(result);
+    } catch (e) {
+        console.error('Error in getUserPackageBookings:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server',
+        });
+    }
+};
+
+let handleDeletePackageAppointment = async (req, res) => {
+    try {
+        let result = await userService.deletePackageAppointment(req.query.appointmentId);
+        return res.status(200).json(result);
+    } catch (e) {
+        console.error('Error in deletePackageAppointment:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server',
+        });
+    }
+};
+
+let handleGetDepositInfoPackage = async (req, res) => {
+    try {
+        let result = await userService.getDepositInfoPackage(req.query.appointmentId);
+        return res.status(200).json(result);
+    } catch (e) {
+        console.error('Error in getDepositInfoPackage:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server',
+        });
+    }
+};
 
 
 let handleSendPasswordResetEmail = async (req, res) => {
@@ -245,5 +248,8 @@ module.exports = {
     getDepositInfo: getDepositInfo,
     handleResetPassword: handleResetPassword,
     handleSendPasswordResetEmail: handleSendPasswordResetEmail,
-    handleChangePassword: handleChangePassword
+    handleChangePassword: handleChangePassword,
+    handleGetUserPackageBookings: handleGetUserPackageBookings,
+    handleDeletePackageAppointment: handleDeletePackageAppointment,
+    handleGetDepositInfoPackage: handleGetDepositInfoPackage,
 }

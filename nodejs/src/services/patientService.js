@@ -3,27 +3,17 @@ require('dotenv').config();
 import emailService from './emailService'
 import { v4 as uuidv4 } from 'uuid';
 
-let buildUrlEmail = (doctorId, packageId, token) => {
-    let result = '';
-    
-    if (doctorId) {
-        result = `${process.env.URL_REACT}/verify-booking?token=${token}&doctorId=${doctorId}`;
-    }
-    
-    if (packageId) {
-        result = `${process.env.URL_REACT}/verify-booking?token=${token}&packageId=${packageId}`;
-    }
-
+let buildUrlEmail = (doctorId, token) => {
+    let result = `${process.env.URL_REACT}/verify-booking?token=${token}&doctorId=${doctorId}`
     return result;
 }
-
 
 let postBookAppointment = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.email || (!data.doctorId && !data.packageId) || !data.timeType
+            if (!data.email || !data.doctorId || !data.timeType
                 || !data.date || !data.fullName || !data.selectedGender
-                || !data.address || !data.reason) {  // Check for the reason and either doctorId or packageId
+                || !data.address || !data.reason) {  // Check for the reason
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing parameter'
@@ -31,14 +21,16 @@ let postBookAppointment = (data) => {
             } else {
                 let token = uuidv4();
                 await emailService.sendSimpleEmail({
+                    type: 'doctor',
                     receiverEmail: data.email,
                     patientName: data.fullName,
                     time: data.timeString,
                     doctorName: data.doctorName,
                     language: data.language,
-                    // Thay doctorId bằng packageId nếu người dùng chọn gói khám
-                    redirectLink: buildUrlEmail(data.doctorId, data.packageId, token)
-                });
+                    redirectLink: buildUrlEmail(data.doctorId, token)
+                  });
+                  
+
                 // Upsert patient    
                 let user = await db.User.findOrCreate({
                     where: { email: data.email },
@@ -57,7 +49,6 @@ let postBookAppointment = (data) => {
                         where: {
                             patientId: user[0].id,
                             doctorId: data.doctorId,
-                            packageId: data.packageId, // Include packageId if provided
                             token: token
                         },
                         defaults: {
@@ -67,12 +58,11 @@ let postBookAppointment = (data) => {
                             date: data.date,
                             timeType: data.timeType,
                             token: token,
-                            reason: data.reason, // Save the reason in the booking record
-                            packageId: data.packageId // Save packageId if the booking is for an exam package
+                            reason: data.reason   // Save the reason in the booking record
                         }
                     });
 
-                    // If booking is created, increase the current number for the schedule
+                    // Nếu booking thành công, tăng currentNumber trong bảng Schedule
                     if (booking && booking[1] === true) {  // Check if a new booking was created
                         let schedule = await db.Schedule.findOne({
                             where: {
@@ -83,15 +73,15 @@ let postBookAppointment = (data) => {
                         });
 
                         if (schedule) {
-                            schedule.currentNumber += 1; // Increment currentNumber
-                            await schedule.save(); // Save the change to the database
+                            schedule.currentNumber += 1; // Tăng currentNumber
+                            await schedule.save(); // Lưu thay đổi vào database
                         }
                     }
                 }
 
                 resolve({
                     errCode: 0,
-                    errMessage: 'Save info patient succeed!'
+                    errMessage: 'Save infor patient succeed!'
                 });
             }
         } catch (e) {
@@ -102,11 +92,10 @@ let postBookAppointment = (data) => {
 
 
 
-
 let postVerifyBookAppointment = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.token || (!data.doctorId && !data.packageId)) {
+            if (!data.token || !data.doctorId) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing parameter'
@@ -114,8 +103,7 @@ let postVerifyBookAppointment = (data) => {
             } else {
                 let appointment = await db.Booking.findOne({
                     where: {
-                        ...(data.doctorId ? { doctorId: data.doctorId } : {}),
-                        ...(data.packageId ? { packageId: data.packageId } : {}),
+                        doctorId: data.doctorId,
                         token: data.token,
                         statusId: 'S1'
                     },
@@ -144,9 +132,135 @@ let postVerifyBookAppointment = (data) => {
     })
 }
 
+let buildUrlEmailPackage = (packageId, token) => {
+    return `${process.env.URL_REACT}/verify-booking-package?token=${token}&packageId=${packageId}`;
+};
+
+let postBookExamPackageAppointment = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.email || !data.packageId || !data.timeType || !data.date || !data.fullName || !data.selectedGender || !data.address || !data.reason) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing parameter'
+                });
+                return;
+            }
+
+            let token = uuidv4();
+
+            await emailService.sendSimpleEmail({
+                type: 'package',
+                receiverEmail: data.email,
+                patientName: data.fullName,
+                time: data.timeString,
+                packageName: data.packageName,
+                language: data.language,
+                redirectLink: buildUrlEmailPackage(data.packageId, token)
+              });
+              
+
+            // Tạo user nếu chưa tồn tại
+            let user = await db.User.findOrCreate({
+                where: { email: data.email },
+                defaults: {
+                    email: data.email,
+                    roleId: 'R3',
+                    gender: data.selectedGender,
+                    address: data.address,
+                    firstName: data.fullName
+                }
+            });
+
+            if (user && user[0]) {
+                let booking = await db.BookingPackage.findOrCreate({
+                    where: {
+                        patientId: user[0].id,
+                        packageId: data.packageId,
+                        token: token
+                    },
+                    defaults: {
+                        statusId: 'S1',
+                        packageId: data.packageId,
+                        patientId: user[0].id,
+                        date: data.date,
+                        timeType: data.timeType,
+                        token: token,
+                        reason: data.reason
+                    }
+                });
+
+                // Tăng currentNumber trong bảng SchedulePackage
+                if (booking && booking[1] === true) {
+                    let schedule = await db.SchedulePackage.findOne({
+                        where: {
+                            packageId: data.packageId,
+                            date: data.date,
+                            timeType: data.timeType
+                        }
+                    });
+
+                    if (schedule) {
+                        schedule.currentNumber += 1;
+                        await schedule.save();
+                    }
+                }
+            }
+
+            resolve({
+                errCode: 0,
+                errMessage: 'Save exam package booking succeed!'
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+let postVerifyBookExamPackageAppointment = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.token || !data.packageId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing parameter'
+                });
+                return;
+            }
+
+            let appointment = await db.BookingPackage.findOne({
+                where: {
+                    packageId: data.packageId,
+                    token: data.token,
+                    statusId: 'S1'
+                },
+                raw: false
+            });
+
+            if (appointment) {
+                appointment.statusId = 'S2'; // Đã xác nhận
+                await appointment.save();
+
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Update appointment succeed!'
+                });
+            } else {
+                resolve({
+                    errCode: 2,
+                    errMessage: 'Appointment has been verified or does not exist'
+                });
+            }
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
 
 
 module.exports = {
     postBookAppointment: postBookAppointment,
-    postVerifyBookAppointment: postVerifyBookAppointment
+    postVerifyBookAppointment: postVerifyBookAppointment,
+    postBookExamPackageAppointment: postBookExamPackageAppointment,
+    postVerifyBookExamPackageAppointment: postVerifyBookExamPackageAppointment
 }

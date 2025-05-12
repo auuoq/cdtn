@@ -65,6 +65,7 @@ class Appointments extends Component {
             if (!confirm) return;
             
             const response = await deleteAppointment(appointmentId);
+            console.log('Delete appointment response:', response?.errCode);
             if (response?.errCode === 0) {
                 toast.success('Hủy lịch hẹn thành công');
                 await this.fetchAppointments();

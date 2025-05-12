@@ -330,6 +330,112 @@ let getDetailExamPackageById = (packageId) => {
     });
 };
 
+let getSchedulePackageByDate = (packageId, date) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!packageId || !date) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameter'
+                });
+            } else {
+                let dataSchedule = await db.SchedulePackage.findAll({
+                    where: {
+                        packageId: packageId,
+                        date: date
+                    },
+                    include: [
+                        {
+                            model: db.Allcode,
+                            as: 'timeTypeData',
+                            attributes: ['valueEn', 'valueVi']
+                        },
+                        {
+                            model: db.ExamPackage,
+                            as: 'packageInfo',
+                            attributes: ['name', 'price']
+                        }
+                    ],
+                    attributes: ['currentNumber', 'maxNumber', 'timeType', 'date', 'packageId'],
+                    raw: false,
+                    nest: true
+                });
+
+                if (!dataSchedule) dataSchedule = [];
+
+                resolve({
+                    errCode: 0,
+                    data: dataSchedule
+                });
+            }
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+let getListAllExamPackagePatientWithStatusS3 = (packageId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!packageId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                });
+            } else {
+                let data = await db.BookingPackage.findAll({
+                    where: {
+                        statusId: 'S3',
+                        packageId: packageId
+                    },
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'patientData',
+                            attributes: ['email', 'firstName', 'lastName', 'address', 'gender'],
+                            include: [
+                                {
+                                    model: db.Allcode,
+                                    as: 'genderData',
+                                    attributes: ['valueVi', 'valueEn']
+                                }
+                            ]
+                        },
+                        {
+                            model: db.Allcode,
+                            as: 'timeTypeData',
+                            attributes: ['valueVi', 'valueEn']
+                        },
+                        {
+                            model: db.ExamPackage,
+                            as: 'packageData',
+                            attributes: ['name', 'price'],
+                            include: [
+                                {
+                                    model: db.Clinic,
+                                    as: 'clinicInfo',
+                                    attributes: ['name', 'address']
+                                }
+                            ]
+                        }
+                    ],
+                    raw: false,
+                    nest: true
+                });
+
+                resolve({
+                    errCode: 0,
+                    data: data
+                });
+            }
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+
+
 module.exports = {
     createExamPackage,
     updateExamPackage,
@@ -337,5 +443,7 @@ module.exports = {
     getAllExamPackages,
     getExamPackagesDetailByManager,
     bulkCreateScheduleForPackage,
-    getDetailExamPackageById
+    getDetailExamPackageById,
+    getSchedulePackageByDate,
+    getListAllExamPackagePatientWithStatusS3
 };

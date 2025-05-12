@@ -94,6 +94,33 @@ let getDetailExamPackageById = async (req, res) => {
     }
 };
 
+let getSchedulePackageByDate = async (req, res) => {
+    try {
+        let infor = await examPackageService.getSchedulePackageByDate(req.query.date, req.query.packageId);
+        return res.status(200).json(infor);
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+}
+
+let getListAllExamPackagePatientWithStatusS3 = async (req, res) => {
+    try {
+        let infor = await examPackageService.getListAllExamPackagePatientWithStatusS3(req.query.id);
+        return res.status(200).json(infor);
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+}
+
+
 
 module.exports = {
     createExamPackage,
@@ -103,4 +130,6 @@ module.exports = {
     getExamPackagesDetailByManager,
     bulkCreateScheduleForPackage,
     getDetailExamPackageById,
+    getSchedulePackageByDate,
+    getListAllExamPackagePatientWithStatusS3
 };

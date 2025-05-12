@@ -18,20 +18,24 @@ const getUserBookings = (userId) => {
 }
 
 
-const deleteAppointment = async (appointmentId) => {
-    try {
-        const response = await axios.delete(`/api/delete-appointment`, {
-            params: { appointmentId }
-        });
-        return response.data || {}; // Trả về đối tượng rỗng nếu không có dữ liệu
-    } catch (error) {
-        console.error('Lỗi khi gọi API xóa:', error.response ? error.response.data : error.message);
-        return {}; // Đảm bảo rằng luôn trả về đối tượng, ngay cả khi có lỗi
-    }
-}
+const deleteAppointment = (appointmentId) => {
+    return axios.delete(`/api/delete-appointment?appointmentId=${appointmentId}`);
+  }
+  
 
 const getDepositInfo = async (appointmentId) => {
     return axios.get(`/api/get-deposit-info?appointmentId=${appointmentId}`);
+}
+
+const getUserPackageBookings = (userId) => {
+    return axios.get(`/api/get-user-package-booking?userId=${userId}`);
+}
+
+const deletePackageAppointment = (appointmentId) => {
+    return axios.delete(`/api/delete-package-appointment?appointmentId=${appointmentId}`);
+}
+const getPackageDepositInfo = (appointmentId) => {
+    return axios.get(`/api/get-package-deposit-info?appointmentId=${appointmentId}`);
 }
 
 const createNewUserService = (data) => {
@@ -98,6 +102,15 @@ const postPatientBookAppointment = (data) => {
 const postVerifyBookAppointment = (data) => {
     return axios.post('/api/verify-book-appointment', data);
 }
+
+const postBookExamPackageAppointment = (data) => {
+    return axios.post('/api/patient-book-exam-package-appointment', data);
+};
+
+const postVerifyBookExamPackageAppointment = (data) => {
+    return axios.post('/api/verify-book-exam-package-appointment', data);
+}
+
 
 const createNewSpecialty = (data) => {
     return axios.post('/api/create-new-specialty', data);
@@ -173,6 +186,10 @@ const getUserBookingsByManager = (userId) => {
     return axios.get(`/api/get-user-bookings-by-manager?userId=${userId}`);
 }
 
+const getPackageBookingsByManager = (userId) => {
+    return axios.get(`/api/get-package-bookings-by-manager?userId=${userId}`);
+}
+
 const getAllClinicManager = async () => {
     return axios.get(`/api/get-all-clinic-manager`);
 }
@@ -206,6 +223,12 @@ const bulkCreateScheduleForPackage = (data) => {
 const getDetailExamPackageById = (packageId) => {
     return axios.get(`/api/get-detail-exam-package-by-id?id=${packageId}`);
 }
+const getSchedulePackageByDate = (date, packageId) => {
+    return axios.get(`/api/get-schedule-package-by-date?date=${date}&packageId=${packageId}`);
+}
+const getListAllExamPackagePatientWithStatusS3 = (userId) => {
+    return axios.get(`/api/get-list-all-exam-package-patient-with-status-s3?userId=${userId}`);
+}
 
 
 export {
@@ -223,5 +246,7 @@ export {
     getUserInfoByEmail,getUserBookings,deleteAppointment,getDepositInfo,
     sendPasswordResetEmail,resetPassword,getDetailClinicByManager,getClinicByManager,getAllDoctorsByMagager,
     getUserBookingsByManager,deleteSpecialty,updateSpecialty,getAllClinicManager,assignClinicToManager,getAllExamPackages,
-    createExamPackage,updateExamPackage,deleteExamPackage,getExamPackagesDetailByManager,bulkCreateScheduleForPackage,getDetailExamPackageById
+    createExamPackage,updateExamPackage,deleteExamPackage,getExamPackagesDetailByManager,bulkCreateScheduleForPackage,getDetailExamPackageById,
+    getSchedulePackageByDate,getListAllExamPackagePatientWithStatusS3,getPackageDepositInfo,postBookExamPackageAppointment,postVerifyBookExamPackageAppointment,
+    getUserPackageBookings,deletePackageAppointment,getPackageBookingsByManager
 }
