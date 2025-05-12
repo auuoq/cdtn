@@ -67,47 +67,47 @@ export const doctorMenu = [
 
 export const manager_clinicMenu = [
     {
-    name: 'menu.admin.manage',
+    name: 'Quản lý lịch khám ',
     menus: [
         { //Quản lí kế hoạch khám bệnh của bác sĩ
-            name: 'menu.manage.manage-booking', link: '/manage/manage-booking'
+            name: 'Quản lí kế hoạch khám bệnh', link: '/manage/manage-booking'
 
         },
 
     ]
     },
     { //Quản lí phòng khám
-        name: 'menu.manage.clinic',
+        name: 'Quản lý phòng khám',
         menus: [
             {
-                name: 'menu.manage.manage-clinic', link: '/manage/clinic-by-manager',
+                name: 'Quản lý phòng khám', link: '/manage/clinic-by-manager',
             },
         ]
     },
     { //Quản lí kế hoạch khám bệnh của bác sĩ
-        name: 'menu.manage.schedule',
+        name: 'Quản lý đặt lịch',
         menus: [
             {
-                name: 'menu.manage.manage-schedule', link: '/manage/schedule-by-manager',
+                name: 'Đặt lịch', link: '/manage/schedule-by-manager',
             },
         ]
     },
     { //Quản lí lịch hẹnhẹn
-        name: 'menu.manage.bookingbooking',
+        name: 'Thông tin lịch khám',
         menus: [
             {
-                name: 'menu.manage.manage-booking', link: '/manage/booking',
+                name: 'Thông tin lịch khám', link: '/manage/booking',
             },
         ]
     },
     { //Quản lí gói khám
-        name: 'menu.manage.manage-package',
+        name: 'Gói khám',
         menus: [
             {
-                name: 'menu.manage.manage-package', link: '/manage/manage-package',
+                name: 'Quản lý gói khám', link: '/manage/manage-package',
             },
             {
-                name: 'menu.manage.manage-schedule-package', link: '/manage/schedule-package',
+                name: 'Đặt lịch gói khám', link: '/manage/schedule-package',
             },
         ]
     }

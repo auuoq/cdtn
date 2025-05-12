@@ -92,43 +92,43 @@ let updateExamPackage = (data, userId) => {
     });
 };
 
-let deleteExamPackage = (packageId) =>{
-    return new Promise(async(resolve, reject) =>{
+let deleteExamPackage = (packageId) => {
+    return new Promise(async (resolve, reject) => {
         try {
             console.log(packageId)
-            if(!packageId){
+            if (!packageId) {
                 return resolve({
                     errCode: 1,
                     errMessage: 'Missing required parameter'
                 })
             }
-            
+
             let idpackage = await db.ExamPackage.findOne({
-                where: {id: packageId}
+                where: { id: packageId }
             })
-    
-            if(!idpackage){
+
+            if (!idpackage) {
                 return resolve({
                     errCode: 2,
                     errMessage: 'Clinic not found'
                 })
             }
-    
-            else{
+
+            else {
                 await db.ExamPackage.destroy({
-                    where: {id: packageId}
+                    where: { id: packageId }
                 })
                 return resolve({
                     errCode: 0,
                     errMessage: 'Clinic deleted successfully!'
                 })
-    
-            }            
+
+            }
         } catch (e) {
             reject(e)
-            
+
         }
-        
+
     })
 }
 
@@ -136,7 +136,7 @@ let getAllExamPackages = () => {
     return new Promise(async (resolve, reject) => {
         try {
             let packages = await db.ExamPackage.findAll();
-            
+
             if (packages && packages.length > 0) {
                 packages = packages.map(item => {
                     if (item.image) {
@@ -146,7 +146,7 @@ let getAllExamPackages = () => {
                 });
             }
 
-            resolve({   
+            resolve({
                 errCode: 0,
                 errMessage: 'ok',
                 data: packages
@@ -339,6 +339,8 @@ let getSchedulePackageByDate = (packageId, date) => {
                     errMessage: 'Missing required parameter'
                 });
             } else {
+                console.log('packageId', packageId);
+                console.log('date', date);
                 let dataSchedule = await db.SchedulePackage.findAll({
                     where: {
                         packageId: packageId,

@@ -20,8 +20,8 @@ const getUserBookings = (userId) => {
 
 const deleteAppointment = (appointmentId) => {
     return axios.delete(`/api/delete-appointment?appointmentId=${appointmentId}`);
-  }
-  
+}
+
 
 const getDepositInfo = async (appointmentId) => {
     return axios.get(`/api/get-deposit-info?appointmentId=${appointmentId}`);
@@ -241,12 +241,12 @@ export {
     getProfileDoctorById, postPatientBookAppointment,
     postVerifyBookAppointment, createNewSpecialty,
     getAllSpecialty, getAllDetailSpecialtyById,
-    createNewClinic, getAllClinic, getAllDetailClinicById,updateClinic,deleteClinic,
-    getAllPatientForDoctor, postSendRemedy,getAllPatientsWithStatusS3,
-    getUserInfoByEmail,getUserBookings,deleteAppointment,getDepositInfo,
-    sendPasswordResetEmail,resetPassword,getDetailClinicByManager,getClinicByManager,getAllDoctorsByMagager,
-    getUserBookingsByManager,deleteSpecialty,updateSpecialty,getAllClinicManager,assignClinicToManager,getAllExamPackages,
-    createExamPackage,updateExamPackage,deleteExamPackage,getExamPackagesDetailByManager,bulkCreateScheduleForPackage,getDetailExamPackageById,
-    getSchedulePackageByDate,getListAllExamPackagePatientWithStatusS3,getPackageDepositInfo,postBookExamPackageAppointment,postVerifyBookExamPackageAppointment,
-    getUserPackageBookings,deletePackageAppointment,getPackageBookingsByManager
+    createNewClinic, getAllClinic, getAllDetailClinicById, updateClinic, deleteClinic,
+    getAllPatientForDoctor, postSendRemedy, getAllPatientsWithStatusS3,
+    getUserInfoByEmail, getUserBookings, deleteAppointment, getDepositInfo,
+    sendPasswordResetEmail, resetPassword, getDetailClinicByManager, getClinicByManager, getAllDoctorsByMagager,
+    getUserBookingsByManager, deleteSpecialty, updateSpecialty, getAllClinicManager, assignClinicToManager, getAllExamPackages,
+    createExamPackage, updateExamPackage, deleteExamPackage, getExamPackagesDetailByManager, bulkCreateScheduleForPackage, getDetailExamPackageById,
+    getSchedulePackageByDate, getListAllExamPackagePatientWithStatusS3, getPackageDepositInfo, postBookExamPackageAppointment, postVerifyBookExamPackageAppointment,
+    getUserPackageBookings, deletePackageAppointment, getPackageBookingsByManager
 }
