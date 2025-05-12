@@ -4,10 +4,15 @@ import { connect } from 'react-redux';
 import HomeHeader from '../../HomePage/HomeHeader';
 import './DetailPackage.scss';
 import { getDetailExamPackageById } from '../../../services/userService';
+import PackageSchedule from './PackageSchedule';
+import PackageExtraInfor from './PackageExtraInfor';
+import BookingModal from './BookingModal';
 
 class DetailPackage extends Component {
     state = {
         detailPackage: {},
+        isOpenModalBooking: false,
+        dataScheduleTimeModal: {}
     };
 
     async componentDidMount() {
@@ -20,8 +25,21 @@ class DetailPackage extends Component {
         }
     }
 
+    handleClickScheduleTime = (time) => {
+        this.setState({
+            isOpenModalBooking: true,
+            dataScheduleTimeModal: time
+        })
+    }
+
+    closeBookingModal = () => {
+        this.setState({
+            isOpenModalBooking: false
+        })
+    }
+
     render() {
-        const { detailPackage } = this.state;
+        const { detailPackage, isOpenModalBooking, dataScheduleTimeModal } = this.state;
         const {
             name,
             image,
@@ -38,34 +56,82 @@ class DetailPackage extends Component {
             <>
                 <HomeHeader isShowBanner={false} />
                 <div className="exam-package-detail-container">
-                    <div className="intro-package">
-                        <div
-                            className="content-left"
-                            style={{ backgroundImage: `url(${image || ''})` }}
-                        />
-                        <div className="content-right">
-                            <div className="up">{name}</div>
-                            <div className="down">
-                                <span>{description}</span>
+                    {/* Header Section */}
+                    <div className="package-header">
+                        <div className="header-image" style={{ backgroundImage: `url(${image || ''})` }} />
+                        <div className="header-content">
+                            <h1 className="package-title">{name}</h1>
+                            <p className="package-description">{description}</p>
+                            <div className="price-tag">
+                                {new Intl.NumberFormat('vi-VN').format(price)} VND
                             </div>
                         </div>
                     </div>
 
-                    <div className="info-package">
-                        <p><strong>Phòng khám:</strong> {clinicInfo?.name}</p>
-                        <p><strong>Địa chỉ:</strong> {clinicInfo?.address}</p>
-                        <p><strong>Khu vực:</strong> {provinceTypeData?.valueVi}</p>
-                        <p><strong>Danh mục:</strong> {categoryTypeData?.valueVi}</p>
-                        <p><strong>Hình thức thanh toán:</strong> {paymentTypeData?.valueVi}</p>
-                        <p><strong>Giá:</strong> {new Intl.NumberFormat('vi-VN').format(price)} VND</p>
-                    </div>
+                    {/* Main Content */}
+                    <div className="package-body">
+                        <div className="main-content">
+                            {/* Schedule Section */}
+                            <div className="schedule-section">
+                                <h2 className="section-title">Lịch khám</h2>
+                                <PackageSchedule
+                                    packageIdFromParent={this.props.match?.params?.id}
+                                    handleClickScheduleTime={this.handleClickScheduleTime}
+                                />
+                            </div>
 
-                    <div className="detail-content" dangerouslySetInnerHTML={{ __html: contentHTML }} />
+                            {/* Detail Content */}
+                            <div className="content-section">
+                                <h2 className="section-title">Chi tiết gói khám</h2>
+                                <div className="detail-content" dangerouslySetInnerHTML={{ __html: contentHTML }} />
+                            </div>
+                        </div>
 
-                    <div className="comment-package">
-                        {/* future: Facebook comment plugin or rating system */}
+                        {/* Sidebar */}
+                        <div className="sidebar">
+                            <div className="info-card">
+                                <h3 className="card-title">Thông tin cơ bản</h3>
+                                <div className="info-grid">
+                                    <div className="info-item">
+                                        <i className="fas fa-hospital icon"></i>
+                                        <div>
+                                            <div className="info-label">Phòng khám</div>
+                                            <div className="info-value">{clinicInfo?.name}</div>
+                                        </div>
+                                    </div>
+                                    <div className="info-item">
+                                        <i className="fas fa-map-marker-alt icon"></i>
+                                        <div>
+                                            <div className="info-label">Địa chỉ</div>
+                                            <div className="info-value">{clinicInfo?.address}</div>
+                                        </div>
+                                    </div>
+                                    <div className="info-item">
+                                        <i className="fas fa-map icon"></i>
+                                        <div>
+                                            <div className="info-label">Khu vực</div>
+                                            <div className="info-value">Miền Bắc</div>
+                                        </div>
+                                    </div>
+                                    <div className="info-item">
+                                        <i className="fas fa-credit-card icon"></i>
+                                        <div>
+                                            <div className="info-label">Thanh toán</div>
+                                            <div className="info-value">{paymentTypeData?.valueVi}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <BookingModal
+                    isOpenModal={isOpenModalBooking}
+                    closeBookingModal={this.closeBookingModal}
+                    dataTime={dataScheduleTimeModal}
+                    detailPackage={detailPackage}
+                />
             </>
         );
     }
