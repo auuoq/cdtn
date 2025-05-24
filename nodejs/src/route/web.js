@@ -34,6 +34,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-user-booking', userController.getUserBookings);
     router.delete('/api/delete-appointment', userController.deleteAppointment);
     router.get('/api/get-deposit-info', userController.getDepositInfo);
+    router.post('/api/submit-feedback', userController.submitFeedback);
     router.get('/api/get-user-package-booking', userController.handleGetUserPackageBookings);
     router.delete('/api/delete-package-appointment', userController.handleDeletePackageAppointment);
     router.get('/api/get-package-deposit-info', userController.handleGetDepositInfoPackage);
@@ -108,6 +109,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-online-doctors', messageController.getOnlineDoctors);
     router.post('/api/send-message', messageController.sendMessage);
     router.get('/api/get-messages', messageController.getMessagesBetweenUsers);
+    router.get('/api/get-messages-by-user', messageController.getUserConversations);
     return app.use("/", router);
 }
 

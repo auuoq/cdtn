@@ -211,3 +211,64 @@
         }
     }
 }
+.rating-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); // mờ nền
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+
+  .rating-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    animation: fadeInUp 0.3s ease;
+
+    h5 {
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    label {
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: block;
+      color: #34495e;
+    }
+
+    textarea {
+      width: 100%;
+      resize: none;
+      border-radius: 8px;
+      border: 1px solid #ced4da;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .btn {
+      margin-top: 15px;
+      margin-right: 10px;
+      min-width: 100px;
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

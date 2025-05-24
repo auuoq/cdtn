@@ -27,6 +27,10 @@ const getDepositInfo = async (appointmentId) => {
     return axios.get(`/api/get-deposit-info?appointmentId=${appointmentId}`);
 }
 
+const submitFeedback = (data) => {
+    return axios.post('/api/submit-feedback', data);
+}
+
 const getUserPackageBookings = (userId) => {
     return axios.get(`/api/get-user-package-booking?userId=${userId}`);
 }
@@ -246,6 +250,10 @@ const getMessagesBetweenUsers = (userId1, userId2) => {
     return axios.get(`/api/get-messages?userId1=${userId1}&userId2=${userId2}`);
 };
 
+const getUserConversations = (userId) => {
+    return axios.get(`/api/get-messages-by-user?userId=${userId}`);
+}
+
 
 export {
     handleLoginApi, getAllUsers,
@@ -264,5 +272,5 @@ export {
     getUserBookingsByManager, deleteSpecialty, updateSpecialty, getAllClinicManager, assignClinicToManager, getAllExamPackages,
     createExamPackage, updateExamPackage, deleteExamPackage, getExamPackagesDetailByManager, bulkCreateScheduleForPackage, getDetailExamPackageById,
     getSchedulePackageByDate, getListAllExamPackagePatientWithStatusS3, getPackageDepositInfo, postBookExamPackageAppointment, postVerifyBookExamPackageAppointment,
-    getUserPackageBookings, deletePackageAppointment, getPackageBookingsByManager, toggleOnlineStatus, getOnlineDoctors, sendMessage, getMessagesBetweenUsers
+    getUserPackageBookings, deletePackageAppointment, getPackageBookingsByManager, toggleOnlineStatus, getOnlineDoctors, sendMessage, getMessagesBetweenUsers, getUserConversations, submitFeedback
 }

@@ -505,15 +505,13 @@ let getListAllPatientWithStatusS3 = (doctorId) => {
 let sendRemedy = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.email || !data.doctorId || !data.patientId || !data.timeType
-                || !data.imgBase64
-            ) {
+            if (!data.email || !data.doctorId || !data.patientId || !data.timeType || !data.imgBase64 || !data.diagnosis) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing required parameters'
-                })
+                });
             } else {
-                //update patient booking status
+                // Cập nhật trạng thái lịch hẹn và thêm chuẩn đoán
                 let appointment = await db.Booking.findOne({
                     where: {
                         doctorId: data.doctorId,
@@ -521,27 +519,29 @@ let sendRemedy = (data) => {
                         timeType: data.timeType,
                         statusId: 'S2'
                     },
-                    raw: false //set to false -> instance of sequelize, default raw = true
-                })
+                    raw: false
+                });
 
                 if (appointment) {
-                    appointment.statusId = 'S3'
+                    appointment.statusId = 'S3';
+                    appointment.diagnosis = data.diagnosis; // lưu chuẩn đoán
                     await appointment.save();
                 }
 
-                //send email remedy
+                // Gửi email hóa đơn/đơn thuốc
                 await emailService.sendAttachment(data);
 
                 resolve({
                     errCode: 0,
                     errMessage: 'ok'
-                })
+                });
             }
         } catch (e) {
             reject(e);
         }
-    })
-}
+    });
+};
+
 
 module.exports = {
     getTopDoctorHome: getTopDoctorHome,

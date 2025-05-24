@@ -51,8 +51,7 @@ class AssignClinicToManager extends Component {
 
         // Tìm phòng khám mà người quản lý này đang phụ trách
         if (selectedManager) {
-            const manager = this.state.managers.find(manager => manager.id === Number(selectedManager));
-            const clinics = this.state.clinics.find(clinic => clinic.id === manager.managedClinics[0].clinicId);
+            const manager = this.state.managers.find(manager => manager.id === Number(selectedManager));            const clinics = this.state.clinics.find(clinic => clinic.id === manager.managedClinics[0].clinicId);
             if (manager && manager.managedClinics[0].clinicId) {
                 this.setState({ selectedClinic: clinics.id });
             } else {
