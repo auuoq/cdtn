@@ -279,7 +279,7 @@ class ManageDoctor extends Component {
         return (
             <div className="manage-doctor-container" style={{padding : "0 20px"}}>
                 <div className="manage-doctor-title">
-                    Thêm mới bác sĩ
+                    Quản lý bác sĩ
                 </div>
                 <div className="more-infor">
                     <div className="content-left form-group" style={{paddingRight: "15px"}}>

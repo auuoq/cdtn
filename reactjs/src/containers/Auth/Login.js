@@ -34,6 +34,14 @@ class Login extends Component {
       this.handleLogin();
     }
   }
+      handleRedirectToRegister = () => {
+        this.props.navigate('/register'); 
+    }
+
+    // Handle redirect to forgot password page
+    handleRedirectToForgotPassword = () => {
+        this.props.navigate('/forgot-password'); 
+    }
 
   handleLogin = async () => {
     this.setState({ errMessage: '' });
@@ -46,8 +54,15 @@ class Login extends Component {
         this.props.userLoginSuccess(data.user);
         if (data.user.roleId === "R4") {
           this.props.navigate('/manage/manage-package');
-        } else {
+        } 
+        else if(data.user.roleId === "R1") {
           this.props.navigate('/system/user-redux');
+        }
+        else if(data.user.roleId === "R2") {
+          this.props.navigate('/doctor/manage-record');
+        }
+        else {
+          this.props.navigate('/home');
         }
       }
     } catch (error) {
@@ -153,6 +168,19 @@ class Login extends Component {
           >
             Đăng nhập
           </button>
+
+          <div className="text-center mt-3">
+              <span className="text-primary" style={{ cursor: 'pointer' }} onClick={this.handleRedirectToForgotPassword}>
+                  Quên mật khẩu?
+              </span>
+          </div>
+
+          <div className="text-center mt-3">
+              <span className="text-muted">Bạn chưa có tài khoản? </span>
+              <span className="text-primary" style={{ cursor: 'pointer' }} onClick={this.handleRedirectToRegister}>
+                  Đăng ký
+              </span>
+          </div>
         </div>
       </div>
     );

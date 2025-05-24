@@ -127,8 +127,8 @@ class HomeHeader extends Component {
                                 </>
                             ) : (
                                 <>
-                                    <div className="menu-item1" onClick={() => this.handleMenuClick('user-login')}>Đăng nhập</div>
-                                    <div className="menu-item1" onClick={() => this.handleMenuClick('login')}>Admin</div>
+                                    {/* <div className="menu-item1" onClick={() => this.handleMenuClick('user-login')}>Đăng nhập</div> */}
+                                    <div className="menu-item1" onClick={() => this.handleMenuClick('login')}>Đăng nhập</div>
                                 </>
                             )}
                         </div>
