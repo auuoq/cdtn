@@ -18,6 +18,8 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Schedule, { foreignKey: 'doctorId', as: 'doctorData' })
       User.hasMany(models.Booking, { foreignKey: 'patientId', as: 'patientData' })
       User.hasMany(models.Clinic_Manager, { foreignKey: 'userId', as: 'managedClinics' })
+      User.hasMany(models.Message, { foreignKey: 'senderId', as: 'sentMessages' });
+      User.hasMany(models.Message, { foreignKey: 'receiverId', as: 'receivedMessages' });
 
 
     }
@@ -40,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     idCardNumber: { type: DataTypes.STRING, allowNull: true }, // Số CMND/CCCD
     occupation: { type: DataTypes.STRING, allowNull: true },  // Nghề nghiệp
     birthDate: { type: DataTypes.DATE, allowNull: true },  // Ngày sinh
+    isActive: { type: DataTypes.BOOLEAN, defaultValue: true }, // Trạng thái hoạt động
   }, {
     sequelize,
     modelName: 'User',

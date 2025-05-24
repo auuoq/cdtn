@@ -149,7 +149,7 @@ class ManagePatient extends Component {
                                             let time = language === LANGUAGES.VI ?
                                                 item?.timeTypeDataPatient?.valueVi : item?.timeTypeDataPatient?.valueEn;
                                             let gender = language === LANGUAGES.VI ?
-                                                item?.patientData?.genderData?.valueVi : item?.patientData?.genderData?.valueEn;
+                                                item?.patientData?.gender : item?.patientData?.gender.valueEn;
 
                                             return (
                                                 <tr key={index}>

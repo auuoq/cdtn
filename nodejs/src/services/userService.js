@@ -448,15 +448,11 @@ let getUserPackageBookings = (userId) => {
             ]
           },
           {
-            model: db.Allcode,
-            as: 'timeTypeData',
-            attributes: ['valueEn', 'valueVi']
+              model: db.Allcode, as: 'timeTypeDataPatient', attributes: ['valueEn', 'valueVi']
           },
           {
-            model: db.Allcode,
-            as: 'statusData',
-            attributes: ['valueEn', 'valueVi']
-          }
+              model: db.Allcode, as: 'statusIdDataPatient', attributes: ['valueEn', 'valueVi']
+          },
         ],
         raw: false,
         nest: true

@@ -111,29 +111,34 @@ class PackageSchedule extends Component {
                         </i>
                     </div>
                     <div className='time-content'>
-                        {allAvailableTime && allAvailableTime.length > 0 ?
+                        {allAvailableTime && allAvailableTime.length > 0 ? (
                             <div className='time-content-btns'>
-                                {allAvailableTime.map((item, index) => {
-                                    let timeDisplay = language === LANGUAGES.VI ?
-                                        item.timeTypeData.valueVi : item.timeTypeData.valueEn;
-                                    return (
-                                        <button
-                                            key={index}
-                                            className={language === LANGUAGES.VI ? 'btn-vie' : 'btn-en'}
-                                            onClick={() => this.props.handleClickScheduleTime(item)}
-                                            disabled={item.currentNumber >= item.maxNumber}
-                                        >
-                                            {timeDisplay}
-                                        </button>
-                                    )
-                                })}
+                            {allAvailableTime.map((item, index) => {
+                                let timeDisplay = language === LANGUAGES.VI
+                                ? item.timeTypeData.valueVi
+                                : item.timeTypeData.valueEn;
+
+                                let isFull = item.currentNumber >= item.maxNumber;
+
+                                return (
+                                <button
+                                    key={index}
+                                    className={`time-slot-btn ${isFull ? 'full' : ''}`}
+                                    onClick={() => !isFull && this.props.handleClickScheduleTime(item)}
+                                    disabled={isFull}
+                                >
+                                    {timeDisplay} {isFull ? '(Đầy)' : ''}
+                                </button>
+                                );
+                            })}
                             </div>
-                            :
+                        ) : (
                             <div className='no-schedule'>
-                                <FormattedMessage id="patient.detail-doctor.no-schedule" />
+                            <FormattedMessage id="patient.detail-doctor.no-schedule" />
                             </div>
-                        }
-                    </div>
+                        )}
+                        </div>
+
                 </div>
             </div>
         )

@@ -30,6 +30,7 @@ import Manager_Booking from './System/Manager_Clinic/Manager_Booking.js';
 import Manage_Clinic from '../routes/Manage_Clinic.js';
 import DetailPackage from './Patient/ExamPackage/DetailPackage.js';
 import AllPackage from './Patient/ExamPackage/AllPackage.js';
+import ChatBox from '../components/chatbox.js';
 
 class App extends Component {
 
@@ -79,6 +80,7 @@ class App extends Component {
                                     <Route path={path.DETAIL_CLINIC} component={DetailClinic} />
                                     <Route path={path.VERIFY_EMAIL_BOOKING} component={VerifyEmail} />
                                     <Route path={"/allPacket"} component={AllPackage} />
+                                    <Route path={"/chat"} component={userIsAuthenticated(ChatBox)} />
 
                                 </Switch>
                             </CustomScrollbars>

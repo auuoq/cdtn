@@ -32,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
                 {
                     foreignKey: 'doctorId', targetKey: 'doctorId', as: 'doctorBooking'
                 })
+                
         }
     };
     Booking.init({

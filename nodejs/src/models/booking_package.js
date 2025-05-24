@@ -14,12 +14,12 @@ module.exports = (sequelize, DataTypes) => {
       BookingPackage.belongsTo(models.Allcode, {
         foreignKey: 'timeType',
         targetKey: 'keyMap',
-        as: 'timeTypeData'
+        as: 'timeTypeDataPatient'
       });
       BookingPackage.belongsTo(models.Allcode, {
         foreignKey: 'statusId',
         targetKey: 'keyMap',
-        as: 'statusData'
+        as: 'statusIdDataPatient'
       });
     }
   }

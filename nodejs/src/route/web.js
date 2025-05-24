@@ -5,8 +5,9 @@ import doctorController from "../controllers/doctorController";
 import patientController from "../controllers/patientController";
 import specialtyController from "../controllers/specialtyController";
 import clinicController from "../controllers/clinicController";
-import clinicManagerController from "../controllers/manage_clinicController"
+import clinicManagerController from "../controllers/manage_clinicController";
 import examPackageController from "../controllers/examPackageController";
+import messageController from "../controllers/messagesController";
 
 let router = express.Router();
 
@@ -102,6 +103,11 @@ let initWebRoutes = (app) => {
     router.get('/api/get-schedule-package-by-date', examPackageController.getSchedulePackageByDate); // Lấy lịch khám theo ngày cho gói khá
     router.get('/api/get-list-all-exam-package-patients-with-status-s3', examPackageController.getListAllExamPackagePatientWithStatusS3); // Lấy danh sách bệnh nhân theo gói khám với trạng thái S3
 
+    //message
+    router.patch('/api/toggle-online', messageController.toggleOnlineStatus);
+    router.get('/api/get-online-doctors', messageController.getOnlineDoctors);
+    router.post('/api/send-message', messageController.sendMessage);
+    router.get('/api/get-messages', messageController.getMessagesBetweenUsers);
     return app.use("/", router);
 }
 
