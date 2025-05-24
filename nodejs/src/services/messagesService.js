@@ -78,14 +78,18 @@ let getOnlineDoctors = () => {
                 });
             }
 
-            if (onlineDoctors && onlineDoctors.image) {
-                    data.image = new Buffer(data.image, 'base64').toString('binary');
+            const formattedDoctors = onlineDoctors.map(doctor => {
+                const doc = doctor.toJSON(); // convert Sequelize instance to plain object
+                if (doc.image) {
+                    doc.image = new Buffer(doc.image, 'base64').toString('binary');; 
                 }
+                return doc;
+            });
 
             return resolve({
                 errCode: 0,
                 errMessage: 'ok',
-                data: onlineDoctors
+                data: formattedDoctors
             });
         } catch (e) {
             console.error('Error in getOnlineDoctors:', e);
@@ -143,7 +147,7 @@ let getMessagesBetweenUsers = async (data) => {
                 { senderId: userId2, receiverId: userId1 },
             ],
             },
-            order: [['timestamp', 'ASC']],
+            order: [['createdAt', 'ASC']],
         });
 
         resolve({

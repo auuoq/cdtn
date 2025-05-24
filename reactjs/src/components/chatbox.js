@@ -1,142 +1,184 @@
 import React, { Component } from 'react';
 import { getMessagesBetweenUsers, sendMessage, getOnlineDoctors } from '../services/userService';
 import { PaperPlaneIcon } from '@radix-ui/react-icons';
+import { connect } from 'react-redux';
+
+import './chatbox.scss'; 
 
 class ChatBox extends Component {
-    state = {
-        selectedDoctorId: null,
-        messages: [],
-        newMessage: '',
-        doctors: [],
-        loading: false,
-    };
+  state = {
+    selectedDoctorId: null,
+    messages: [],
+    newMessage: '',
+    doctors: [],
+    loading: false,
+  };
 
-    componentDidMount() {
-        this.loadOnlineDoctors();
+  componentDidMount() {
+    this.loadOnlineDoctors();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.selectedDoctorId !== this.state.selectedDoctorId) {
+      this.loadMessages();
     }
+  }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (prevState.selectedDoctorId !== this.state.selectedDoctorId) {
-            this.loadMessages();
-        }
+  loadOnlineDoctors = async () => {
+    try {
+      const res = await getOnlineDoctors();
+      if (res.errCode === 0) {
+        this.setState({ doctors: res.data });
+      }
+    } catch (e) {
+      console.error('Error loading online doctors', e);
     }
+  };
 
-    loadOnlineDoctors = async () => {
-        try {
-            const res = await getOnlineDoctors();
-            if (res.data?.errCode === 0) {
-                this.setState({ doctors: res.data });
-            }
-            console.log("Online doctors loaded", res.data);
-        } catch (e) {
-            console.error("Error loading online doctors", e);
-        }
-    };
+  loadMessages = async () => {
+    const { userInfo } = this.props;
+    const { selectedDoctorId } = this.state;
+    if (!userInfo?.id || !selectedDoctorId) return;
 
-    loadMessages = async () => {
-        const { userInfo } = this.props;
-        const { selectedDoctorId } = this.state;
-        if (!userInfo?.id || !selectedDoctorId) return;
+    try {
+      const res = await getMessagesBetweenUsers(userInfo.id, selectedDoctorId);
+      if (res.errCode === 0) {
+        this.setState({ messages: res.data }, this.scrollToBottom);
+      }
+    } catch (e) {
+      console.error('Error loading messages', e);
+    }
+  };
 
-        try {
-            const res = await getMessagesBetweenUsers(userInfo.id, selectedDoctorId);
-            if (res.data?.errCode === 0) {
-                this.setState({ messages: res.data });
-            }
-        } catch (e) {
-            console.error("Error loading messages", e);
-        }
-    };
+  scrollToBottom = () => {
+    if (this.messagesEnd) {
+      this.messagesEnd.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
-    handleSend = async () => {
-        const { userInfo } = this.props;
-        const { selectedDoctorId, newMessage } = this.state;
-        if (!newMessage.trim()) return;
+  handleSend = async () => {
+    const { userInfo } = this.props;
+    const { selectedDoctorId, newMessage } = this.state;
+    if (!newMessage.trim()) return;
 
-        this.setState({ loading: true });
-        try {
-            const res = await sendMessage({
-                senderId: userInfo.id,
-                receiverId: selectedDoctorId,
-                message: newMessage.trim(),
-            });
-            if (res.data?.errCode === 0) {
-                this.setState((prev) => ({
-                    messages: [...prev.messages, res.data],
-                    newMessage: '',
-                }));
-            }
-        } finally {
-            this.setState({ loading: false });
-        }
-    };
-
-    render() {
-        const { doctors, selectedDoctorId, messages, newMessage, loading } = this.state;
-        const { userInfo } = this.props;
-
-        return (
-            <div className="fixed bottom-4 right-4 z-50 w-[500px] max-h-[600px] bg-white shadow-lg rounded-2xl flex flex-col overflow-hidden">
-                {/* Header */}
-                <div className="flex justify-between items-center p-3 border-b font-semibold bg-gray-100">
-                    <span>💬 Doctor Chat</span>
-                </div>
-
-                {/* Doctors Online */}
-                <div className="flex overflow-x-auto space-x-3 p-3 border-b bg-gray-50">
-                    {doctors.map((doc) => (
-                        <button
-                            key={doc.id}
-                            onClick={() => this.setState({ selectedDoctorId: doc.id })}
-                            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm border ${
-                                doc.id === selectedDoctorId ? 'bg-blue-100 border-blue-500' : 'hover:bg-gray-100'
-                            }`}
-                        >
-                            <img src={`data:image/jpeg;base64,${doc.image}`} alt="" className="w-6 h-6 rounded-full" />
-                            {doc.firstName}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Chat messages */}
-                <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 bg-white">
-                    {messages.length === 0 && (
-                        <div className="text-center text-gray-400 text-sm mt-10">No messages yet. Start chatting!</div>
-                    )}
-                    {messages.map((msg, i) => (
-                        <div
-                            key={i}
-                            className={`p-2 rounded-lg text-sm max-w-[70%] ${
-                                msg.senderId === userInfo.id ? 'bg-blue-100 ml-auto' : 'bg-gray-100 mr-auto'
-                            }`}
-                        >
-                            {msg.message}
-                        </div>
-                    ))}
-                </div>
-
-                {/* Message input */}
-                <div className="flex border-t p-2 gap-2">
-                    <input
-                        value={newMessage}
-                        onChange={(e) => this.setState({ newMessage: e.target.value })}
-                        onKeyDown={(e) => e.key === 'Enter' && this.handleSend()}
-                        className="flex-1 border rounded-xl px-3 py-1 text-sm"
-                        placeholder="Type a message..."
-                        disabled={loading || !selectedDoctorId}
-                    />
-                    <button
-                        onClick={this.handleSend}
-                        disabled={loading || !selectedDoctorId}
-                        className="text-blue-600"
-                        title="Send"
-                    >
-                        <PaperPlaneIcon />
-                    </button>
-                </div>
-            </div>
+    this.setState({ loading: true });
+    try {
+      const res = await sendMessage({
+        senderId: userInfo.id,
+        receiverId: selectedDoctorId,
+        message: newMessage.trim(),
+      });
+      if (res.data?.errCode === 0) {
+        this.setState(
+          (prev) => ({
+            messages: [...prev.messages, res.data],
+            newMessage: '',
+          }),
+          this.scrollToBottom
         );
+      }
+    } finally {
+      this.setState({ loading: false });
     }
+  };
+
+  render() {
+    const { doctors, selectedDoctorId, messages, newMessage, loading } = this.state;
+    const { userInfo } = this.props;
+
+    return (
+      <div className="chatbox">
+        {/* Header */}
+        <div className="chatbox__header">💬 Doctor Chat</div>
+
+        {/* Doctors Online */}
+        <div className="chatbox__doctors">
+          {doctors.map((doc) => (
+            <button
+              key={doc.id}
+              onClick={() => this.setState({ selectedDoctorId: doc.id, messages: [] })}
+              className={`chatbox__doctors-button ${doc.id === selectedDoctorId ? 'selected' : ''}`}
+              title={doc.firstName}
+            >
+              <img src={doc.image || 'https://www.w3schools.com/w3images/avatar2.png'} alt="doctor" />
+              <span>{doc.firstName}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Chat messages */}
+        <div className="chatbox__messages">
+          {messages.length === 0 && (
+            <div className="chatbox__messages-empty">No messages yet. Start chatting!</div>
+          )}
+
+          {messages.map((msg) => {
+            const isSender = msg.senderId === userInfo.id;
+            const senderInfo = doctors.find((d) => d.id === msg.senderId);
+            return (
+              <div
+                key={msg.id}
+                className={`chatbox__messages-item ${isSender ? 'sender' : 'receiver'}`}
+              >
+                {!isSender && (
+                  <img
+                    src={senderInfo?.image || 'https://www.w3schools.com/w3images/avatar2.png'}
+                    alt="avatar"
+                    title={senderInfo?.firstName || 'Doctor'}
+                  />
+                )}
+
+                <div
+                  className={`chatbox__messages-item-bubble ${isSender ? 'sender' : 'receiver'}`}
+                >
+                  {msg.message}
+                  <div
+                    className={`chatbox__messages-item-bubble-time ${
+                      isSender ? 'sender' : 'receiver'
+                    }`}
+                  >
+                    {new Date(msg.createdAt).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          <div
+            ref={(el) => {
+              this.messagesEnd = el;
+            }}
+          />
+        </div>
+
+        {/* Message input */}
+        <div className="chatbox__input">
+          <input
+            value={newMessage}
+            onChange={(e) => this.setState({ newMessage: e.target.value })}
+            onKeyDown={(e) => e.key === 'Enter' && this.handleSend()}
+            placeholder="Type a message..."
+            disabled={loading || !selectedDoctorId}
+          />
+          <button
+            onClick={this.handleSend}
+            disabled={loading || !selectedDoctorId}
+            title="Send"
+            aria-label="Send message"
+          >
+            <PaperPlaneIcon />
+          </button>
+        </div>
+      </div>
+    );
+  }
 }
 
-export default ChatBox;
+const mapStateToProps = (state) => ({
+  userInfo: state.user.userInfo,
+});
+
+export default connect(mapStateToProps)(ChatBox);
