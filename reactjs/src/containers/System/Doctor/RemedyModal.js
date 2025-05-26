@@ -10,7 +10,8 @@ class RemedyModal extends Component {
         super(props);
         this.state = {
             email: '',
-            imgBase64: ''
+            imgBase64: '',
+            diagnosis: ''
         }
     }
 
@@ -63,6 +64,16 @@ class RemedyModal extends Component {
                 centered
             // backdrop={true}
             >
+                <div className="col-12 form-group mt-3">
+                    <label>Chuẩn đoán bệnh</label>
+                    <textarea
+                        className="form-control"
+                        rows="3"
+                        value={this.state.diagnosis}
+                        onChange={(e) => this.setState({ diagnosis: e.target.value })}
+                    />
+                </div>
+
                 <div className="modal-header">
                     <h5 className="modal-title">Gửi hóa đơn khám bệnh thành công</h5>
                     <button type="button" className="close" aria-label="Close" onClick={closeRemedyModal}>

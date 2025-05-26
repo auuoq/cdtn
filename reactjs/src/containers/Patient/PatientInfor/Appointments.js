@@ -7,7 +7,8 @@ import {
   getUserBookings,
   getUserPackageBookings,
   deleteAppointment,
-  deletePackageAppointment
+  deletePackageAppointment,
+  submitFeedback
 } from '../../../services/userService';
 import { toast } from 'react-toastify';
 import ChatBox from '../../../components/chatbox';
@@ -20,7 +21,10 @@ class Appointments extends Component {
       loading: true,
       selectedStatus: 'all',
       statuses: [],
-      typeFilter: 'all' // 'all', 'doctor', 'package'
+      typeFilter: 'all',
+      showRatingModal: false,
+      selectedAppointment: null,
+      commentText: ''
     };
   }
     state = {
@@ -120,6 +124,43 @@ class Appointments extends Component {
     this.props.history.push(`/deposit/${appointmentId}`);
   }
 
+  handleOpenRatingModal = (appointment) => {
+    this.setState({
+      showRatingModal: true,
+      selectedAppointment: appointment,
+      ratingValue: 5,
+      commentText: ''
+    });
+  }
+
+  handleCloseRatingModal = () => {
+    this.setState({
+      showRatingModal: false,
+      selectedAppointment: null
+    });
+  }
+
+  handleRatingSubmit = async () => {
+    const { selectedAppointment, commentText } = this.state;
+    try {
+      const response = await submitFeedback({
+      appointmentId: selectedAppointment.id,
+      feedback: commentText
+    });
+      if (response?.errCode === 0) {
+        toast.success('Đánh giá thành công');
+        this.setState({ showRatingModal: false });
+        await this.fetchAppointments();
+      } else {
+        toast.error(response?.errMessage || 'Gửi đánh giá thất bại');
+      }
+    } catch (err) {
+      console.error('Rating error:', err);
+      toast.error('Lỗi khi gửi đánh giá');
+    }
+  };
+
+
   getFilteredAppointments = () => {
     const { appointments, selectedStatus, typeFilter } = this.state;
     return appointments.filter(app => {
@@ -150,6 +191,28 @@ class Appointments extends Component {
     return <span className={`badge ${badgeClass}`}>{status}</span>;
   }
 
+  renderRatingModal = () => {
+    const { showRatingModal, commentText } = this.state;
+    if (!showRatingModal) return null;
+
+    return (
+      <div className="rating-modal">
+        <div className="rating-content">
+          <h5>Đánh giá cuộc hẹn</h5>
+          <label>Nhận xét:</label>
+          <textarea
+            value={commentText}
+            onChange={e => this.setState({ commentText: e.target.value })}
+            className="form-control mb-3"
+            rows="4"
+          />
+          <button className="btn btn-primary mr-2" onClick={this.handleRatingSubmit}>Gửi đánh giá</button>
+          <button className="btn btn-secondary" onClick={this.handleCloseRatingModal}>Hủy</button>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const { loading, statuses, selectedStatus, typeFilter } = this.state;
     const filteredAppointments = this.getFilteredAppointments();
@@ -157,6 +220,7 @@ class Appointments extends Component {
     return (
       <>
         <HomeHeader />
+        {this.renderRatingModal()}
         <div className="appointments-page container-fluid py-4">
           <div className="row">
             <div className="col-12">
@@ -199,9 +263,7 @@ class Appointments extends Component {
                 </div>
               ) : filteredAppointments.length === 0 ? (
                 <div className="empty-state text-center py-5">
-                  <div className="empty-icon mb-3">
-                    <i className="fas fa-calendar-alt fa-3x text-muted"></i>
-                  </div>
+                  <i className="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
                   <h4>Không có lịch hẹn nào</h4>
                   <p className="text-muted">Bạn chưa có lịch hẹn nào trong mục này</p>
                 </div>
@@ -219,18 +281,9 @@ class Appointments extends Component {
                                   : appointment.packageData?.name || 'Gói khám'}
                               </h4>
                               <div className="appointment-meta mb-3">
-                                <div className="meta-item">
-                                  <i className="fas fa-calendar-alt mr-2"></i>
-                                  <span>{this.formatDate(appointment.date)}</span>
-                                </div>
-                                <div className="meta-item">
-                                  <i className="fas fa-clock mr-2"></i>
-                                  <span>{appointment.timeTypeDataPatient?.valueVi}</span>
-                                </div>
-                                <div className="meta-item">
-                                  <i className="fas fa-user-md mr-2"></i>
-                                  <span>{appointment.type === 'doctor' ? 'Bác sĩ' : 'Gói khám'}</span>
-                                </div>
+                                <div className="meta-item"><i className="fas fa-calendar-alt mr-2"></i>{this.formatDate(appointment.date)}</div>
+                                <div className="meta-item"><i className="fas fa-clock mr-2"></i>{appointment.timeTypeDataPatient?.valueVi}</div>
+                                <div className="meta-item"><i className="fas fa-user-md mr-2"></i>{appointment.type === 'doctor' ? 'Bác sĩ' : 'Gói khám'}</div>
                               </div>
                               <div className="status-container mb-3">
                                 {this.renderStatusBadge(appointment.statusIdDataPatient?.valueVi || 'Chưa xác định')}
@@ -239,31 +292,26 @@ class Appointments extends Component {
                           </div>
                           <div className="col-md-4">
                             <div className="appointment-actions">
-                              <button
-                                className="btn btn-outline-info btn-sm mb-2"
-                                onClick={() => this.handleDetail(appointment)}
-                              >
+                              <button className="btn btn-outline-info btn-sm mb-2" onClick={() => this.handleDetail(appointment)}>
                                 <i className="fas fa-info-circle mr-1"></i>
                                 Chi tiết {appointment.type === 'doctor' ? 'bác sĩ' : 'gói khám'}
                               </button>
 
                               {['Lịch hẹn mới', 'Đã xác nhận'].includes(appointment.statusIdDataPatient?.valueVi) && (
-                                <button
-                                  className="btn btn-danger btn-sm"
-                                  onClick={() => this.handleCancel(appointment)}
-                                >
-                                  <i className="fas fa-times mr-1"></i>
-                                  Hủy lịch
+                                <button className="btn btn-danger btn-sm mb-2" onClick={() => this.handleCancel(appointment)}>
+                                  <i className="fas fa-times mr-1"></i>Hủy lịch
                                 </button>
                               )}
 
                               {appointment.statusIdDataPatient?.valueVi === 'Lịch hẹn mới' && (
-                                <button
-                                  className="btn btn-primary btn-sm mb-2"
-                                  onClick={() => this.handleDeposit(appointment.id)}
-                                >
-                                  <i className="fas fa-money-bill-wave mr-1"></i>
-                                  Đặt cọc
+                                <button className="btn btn-primary btn-sm mb-2" onClick={() => this.handleDeposit(appointment.id)}>
+                                  <i className="fas fa-money-bill-wave mr-1"></i>Đặt cọc
+                                </button>
+                              )}
+
+                              {appointment.statusIdDataPatient?.valueVi === 'Đã khám xong' && (
+                                <button className="btn btn-success btn-sm" onClick={() => this.handleOpenRatingModal(appointment)}>
+                                  <i className="fas fa-star mr-1"></i>Đánh giá
                                 </button>
                               )}
                             </div>

@@ -133,6 +133,22 @@ let getDepositInfo = async (req, res) => {
     }
 };
 
+let submitFeedback = async (req, res) => {
+    try {
+        let infor = await userService.submitFeedback(req.body);
+        return res.status(200).json(infor);
+
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server',
+        })
+    }
+}
+
+
+
 let handleGetUserPackageBookings = async (req, res) => {
     try {
         let result = await userService.getUserPackageBookings(req.query.userId);
@@ -252,4 +268,5 @@ module.exports = {
     handleGetUserPackageBookings: handleGetUserPackageBookings,
     handleDeletePackageAppointment: handleDeletePackageAppointment,
     handleGetDepositInfoPackage: handleGetDepositInfoPackage,
+    submitFeedback: submitFeedback,
 }

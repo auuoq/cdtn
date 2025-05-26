@@ -161,11 +161,69 @@ let getMessagesBetweenUsers = async (data) => {
     });
 };
 
+let getUserConversations = async (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!userId) {
+                return resolve({ errCode: 1, errMessage: 'Missing userId' });
+            }
+
+            const conversations = await db.sequelize.query(`
+                SELECT u.id, u.firstName, u.lastName, u.image, u.isActive,
+                    (SELECT m.message FROM Messages m 
+                     WHERE (m.senderId = u.id AND m.receiverId = :userId)
+                        OR (m.senderId = :userId AND m.receiverId = u.id)
+                     ORDER BY m.createdAt DESC
+                     LIMIT 1) AS lastMessage,
+                    (SELECT m.createdAt FROM Messages m 
+                     WHERE (m.senderId = u.id AND m.receiverId = :userId)
+                        OR (m.senderId = :userId AND m.receiverId = u.id)
+                     ORDER BY m.createdAt DESC
+                     LIMIT 1) AS lastMessageTime
+                FROM Users u
+                WHERE u.id IN (
+                    SELECT DISTINCT CASE
+                        WHEN senderId = :userId THEN receiverId
+                        WHEN receiverId = :userId THEN senderId
+                    END
+                    FROM Messages
+                    WHERE senderId = :userId OR receiverId = :userId
+                )
+            `, {
+                replacements: { userId },
+                type: db.Sequelize.QueryTypes.SELECT,
+            });
+
+            // ✅ Convert ảnh từ base64 sang binary (hoặc URL usable in <img>)
+            const result = conversations.map((doc) => {
+                if (doc.image) {
+                    doc.image = Buffer.from(doc.image, 'base64').toString('binary');
+                }
+                return doc;
+            });
+
+            return resolve({
+                errCode: 0,
+                errMessage: 'ok',
+                data: result,
+            });
+        } catch (e) {
+            console.error('getUserConversations error:', e);
+            reject(e);
+        }
+    });
+};
+
+
+
+
+
 module.exports = {
     toggleOnlineStatus: toggleOnlineStatus,
     getOnlineDoctors: getOnlineDoctors,
     sendMessage: sendMessage,
     getMessagesBetweenUsers: getMessagesBetweenUsers,
+    getUserConversations: getUserConversations,
 };
 
 

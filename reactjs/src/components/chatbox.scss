@@ -54,8 +54,8 @@
 
       span {
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        overflow: visible;
+        text-overflow: unset;
         font-weight: 500;
         font-size: 14px;
         color: #333;

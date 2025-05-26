@@ -48,9 +48,25 @@ let getMessagesBetweenUsers = async (req, res) => {
     }
 };
 
+let getUserConversations = async (req, res) => {
+    try {
+        const userId = req.query.userId; // lấy userId từ query params
+        const response = await messagesService.getUserConversations(userId);
+        return res.status(200).json(response);
+
+    } catch (e) {
+        console.error('Error in getUserConversations controller:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server',
+        });
+    }
+};
+
 module.exports = {
     toggleOnlineStatus: toggleOnlineStatus,
     getOnlineDoctors: getOnlineDoctors,
     sendMessage: sendMessage,
     getMessagesBetweenUsers: getMessagesBetweenUsers,
-};
+    getUserConversations: getUserConversations
+};  

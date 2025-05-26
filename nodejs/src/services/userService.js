@@ -2,6 +2,7 @@ import db from "../models/index"
 import bcrypt from 'bcryptjs'
 import { Op } from 'sequelize'
 import emailService from './emailService'
+import { console } from "inspector";
 
 const crypto = require('crypto');
 const salt = bcrypt.genSaltSync(10);
@@ -427,6 +428,46 @@ const getDepositInfo = async (appointmentId) => {
     }
 };
 
+const submitFeedback = async (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Kiểm tra dữ liệu đầu vào
+            if (!data.appointmentId || !data.feedback) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                });
+                return;
+            }
+            // Tìm cuộc hẹn theo ID
+            let appointment = await db.Booking.findOne({
+                where: { id: data.appointmentId }
+            });
+            // Kiểm tra nếu cuộc hẹn tồn tại
+            if (!appointment) {
+                resolve({
+                    errCode: 2,
+                    errMessage: 'Appointment not found'
+                });
+                return;
+            }
+            // Cập nhật phản hồi
+            appointment.feedback = data.feedback;
+            await appointment.save();
+            resolve({
+                errCode: 0,
+                errMessage: 'Feedback submitted successfully'
+            });
+
+        } catch (e) {
+            console.error('Error in submitFeedback service:', e);
+            reject(e);
+        }
+    }
+    );
+};
+
+
 
 // 1️⃣ Lấy tất cả các lịch hẹn gói khám của bệnh nhân
 let getUserPackageBookings = (userId) => {
@@ -719,4 +760,5 @@ module.exports = {
     getUserPackageBookings: getUserPackageBookings,
     deletePackageAppointment: deletePackageAppointment,
     getDepositInfoPackage: getDepositInfoPackage,
+    submitFeedback: submitFeedback
 }

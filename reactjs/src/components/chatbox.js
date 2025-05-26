@@ -1,5 +1,10 @@
 import React, { Component } from 'react';
-import { getMessagesBetweenUsers, sendMessage, getOnlineDoctors } from '../services/userService';
+import {
+  getMessagesBetweenUsers,
+  sendMessage,
+  getOnlineDoctors,
+  getUserConversations,
+} from '../services/userService';
 import { PaperPlaneIcon } from '@radix-ui/react-icons';
 import { connect } from 'react-redux';
 import { io } from 'socket.io-client';
@@ -12,6 +17,7 @@ class ChatBox extends Component {
     messages: [],
     newMessage: '',
     doctors: [],
+    previousConversations: [],
     loading: false,
   };
 
@@ -19,35 +25,6 @@ class ChatBox extends Component {
 
   componentDidMount() {
     this.loadOnlineDoctors();
-
-    // 👉 Khởi tạo kết nối socket
-    this.socket = io(process.env.REACT_APP_BACKEND_URL); // Thay bằng URL server của bạn
-    const { userInfo } = this.props;
-
-    // Gửi ID người dùng để định danh
-    if (userInfo?.id) {
-      this.socket.emit('setup', userInfo.id);
-    }
-
-    // 👉 Nhận tin nhắn mới từ server
-    this.socket.on('receiveMessage', (message) => {
-      const { selectedDoctorId } = this.state;
-      // Kiểm tra nếu tin nhắn đến từ người đang chat thì mới thêm vào
-      if (
-        (message.senderId === selectedDoctorId && message.receiverId === userInfo.id) ||
-        (message.senderId === userInfo.id && message.receiverId === selectedDoctorId)
-      ) {
-        this.setState((prev) => ({
-          messages: [...prev.messages, message],
-        }), this.scrollToBottom);
-      }
-    });
-  }
-
-  componentWillUnmount() {
-    if (this.socket) {
-      this.socket.disconnect(); 
-    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -66,6 +43,21 @@ class ChatBox extends Component {
       console.error('Error loading online doctors', e);
     }
   };
+
+  loadUserConversations = async () => {
+    const { userInfo } = this.props;
+    if (!userInfo?.id) return;
+
+    try {
+        const res = await getUserConversations(userInfo.id);
+        if (res.errCode === 0) {
+            this.setState({ previousConversations: res.data });
+        }
+    } catch (e) {
+        console.error('Error loading conversation history', e);
+    }
+};
+
 
   loadMessages = async () => {
     const { userInfo } = this.props;
@@ -135,13 +127,31 @@ class ChatBox extends Component {
   };
 
   render() {
-    const { doctors, selectedDoctorId, messages, newMessage, loading } = this.state;
+    const {
+        doctors,
+        selectedDoctorId,
+        messages,
+        newMessage,
+        loading,
+        previousConversations,
+    } = this.state;
     const { userInfo } = this.props;
+
+    const combinedDoctors = [
+        ...doctors,
+        ...previousConversations.filter(
+        (conv) => !doctors.some((doc) => doc.id === conv.id)
+        ),
+    ];
+
+    const selectedDoctor = combinedDoctors.find((d) => d.id === selectedDoctorId);
 
     return (
       <div className="chatbox">
+        {/* Header */}
         <div className="chatbox__header">💬 Doctor Chat</div>
 
+        {/* Doctors Online */}
         <div className="chatbox__doctors">
           {doctors.map((doc) => (
             <button
@@ -156,6 +166,7 @@ class ChatBox extends Component {
           ))}
         </div>
 
+        {/* Chat messages */}
         <div className="chatbox__messages">
           {messages.length === 0 && (
             <div className="chatbox__messages-empty">No messages yet. Start chatting!</div>
@@ -196,9 +207,14 @@ class ChatBox extends Component {
             );
           })}
 
-          <div ref={(el) => { this.messagesEnd = el; }} />
+          <div
+            ref={(el) => {
+              this.messagesEnd = el;
+            }}
+          />
         </div>
 
+        {/* Message input */}
         <div className="chatbox__input">
           <input
             value={newMessage}
@@ -218,7 +234,8 @@ class ChatBox extends Component {
         </div>
       </div>
     );
-  }
+    }
+
 }
 
 const mapStateToProps = (state) => ({
