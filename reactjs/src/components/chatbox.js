@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { getMessagesBetweenUsers, sendMessage, getOnlineDoctors } from '../services/userService';
 import { PaperPlaneIcon } from '@radix-ui/react-icons';
 import { connect } from 'react-redux';
+import { io } from 'socket.io-client';
 
-import './chatbox.scss'; 
+import './chatbox.scss';
 
 class ChatBox extends Component {
   state = {
@@ -14,8 +15,39 @@ class ChatBox extends Component {
     loading: false,
   };
 
+  socket = null; // 👈 Thêm biến socket
+
   componentDidMount() {
     this.loadOnlineDoctors();
+
+    // 👉 Khởi tạo kết nối socket
+    this.socket = io(process.env.REACT_APP_BACKEND_URL); // Thay bằng URL server của bạn
+    const { userInfo } = this.props;
+
+    // Gửi ID người dùng để định danh
+    if (userInfo?.id) {
+      this.socket.emit('setup', userInfo.id);
+    }
+
+    // 👉 Nhận tin nhắn mới từ server
+    this.socket.on('receiveMessage', (message) => {
+      const { selectedDoctorId } = this.state;
+      // Kiểm tra nếu tin nhắn đến từ người đang chat thì mới thêm vào
+      if (
+        (message.senderId === selectedDoctorId && message.receiverId === userInfo.id) ||
+        (message.senderId === userInfo.id && message.receiverId === selectedDoctorId)
+      ) {
+        this.setState((prev) => ({
+          messages: [...prev.messages, message],
+        }), this.scrollToBottom);
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    if (this.socket) {
+      this.socket.disconnect(); 
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -61,24 +93,44 @@ class ChatBox extends Component {
     const { selectedDoctorId, newMessage } = this.state;
     if (!newMessage.trim()) return;
 
-    this.setState({ loading: true });
+    const tempId = Date.now();
+    const optimisticMessage = {
+      id: tempId,
+      senderId: userInfo.id,
+      receiverId: selectedDoctorId,
+      message: newMessage.trim(),
+      createdAt: new Date().toISOString(),
+    };
+
+    this.setState(
+      (prev) => ({
+        messages: [...prev.messages, optimisticMessage],
+        newMessage: '',
+      }),
+      this.scrollToBottom
+    );
+
     try {
       const res = await sendMessage({
         senderId: userInfo.id,
         receiverId: selectedDoctorId,
         message: newMessage.trim(),
       });
+
       if (res.data?.errCode === 0) {
-        this.setState(
-          (prev) => ({
-            messages: [...prev.messages, res.data],
-            newMessage: '',
-          }),
-          this.scrollToBottom
-        );
+        // 👉 Gửi qua socket nếu thành công
+        if (this.socket) {
+          this.socket.emit('sendMessage', res.data);
+        }
+
+        this.setState((prev) => ({
+          messages: prev.messages.map((msg) =>
+            msg.id === tempId ? res.data : msg
+          ),
+        }));
       }
-    } finally {
-      this.setState({ loading: false });
+    } catch (e) {
+      console.error('Send message failed', e);
     }
   };
 
@@ -88,10 +140,8 @@ class ChatBox extends Component {
 
     return (
       <div className="chatbox">
-        {/* Header */}
         <div className="chatbox__header">💬 Doctor Chat</div>
 
-        {/* Doctors Online */}
         <div className="chatbox__doctors">
           {doctors.map((doc) => (
             <button
@@ -106,7 +156,6 @@ class ChatBox extends Component {
           ))}
         </div>
 
-        {/* Chat messages */}
         <div className="chatbox__messages">
           {messages.length === 0 && (
             <div className="chatbox__messages-empty">No messages yet. Start chatting!</div>
@@ -147,14 +196,9 @@ class ChatBox extends Component {
             );
           })}
 
-          <div
-            ref={(el) => {
-              this.messagesEnd = el;
-            }}
-          />
+          <div ref={(el) => { this.messagesEnd = el; }} />
         </div>
 
-        {/* Message input */}
         <div className="chatbox__input">
           <input
             value={newMessage}

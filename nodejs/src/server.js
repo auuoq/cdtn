@@ -19,6 +19,17 @@ let io = new SocketIO(server, {
 });
 
 let onlineUsers = new Map();
+io.on('connection', (socket) => {
+  socket.on('setup', (userId) => {
+    socket.join(userId);
+  });
+
+  socket.on('sendMessage', (message) => {
+    const { receiverId } = message;
+    io.to(receiverId).emit('receiveMessage', message);
+  });
+});
+
 
 io.on("connection", (socket) => {
     console.log("A user connected");

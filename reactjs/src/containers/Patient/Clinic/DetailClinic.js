@@ -6,6 +6,7 @@ import DoctorSchedule from '../Doctor/DoctorSchedule';
 import DoctorExtraInfor from '../Doctor/DoctorExtraInfor';
 import ProfileDoctor from '../Doctor/ProfileDoctor';
 import { getAllDetailClinicById } from '../../../services/userService';
+import ChatBox from '../../../components/chatbox';
 import _ from 'lodash';
 
 class DetailClinic extends Component {
@@ -17,6 +18,20 @@ class DetailClinic extends Component {
             dataDetailClinic: {},
         }
     }
+    state = {
+        detailDoctor: {},
+        currentDoctorId: -1,
+        address: '',
+        loadingMap: true,
+        showChatbox: false,
+        };
+
+        toggleChatbox = () => {
+        this.setState((prevState) => ({
+            showChatbox: !prevState.showChatbox,
+        }));
+    };
+
 
     async componentDidMount() {
         if (this.props.match && this.props.match.params && this.props.match.params.id) {
@@ -118,6 +133,51 @@ class DetailClinic extends Component {
                             );
                         })}
                 </div>
+                {/* Nút mở chatbox */}
+                <div
+                onClick={this.toggleChatbox}
+                style={{
+                    position: 'fixed',
+                    bottom: '10px',
+                    right: '20px',
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '50%',
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    zIndex: 1001,
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                    fontSize: '24px',
+                }}
+                title="Nhắn tin với bác sĩ"
+                >
+                💬
+                </div>
+
+                {/* ChatBox hiển thị khi bật */}
+                {this.state.showChatbox && (
+                <div
+                    style={{
+                    position: 'fixed',
+                    bottom: '100px',
+                    right: '20px',
+                    zIndex: 1000,
+                    width: '320px',
+                    maxHeight: '500px',
+                    background: 'white',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    }}
+                >
+                    <ChatBox />
+                </div>
+                )}
+
             </div>
 
         );
