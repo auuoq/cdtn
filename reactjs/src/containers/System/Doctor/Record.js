@@ -1,29 +1,27 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
 import './ManagePatient.scss';
-import { getAllPatientsWithStatusS3 } from '../../../services/userService'; // API đã cập nhật để lấy bệnh nhân với trạng thái S3
+import { getAllPatientsWithStatusS3 } from '../../../services/userService';
 import { LANGUAGES } from '../../../utils';
 import { toast } from 'react-toastify';
 import LoadingOverlay from 'react-loading-overlay';
-import moment from 'moment'; // Sử dụng moment để định dạng ngày
+import moment from 'moment';
 
 class ManagePatient extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            dataPatient: [],               // Dữ liệu danh sách bệnh nhân
-            isShowLoading: false            // Trạng thái hiển thị loading
+            dataPatient: [],
+            isShowLoading: false
         }
     }
 
     async componentDidMount() {
-        this.getDataPatient();              // Lấy dữ liệu khi component được mount
+        this.getDataPatient();
     }
 
-    // Gọi API lấy danh sách bệnh nhân đã khám (S3)
     getDataPatient = async () => {
-        console.log('this.props:', this.props);
         let { user } = this.props;
         this.setState({ isShowLoading: true });
         try {
@@ -36,16 +34,12 @@ class ManagePatient extends Component {
                     isShowLoading: false
                 });
             } else {
-                this.setState({
-                    isShowLoading: false
-                });
-                toast.error('Failed to fetch patient data.');
+                this.setState({ isShowLoading: false });
+                toast.error('Lỗi khi lấy dữ liệu bệnh nhân.');
             }
         } catch (error) {
             console.error('Error:', error);
-            this.setState({
-                isShowLoading: false
-            });
+            this.setState({ isShowLoading: false });
         }
     }
 
@@ -54,76 +48,82 @@ class ManagePatient extends Component {
         let { language } = this.props;
 
         return (
-            <>
-                <LoadingOverlay
-                    active={this.state.isShowLoading}
-                    spinner
-                    text='Loading...'
-                >
-                    <div className="manage-patient-container">
-                        <div className="m-p-title">
-                            Quản lý bệnh nhân đã khám
-                        </div>
-                        <div className="manage-patient-body row">
-                            <div className="col-12 table-manage-patient">
-                                <table style={{ width: '100%' }}>
-                                    <tbody>
-                                        <tr>
-                                            <th>STT</th>
-                                            <th>Ngày khám</th>
-                                            <th>Họ và tên</th>
-                                            <th>Địa chỉ</th>
-                                            <th>Giới tính</th>
-                                            <th>Lý do khám bệnh</th>
-                                        </tr>
-                                        {dataPatient && dataPatient.length > 0 ?
-                                            dataPatient.map((item, index) => {
-                                                // Định dạng ngày và thời gian khám
-                                                let formattedDate = moment(parseInt(item.date)).format('DD/MM/YYYY');
-                                                let timeSlot = language === LANGUAGES.VI ? 
-                                                    item?.timeTypeDataPatient?.valueVi : item?.timeTypeDataPatient?.valueEn;
-                                                let gender = language === LANGUAGES.VI ?
-                                                    item?.patientData?.genderData?.valueVi : item?.patientData?.genderData?.valueEn;
-                                                
-                                                return (
-                                                    <tr key={index}>
-                                                        <td>{index + 1}</td>
-                                                        <td>{formattedDate} {timeSlot}</td>
-                                                        <td>{item.patientData.firstName} {item.patientData.lastName}</td>
-                                                        <td>{item.patientData.address}</td>
-                                                        <td>{gender}</td>
-                                                        <td>{item.reason}</td> {/* Hiển thị lý do khám bệnh */}
-                                                    </tr>
-                                                )
-                                            })
-                                            :
-                                            <tr>
-                                                <td colSpan="6" style={{ textAlign: 'center' }}>Không có dữ liệu</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+            <LoadingOverlay
+                active={this.state.isShowLoading}
+                spinner
+                text="Đang tải dữ liệu..."
+            >
+                <div  style={
+                   {
+                    maxWidth: "1200px",
+                    margin: "0 auto",
+                    padding: "30px",
+                    marginTop: "60px",
+                    backgroundColor: "#fff",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+                }
+                }>
+                    <h2 className="text-left mb-4" style={{
+                    fontSize: "24px",
+                    fontWeight: "600",
+                    color: "#333",
+                    marginBottom: "30px",
+                    paddingBottom: "15px",
+                    borderBottom: "1px solid #eee",
+                }
+                    }>Quản lý bệnh nhân đã khám</h2>
+                    <div className="table-responsive">
+                        <table className="table table-striped table-bordered align-middle">
+                            <thead className="">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Ngày khám</th>
+                                    <th>Họ và tên</th>
+                                    <th>Địa chỉ</th>
+                                    <th>Giới tính</th>
+                                    <th>Lý do khám</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {dataPatient && dataPatient.length > 0 ? (
+                                    dataPatient.map((item, index) => {
+                                        let formattedDate = moment(parseInt(item.date)).format('DD/MM/YYYY');
+                                        let timeSlot = language === LANGUAGES.VI ?
+                                            item?.timeTypeDataPatient?.valueVi : item?.timeTypeDataPatient?.valueEn;
+                                        let gender = language === LANGUAGES.VI ?
+                                            item?.patientData?.genderData?.valueVi : item?.patientData?.genderData?.valueEn;
 
+                                        return (
+                                            <tr key={index}>
+                                                <td>{index + 1}</td>
+                                                <td>{formattedDate} {timeSlot}</td>
+                                                <td>{item.patientData.firstName} {item.patientData.lastName}</td>
+                                                <td>{item.patientData.address}</td>
+                                                <td>{gender}</td>
+                                                <td>{item.reason}</td>
+                                            </tr>
+                                        );
+                                    })
+                                ) : (
+                                    <tr>
+                                        <td colSpan="6" className="text-center">Không có dữ liệu</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
-                </LoadingOverlay>
-            </>
+                </div>
+            </LoadingOverlay>
         );
     }
 }
 
 const mapStateToProps = state => {
     return {
-        language: state.app.language,        // Lấy ngôn ngữ từ Redux
-        user: state.user.userInfo,           // Lấy thông tin người dùng từ Redux
+        language: state.app.language,
+        user: state.user.userInfo,
     };
 };
 
-const mapDispatchToProps = dispatch => {
-    return {
-
-    };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(ManagePatient);
+export default connect(mapStateToProps)(ManagePatient);

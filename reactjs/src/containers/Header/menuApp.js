@@ -15,7 +15,7 @@ export const adminMenu = [
                 name: 'menu.admin.manage-doctor', link: '/system/manage-doctor',
             },
             {
-                name: 'Quản lý gói khám', link: '/system/manage-clinicManager',
+                name: 'Quản lý phòng khám', link: '/system/manage-clinicManager',
             },
 
             // {
@@ -70,7 +70,15 @@ export const manager_clinicMenu = [
     name: 'Quản lý lịch khám ',
     menus: [
         { //Quản lí kế hoạch khám bệnh của bác sĩ
-            name: 'Quản lí kế hoạch khám bệnh', link: '/manage/manage-booking'
+            name: 'Đặt lịch khám bệnh nhân', link: '/manage/manage-booking'
+
+        },
+                { //Quản lí kế hoạch khám bệnh của bác sĩ
+            name: 'Đặt lịch khám bác sĩ', link: '/manage/schedule-by-manager' 
+
+        },
+                        { //Quản lí kế hoạch khám bệnh của bác sĩ
+            name: 'Xem lịch khám', link: '/manage/booking' 
 
         },
 
@@ -84,22 +92,22 @@ export const manager_clinicMenu = [
             },
         ]
     },
-    { //Quản lí kế hoạch khám bệnh của bác sĩ
-        name: 'Quản lý đặt lịch',
-        menus: [
-            {
-                name: 'Đặt lịch', link: '/manage/schedule-by-manager',
-            },
-        ]
-    },
-    { //Quản lí lịch hẹnhẹn
-        name: 'Thông tin lịch khám',
-        menus: [
-            {
-                name: 'Thông tin lịch khám', link: '/manage/booking',
-            },
-        ]
-    },
+    // { //Quản lí kế hoạch khám bệnh của bác sĩ
+    //     name: 'Quản lý đặt lịch',
+    //     menus: [
+    //         {
+    //             name: 'Đặt lịch', link: '/manage/schedule-by-manager',
+    //         },
+    //     ]
+    // },
+    // { //Quản lí lịch hẹnhẹn
+    //     name: 'Thông tin lịch khám',
+    //     menus: [
+    //         {
+    //             name: 'Thông tin lịch khám', link: '/manage/booking',
+    //         },
+    //     ]
+    // },
     { //Quản lí gói khám
         name: 'Gói khám',
         menus: [

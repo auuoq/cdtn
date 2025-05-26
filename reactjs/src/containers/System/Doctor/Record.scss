@@ -1,0 +1,27 @@
+.manage-patient {
+    h2 {
+        font-weight: 600;
+        color: #343a40;
+    }
+
+    table {
+        font-size: 15px;
+
+        thead {
+            th {
+                text-align: center;
+                vertical-align: middle;
+            }
+        }
+
+        tbody {
+            tr:hover {
+                background-color: #f9f9f9;
+            }
+
+            td {
+                vertical-align: middle;
+            }
+        }
+    }
+}

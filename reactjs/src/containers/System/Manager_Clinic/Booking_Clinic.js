@@ -26,7 +26,11 @@ class Booking_Clinic extends Component {
 
         return (
             <div className="booking-clinic-wrapper">
-                <h2 className="booking-title">Lịch khám của bệnh nhân</h2>
+                <h2 className="booking-title" style={
+                    {
+                        textAlign:"left"
+                    }
+                }>Lịch khám của bệnh nhân</h2>
 
                 {loading ? (
                     <div className="loading-text">Đang tải dữ liệu...</div>

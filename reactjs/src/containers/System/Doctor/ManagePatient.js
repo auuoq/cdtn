@@ -120,65 +120,92 @@ class ManagePatient extends Component {
                     spinner
                     text='Loading...'
                 >
-                    <div className="manage-patient-container">
-                        <div className="m-p-title">
-                            Quản lý bệnh nhân khám bệnh
-                        </div>
-                        <div className="manage-patient-body row">
-                            <div className="col-4 form-group">
-                                <label>Chọn ngày khám</label>
+                    <div className="manage-patient-container" style={
+                   {
+                    maxWidth: "1200px",
+                    margin: "0 auto",
+                    padding: "30px",
+                    marginTop: "60px",
+                    backgroundColor: "#fff",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+                }
+                }>
+                <div style={{
+                    fontSize: "24px",
+                    fontWeight: "600",
+                    color: "#333",
+                    marginBottom: "30px",
+                    paddingBottom: "15px",
+                    borderBottom: "1px solid #eee",
+                    display: "flex",
+                    justifyContent:"space-between"
+                }
+                    }>
+                            <div>Quản lý bệnh nhân khám bệnh</div>
+                            <div>
                                 <DatePicker
                                     onChange={this.handleOnChangeDatePicker}
                                     className="form-control"
                                     value={this.state.currentDate}
                                 />
                             </div>
-                            <div className="col-12 table-manage-patient">
-                                <table style={{ width: '100%' }} >
-                                    <tbody>
-                                        <tr>
-                                            <th>STT</th>
-                                            <th>Thời gian</th>
-                                            <th>Họ và tên</th>
-                                            <th>Địa chỉ</th>
-                                            <th>Giới tính</th>
-                                            <th>Lý do khám bệnh</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                        {dataPatient && dataPatient.length > 0 ? 
-                                        dataPatient.map((item, index) => {
-                                            let time = language === LANGUAGES.VI ?
-                                                item?.timeTypeDataPatient?.valueVi : item?.timeTypeDataPatient?.valueEn;
-                                            let gender = language === LANGUAGES.VI ?
-                                                item?.patientData?.gender : item?.patientData?.gender.valueEn;
+                        </div>
+                        <div className="manage-patient-body row">
+                            <div className="col-12">
+                                <div className="table-responsive">
+                                    <table className="table table-bordered table-striped align-middle text-center">
+                                        <thead className="">
+                                            <tr>
+                                                <th>STT</th>
+                                                <th>Thời gian</th>
+                                                <th>Họ và tên</th>
+                                                <th>Địa chỉ</th>
+                                                <th>Giới tính</th>
+                                                <th>Lý do khám bệnh</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {dataPatient && dataPatient.length > 0 ? (
+                                                dataPatient.map((item, index) => {
+                                                    let time = language === LANGUAGES.VI
+                                                        ? item?.timeTypeDataPatient?.valueVi
+                                                        : item?.timeTypeDataPatient?.valueEn;
+                                                    let gender = language === LANGUAGES.VI
+                                                        ? item?.patientData?.gender
+                                                        : item?.patientData?.gender.valueEn;
 
-                                            return (
-                                                <tr key={index}>
-                                                    <td>{index + 1}</td>
-                                                    <td>{time}</td>
-                                                    <td>{item?.patientData?.firstName} {item?.patientData?.lastName}</td>
-                                                    <td>{item?.patientData?.address}</td>
-                                                    <td>{gender}</td>
-                                                    <td>{item.reason}</td> {/* Add reason for appointment */}
-                                                    <td>
-                                                        <button className="mp-btn-confirm"
-                                                            onClick={() => this.handleBtnConfirm(item)}
-                                                        >Xác nhận đã khám
-                                                        </button>
-                                                    </td>
+                                                    return (
+                                                        <tr key={index}>
+                                                            <td>{index + 1}</td>
+                                                            <td>{time}</td>
+                                                            <td>{item?.patientData?.firstName} {item?.patientData?.lastName}</td>
+                                                            <td>{item?.patientData?.address}</td>
+                                                            <td>{gender}</td>
+                                                            <td>{item.reason}</td>
+                                                            <td>
+                                                                <button
+                                                                    className="btn btn-success btn-sm"
+                                                                    onClick={() => this.handleBtnConfirm(item)}
+                                                                >
+                                                                    Xác nhận đã khám
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="7" className="text-center">Không có dữ liệu</td>
                                                 </tr>
-                                            );
-                                        })
-                                        :
-                                        <tr>
-                                            <td colSpan="7" style={{ textAlign: 'center' }}>Không có dữ liệu</td>
-                                        </tr>
-                                    }
-
-                                    </tbody>
-                                </table>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
+
 
                     </div>
                     <RemedyModal

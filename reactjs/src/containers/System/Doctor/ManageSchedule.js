@@ -228,34 +228,6 @@ class ManageSchedule extends Component {
                     </div>
 
                 </div>
-
-                {/* Chat button */}
-                <div
-                    onClick={this.toggleChatbox}
-                    style={{
-                        position: 'fixed',
-                        bottom: '10px',
-                        right: '20px',
-                        width: '50px',
-                        height: '50px',
-                        borderRadius: '50%',
-                        backgroundColor: '#007bff',
-                        color: 'white',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        cursor: 'pointer',
-                        zIndex: 1001,
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                        fontSize: '24px',
-                    }}
-                    title="Chat with patients"
-                >
-                    💬
-                </div>
-
-                {/* DoctorChat */}
-                {this.state.showChatbox && <DoctorChat />}
             </div>
         );
     }
