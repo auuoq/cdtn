@@ -4,11 +4,12 @@ import './ManageSchedule.scss';
 import { FormattedMessage } from 'react-intl';
 import Select from 'react-select';
 import * as actions from "../../../store/actions";
-import {LANGUAGES} from '../../../utils';
+import { LANGUAGES } from '../../../utils';
 import DatePicker from '../../../components/Input/DatePicker';
 import { toast } from 'react-toastify';
 import _ from 'lodash';
 import { saveBulkScheduleDoctor } from '../../../services/userService'
+import DoctorChat from '../../../components/DoctorChat';
 
 class ManageSchedule extends Component {
     constructor(props) {
@@ -18,7 +19,8 @@ class ManageSchedule extends Component {
             listDoctors: [],
             selectedDoctor: {},
             currentDate: '',
-            rangeTime: []
+            rangeTime: [],
+            showChatbox: false,
         }
     }
 
@@ -147,6 +149,11 @@ class ManageSchedule extends Component {
         }
     }
 
+    toggleChatbox = () => {
+        this.setState((prevState) => ({
+            showChatbox: !prevState.showChatbox,
+        }));
+    };
 
     render() {
         let { rangeTime } = this.state;
@@ -166,12 +173,12 @@ class ManageSchedule extends Component {
                 }
             }>
                 <div className="" style={{
-                          fontSize: "24px",
-                          fontWeight: "600",
-                          color: "#333",
-                          marginBottom: "30px",
-                          paddingBottom: "15px",
-                          borderBottom: "1px solid #eee",
+                    fontSize: "24px",
+                    fontWeight: "600",
+                    color: "#333",
+                    marginBottom: "30px",
+                    paddingBottom: "15px",
+                    borderBottom: "1px solid #eee",
                 }}>
                     <FormattedMessage id="manage-schedule.title" />
                 </div>
@@ -221,8 +228,35 @@ class ManageSchedule extends Component {
                     </div>
 
                 </div>
-            </div>
 
+                {/* Chat button */}
+                <div
+                    onClick={this.toggleChatbox}
+                    style={{
+                        position: 'fixed',
+                        bottom: '10px',
+                        right: '20px',
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '50%',
+                        backgroundColor: '#007bff',
+                        color: 'white',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        zIndex: 1001,
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                        fontSize: '24px',
+                    }}
+                    title="Chat with patients"
+                >
+                    💬
+                </div>
+
+                {/* DoctorChat */}
+                {this.state.showChatbox && <DoctorChat />}
+            </div>
         );
     }
 }
