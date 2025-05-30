@@ -1,10 +1,10 @@
+
 .chatbox {
   position: fixed;
-  bottom: 65px;
+  bottom: 20px;
   right: 20px;
   width: 420px;
-  max-height: 450px;
-  min-height: 450px;
+  max-height: 580px;
   background-color: #fff;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   border-radius: 20px;
@@ -24,8 +24,6 @@
   &__doctors {
     display: flex;
     overflow-x: auto;
-    height: 60px;
-    min-height: 60px;
     padding: 12px 15px;
     border-bottom: 1px solid #eee;
     background-color: #fafafa;
@@ -69,7 +67,6 @@
   &__messages {
     flex: 1;
     padding: 20px;
-    // max-height: 420px;
     overflow-y: auto;
     background-color: #fafafa;
     display: flex;
@@ -185,62 +182,122 @@
     }
   }
 }
-@media (max-width: 768px) {
-  .chatbox {
-    right: 10px;
-    bottom: 120px;
-    width: 95vw;
-    max-height: 80vh;
-    min-height: 80vh;
-    border-radius: 15px;
 
-    &__messages {
-      padding: 15px;
-      gap: 10px;
+.chatbox__history {
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+
+  h4 {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+  }
+
+  .chatbox__doctors-button {
+    display: flex;
+    width: 100%;                  // Thêm dòng này
+    padding: 8px 12px;            // Gợi ý: tăng padding cho đẹp
+    border-radius: 10px;          // Làm mềm bo góc
+    transition: background-color 0.2s;
+    gap: 8px;
+
+    &:hover {
+        background-color: #f0f0f0;  // Optional: highlight khi hover
     }
 
-    &__input {
-      padding: 8px 12px;
-
-      input {
-        font-size: 14px;
-        padding: 8px 12px;
+    .chatbox__history-content {
+      display: flex;
+      flex-direction: column;
+      span {
+        font-weight: 600;
       }
 
-      button {
-        width: 36px;
-        height: 36px;
+      .chatbox__history-preview {
+        font-size: 12px;
+        color: #777;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-    }
-
-    &__doctors {
-      padding: 10px 12px;
-      gap: 8px;
-
-      &-button {
-        min-width: 80px;
-        padding: 4px 10px;
-
-        img {
-          width: 28px;
-          height: 28px;
-        }
-
-        span {
-          font-size: 13px;
-        }
-      }
-    }
-
-    &__messages-item-bubble {
-      font-size: 14px;
-      padding: 8px 12px;
-    }
-
-    &__header {
-      font-size: 16px;
-      padding: 12px 16px;
     }
   }
 }
 
+.chatbox__chat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .chatbox__back-button {
+    background: none;
+    border: none;
+    color: #3b82f6;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+  }
+
+  .chatbox__doctor-info {
+    display: flex;
+    flex-direction: column;
+
+    strong {
+      font-size: 14px;
+    }
+
+    span {
+      font-size: 12px;
+      color: #777;
+
+      &.online {
+        color: green;
+      }
+
+      &.offline {
+        color: red;
+      }
+    }
+  }
+}
+.chatbox__doctors {
+    .chatbox__doctors-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    border-radius: 50px;
+    border: 1px solid #ccc;
+    background-color: white;
+    cursor: pointer;
+    height: 42px;
+    transition: background-color 0.2s, border-color 0.2s;
+    white-space: nowrap;       // Đảm bảo không xuống dòng
+    flex-shrink: 0;            // Không bị co lại khi overflow container
+
+    &.selected {
+        border-color: #3b82f6;
+        background-color: #dbebff;
+    }
+
+    img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    span {
+        font-weight: 500;
+        font-size: 14px;
+        color: #333;
+        white-space: nowrap;     // Không xuống dòng
+    }
+    }
+}

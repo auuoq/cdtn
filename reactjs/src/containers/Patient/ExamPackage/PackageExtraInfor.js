@@ -9,18 +9,27 @@ class PackageExtraInfor extends Component {
         super(props);
         this.state = {
             isShowDetailInfor: false
-        }
+        };
     }
 
     showHideDetailInfor = (status) => {
         this.setState({
             isShowDetailInfor: status
-        })
+        });
     }
 
     render() {
         let { isShowDetailInfor } = this.state;
         let { language, detailPackage } = this.props;
+
+        // Tỷ giá tạm tính: 1 USD = 24,000 VND
+        const exchangeRate = 24000;
+
+        let priceVi = detailPackage?.price || 0;
+        let priceEn = priceVi / exchangeRate;
+
+        let extraPriceVi = priceVi * 1.5;
+        let extraPriceEn = priceEn * 1.5;
 
         return (
             <div className="doctor-extra-infor-container">
@@ -29,27 +38,24 @@ class PackageExtraInfor extends Component {
                         <FormattedMessage id="patient.extra-infor-package.text-address" />
                     </div>
                     <div className="name-clinic">
-                        {detailPackage && detailPackage.clinicInfo ? detailPackage.clinicInfo.name : ''}
+                        {detailPackage?.clinicInfo?.name || ''}
                     </div>
                     <div className="detail-address">
-                        {detailPackage && detailPackage.clinicInfo ? detailPackage.clinicInfo.address : ''}
+                        {detailPackage?.clinicInfo?.address || ''}
                     </div>
                 </div>
                 <div className="content-down">
-                    {isShowDetailInfor === false &&
+                    {!isShowDetailInfor &&
                         <div className="short-infor">
                             <FormattedMessage id="patient.extra-infor-package.price" />
-                            {detailPackage && detailPackage.price && language === LANGUAGES.VI
-                                &&
+                            {language === LANGUAGES.VI &&
                                 <span className="currency">
-                                    {new Intl.NumberFormat('vi-VN').format(detailPackage.price)} VND
+                                    {new Intl.NumberFormat('vi-VN').format(priceVi)} VND
                                 </span>
                             }
-
-                            {detailPackage && detailPackage.price && language === LANGUAGES.EN
-                                &&
+                            {language === LANGUAGES.EN &&
                                 <span className="currency">
-                                    {new Intl.NumberFormat('en-US').format(detailPackage.price)} $
+                                    {new Intl.NumberFormat('en-US').format(priceEn)} $
                                 </span>
                             }
                             <span className="detail" onClick={() => this.showHideDetailInfor(true)}>
@@ -57,7 +63,8 @@ class PackageExtraInfor extends Component {
                             </span>
                         </div>
                     }
-                    {isShowDetailInfor === true &&
+
+                    {isShowDetailInfor &&
                         <>
                             <div className="title-price">
                                 <FormattedMessage id="patient.extra-infor-package.price" />
@@ -68,26 +75,57 @@ class PackageExtraInfor extends Component {
                                         <FormattedMessage id="patient.extra-infor-package.price" />
                                     </span>
                                     <span className="right">
-                                        {detailPackage && detailPackage.price && language === LANGUAGES.VI &&
+                                        {language === LANGUAGES.VI &&
                                             <span className="currency">
-                                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detailPackage.price)}
+                                                {new Intl.NumberFormat('vi-VN', {
+                                                    style: 'currency',
+                                                    currency: 'VND'
+                                                }).format(priceVi)}
                                             </span>
                                         }
-                                        {detailPackage && detailPackage.price && language === LANGUAGES.EN &&
+                                        {language === LANGUAGES.EN &&
                                             <span className="currency">
-                                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(detailPackage.price)}
+                                                {new Intl.NumberFormat('en-US', {
+                                                    style: 'currency',
+                                                    currency: 'USD'
+                                                }).format(priceEn)}
+                                            </span>
+                                        }
+                                    </span>
+                                </div>
+
+                                <div className="price">
+                                    <span className="left">
+                                        <FormattedMessage id="patient.extra-infor-package.extra-price" />
+                                    </span>
+                                    <span className="right">
+                                        {language === LANGUAGES.VI &&
+                                            <span className="currency">
+                                                {new Intl.NumberFormat('vi-VN', {
+                                                    style: 'currency',
+                                                    currency: 'VND'
+                                                }).format(extraPriceVi)}
+                                            </span>
+                                        }
+                                        {language === LANGUAGES.EN &&
+                                            <span className="currency">
+                                                {new Intl.NumberFormat('en-US', {
+                                                    style: 'currency',
+                                                    currency: 'USD'
+                                                }).format(extraPriceEn)}
                                             </span>
                                         }
                                     </span>
                                 </div>
                             </div>
+
                             <div className="payment">
                                 <FormattedMessage id="patient.extra-infor-package.payment" />
-                                {detailPackage && detailPackage.paymentTypeData && language === LANGUAGES.VI ?
-                                    detailPackage.paymentTypeData.valueVi : ''}
-                                {detailPackage && detailPackage.paymentTypeData && language === LANGUAGES.EN ?
-                                    detailPackage.paymentTypeData.valueEn : ''}
+                                {language === LANGUAGES.VI
+                                    ? detailPackage?.paymentTypeData?.valueVi || ''
+                                    : detailPackage?.paymentTypeData?.valueEn || ''}
                             </div>
+
                             <div className="hide-price">
                                 <span onClick={() => this.showHideDetailInfor(false)}>
                                     <FormattedMessage id="patient.extra-infor-package.hide-price" />
@@ -107,4 +145,4 @@ const mapStateToProps = state => {
     };
 };
 
-export default connect(mapStateToProps)(PackageExtraInfor); 
+export default connect(mapStateToProps)(PackageExtraInfor);

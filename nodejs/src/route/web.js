@@ -91,6 +91,9 @@ let initWebRoutes = (app) => {
     router.get('/api/get-package-bookings-by-manager', clinicManagerController.getPackageBookingsByManager);
     router.get('/api/get-all-clinic-manager', clinicManagerController.getAllClinicManager);
     router.post('/api/assign-clinic-to-manager', clinicManagerController.assignClinicToManager);
+    router.get("/api/get-list-patient-package", clinicManagerController.getListPatientForPackageManager);
+    router.post('/api/send-remedy-package', clinicManagerController.sendRemedyForPackage);
+
 
 
     //Exam Package

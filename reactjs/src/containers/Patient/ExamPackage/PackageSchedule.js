@@ -1,25 +1,30 @@
+// PackageSchedule.js
 import React, { Component } from 'react';
 import { connect } from "react-redux";
 import { FormattedMessage } from 'react-intl';
 import { LANGUAGES } from '../../../utils';
 import { getSchedulePackageByDate } from '../../../services/userService';
+import BookingModal from './BookingModal';
 import './PackageSchedule.scss';
 
 class PackageSchedule extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            allDays: [],
-            allAvailableTime: [],
-        }
+    state = {
+        allDays: [],
+        allAvailableTime: [],
+        isOpenModalBooking: false,
+        dataScheduleTimeModal: {},
+    };
+
+    componentDidMount() {
+        const allDays = this.getArrDays(this.props.language);
+        this.setState({ allDays });
     }
 
-    async componentDidMount() {
-        let { language } = this.props;
-        let allDays = this.getArrDays(language);
-        this.setState({
-            allDays: allDays,
-        })
+    componentDidUpdate(prevProps) {
+        if (prevProps.language !== this.props.language || prevProps.packageIdFromParent !== this.props.packageIdFromParent) {
+            const allDays = this.getArrDays(this.props.language);
+            this.setState({ allDays });
+        }
     }
 
     capitalizeFirstLetter(string) {
@@ -27,128 +32,121 @@ class PackageSchedule extends Component {
     }
 
     getArrDays = (language) => {
-        let allDays = []
+        const allDays = [];
         for (let i = 0; i < 7; i++) {
-            let object = {};
+            const date = new Date();
+            date.setDate(date.getDate() + i);
+            let label;
+
             if (language === LANGUAGES.VI) {
-                if (i === 0) {
-                    let ddMM = new Date().toLocaleDateString('vi-VI');
-                    let today = `Hôm nay - ${ddMM}`;
-                    object.label = today;
-                } else {
-                    let labelVi = new Date(new Date().setDate(new Date().getDate() + i)).toLocaleDateString('vi-VI', { weekday: 'long', day: '2-digit', month: '2-digit' });
-                    object.label = this.capitalizeFirstLetter(labelVi);
-                }
+                label = i === 0
+                    ? `Hôm nay - ${date.toLocaleDateString('vi-VI')}`
+                    : this.capitalizeFirstLetter(date.toLocaleDateString('vi-VI', { weekday: 'long', day: '2-digit', month: '2-digit' }));
             } else {
-                if (i === 0) {
-                    let ddMM = new Date().toLocaleDateString('en-US');
-                    let today = `Today - ${ddMM}`;
-                    object.label = today;
-                } else {
-                    object.label = new Date(new Date().setDate(new Date().getDate() + i)).toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: '2-digit' });
-                }
+                label = i === 0
+                    ? `Today - ${date.toLocaleDateString('en-US')}`
+                    : date.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: '2-digit' });
             }
-            object.value = new Date(new Date().setDate(new Date().getDate() + i)).setHours(0, 0, 0, 0);
-            allDays.push(object);
+
+            allDays.push({ label, value: date.setHours(0, 0, 0, 0) });
         }
         return allDays;
-    }
-
-    async componentDidUpdate(prevProps, prevState, snapShot) {
-        if (this.props.language !== prevProps.language) {
-            let allDays = this.getArrDays(this.props.language);
-            this.setState({
-                allDays: allDays,
-            })
-        }
-        if (this.props.packageIdFromParent !== prevProps.packageIdFromParent) {
-            let allDays = this.getArrDays(this.props.language);
-            this.setState({
-                allDays: allDays,
-            })
-        }
-    }
+    };
 
     handleOnChangeSelect = async (event) => {
-        if (this.props.packageIdFromParent && this.props.packageIdFromParent !== -1) {
-            let date = event.target.value;
-            let res = await getSchedulePackageByDate(date,this.props.packageIdFromParent);
+        const date = event.target.value;
+        const { packageIdFromParent } = this.props;
+
+        if (packageIdFromParent && packageIdFromParent !== -1) {
+            const res = await getSchedulePackageByDate(date, packageIdFromParent);
             if (res && res.errCode === 0) {
-                this.setState({
-                    allAvailableTime: res.data ? res.data : []
-                })
+                this.setState({ allAvailableTime: res.data || [] });
             }
         }
-    }
+    };
+
+    handleClickScheduleTime = (time) => {
+        this.setState({
+            isOpenModalBooking: true,
+            dataScheduleTimeModal: time,
+        });
+    };
+
+    closeBookingModal = () => {
+        this.setState({
+            isOpenModalBooking: false,
+            dataScheduleTimeModal: {},
+        });
+    };
 
     render() {
-        let { allDays, allAvailableTime } = this.state;
-        let { language } = this.props;
+        const { allDays, allAvailableTime, isOpenModalBooking, dataScheduleTimeModal } = this.state;
+        const { language, detailPackage } = this.props;
+
         return (
             <div className='doctor-schedule-container'>
                 <div className='all-schedule'>
-                    <select onChange={(event) => this.handleOnChangeSelect(event)}>
-                        {allDays && allDays.length > 0 &&
-                            allDays.map((item, index) => {
-                                return (
-                                    <option
-                                        key={index}
-                                        value={item.value}
-                                    >
-                                        {item.label}
-                                    </option>
-                                )
-                            })
-                        }
+                    <select onChange={this.handleOnChangeSelect}>
+                        {allDays.map((item, index) => (
+                            <option key={index} value={item.value}>
+                                {item.label}
+                            </option>
+                        ))}
                     </select>
                 </div>
+
                 <div className='all-available-time'>
                     <div className='text-calendar'>
                         <i className="fas fa-calendar-alt">
-                            <span>
-                                <FormattedMessage id="patient.detail-doctor.schedule" />
-                            </span>
+                            <span><FormattedMessage id="patient.detail-doctor.schedule" /></span>
                         </i>
                     </div>
+
                     <div className='time-content'>
-                        {allAvailableTime && allAvailableTime.length > 0 ? (
+                        {allAvailableTime.length > 0 ? (
                             <div className='time-content-btns'>
-                            {allAvailableTime.map((item, index) => {
-                                let timeDisplay = language === LANGUAGES.VI
-                                ? item.timeTypeData.valueVi
-                                : item.timeTypeData.valueEn;
+                                {allAvailableTime.map((item, index) => {
+                                    const timeDisplay = language === LANGUAGES.VI
+                                        ? item.timeTypeData.valueVi
+                                        : item.timeTypeData.valueEn;
 
-                                let isFull = item.currentNumber >= item.maxNumber;
+                                    const isFull = item.currentNumber >= item.maxNumber;
 
-                                return (
-                                <button
-                                    key={index}
-                                    className={`time-slot-btn ${isFull ? 'full' : ''}`}
-                                    onClick={() => !isFull && this.props.handleClickScheduleTime(item)}
-                                    disabled={isFull}
-                                >
-                                    {timeDisplay} {isFull ? '(Đầy)' : ''}
-                                </button>
-                                );
-                            })}
+                                    return (
+                                        <button
+                                            key={index}
+                                            className={`time-slot-btn ${isFull ? 'full' : ''}`}
+                                            onClick={() => !isFull && this.handleClickScheduleTime(item)}
+                                            disabled={isFull}
+                                        >
+                                            {timeDisplay} {isFull ? '(Đầy)' : ''}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         ) : (
                             <div className='no-schedule'>
-                            <FormattedMessage id="patient.detail-doctor.no-schedule" />
+                                <FormattedMessage id="patient.detail-doctor.no-schedule" />
                             </div>
                         )}
-                        </div>
+                    </div>
 
                 </div>
+
+                {/* BookingModal dùng nội bộ */}
+                <BookingModal
+                    isOpenModal={isOpenModalBooking}
+                    closeBookingModal={this.closeBookingModal}
+                    dataTime={dataScheduleTimeModal}
+                    detailPackage={detailPackage}
+                />
             </div>
-        )
+        );
     }
 }
 
-const mapStateToProps = state => {
-    return {
-        language: state.app.language,
-    };
-};
+const mapStateToProps = state => ({
+    language: state.app.language,
+});
 
-export default connect(mapStateToProps)(PackageSchedule); 
+export default connect(mapStateToProps)(PackageSchedule);

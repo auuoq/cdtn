@@ -161,58 +161,78 @@ let getMessagesBetweenUsers = async (data) => {
     });
 };
 
-let getUserConversations = async (userId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (!userId) {
-                return resolve({ errCode: 1, errMessage: 'Missing userId' });
+const getUserConversations = async (userId) => {
+    try {
+        if (!userId) {
+            return { errCode: 1, errMessage: 'Missing userId' };
+        }
+
+        // Lấy tất cả tin nhắn liên quan đến user
+        const messages = await db.Message.findAll({
+            where: {
+                [db.Sequelize.Op.or]: [
+                    { senderId: userId },
+                    { receiverId: userId }
+                ]
+            },
+            order: [['createdAt', 'DESC']],
+            raw: true
+        });
+        console.log('messages:', messages);
+
+        // Xác định danh sách userId đã trò chuyện
+        userId = Number(userId);
+        const userIds = new Set();
+        messages.forEach(msg => {
+            if (msg.senderId !== userId) userIds.add(msg.senderId);
+            if (msg.receiverId !== userId) userIds.add(msg.receiverId);
+        });
+
+        // Lấy thông tin từng user + tin nhắn cuối cùng với họ
+        const conversations = await Promise.all([...userIds].map(async (otherUserId) => {
+            const user = await db.User.findOne({
+                where: { id: otherUserId },
+                attributes: ['id', 'firstName', 'lastName', 'image', 'isActive'],
+                raw: true
+            });
+        console.log('user:', user);
+
+            const lastMsg = await db.Message.findOne({
+                where: {
+                    [db.Sequelize.Op.or]: [
+                        { senderId: userId, receiverId: otherUserId },
+                        { senderId: otherUserId, receiverId: userId }
+                    ]
+                },
+                order: [['createdAt', 'DESC']],
+                raw: true
+            });
+
+            // ✅ Convert ảnh từ base64 sang binary (nếu có)
+            if (user?.image) {
+                user.image = Buffer.from(user.image, 'base64').toString('binary');
             }
 
-            const conversations = await db.sequelize.query(`
-                SELECT u.id, u.firstName, u.lastName, u.image, u.isActive,
-                    (SELECT m.message FROM Messages m 
-                     WHERE (m.senderId = u.id AND m.receiverId = :userId)
-                        OR (m.senderId = :userId AND m.receiverId = u.id)
-                     ORDER BY m.createdAt DESC
-                     LIMIT 1) AS lastMessage,
-                    (SELECT m.createdAt FROM Messages m 
-                     WHERE (m.senderId = u.id AND m.receiverId = :userId)
-                        OR (m.senderId = :userId AND m.receiverId = u.id)
-                     ORDER BY m.createdAt DESC
-                     LIMIT 1) AS lastMessageTime
-                FROM Users u
-                WHERE u.id IN (
-                    SELECT DISTINCT CASE
-                        WHEN senderId = :userId THEN receiverId
-                        WHEN receiverId = :userId THEN senderId
-                    END
-                    FROM Messages
-                    WHERE senderId = :userId OR receiverId = :userId
-                )
-            `, {
-                replacements: { userId },
-                type: db.Sequelize.QueryTypes.SELECT,
-            });
+            return {
+                ...user,
+                lastMessage: lastMsg?.message || '',
+                lastMessageTime: lastMsg?.createdAt || null,
+                lastMessageSenderId: lastMsg?.senderId || null,
+                lastMessageReceiverId: lastMsg?.receiverId || null,
+            };
+        }));
 
-            // ✅ Convert ảnh từ base64 sang binary (hoặc URL usable in <img>)
-            const result = conversations.map((doc) => {
-                if (doc.image) {
-                    doc.image = Buffer.from(doc.image, 'base64').toString('binary');
-                }
-                return doc;
-            });
-
-            return resolve({
-                errCode: 0,
-                errMessage: 'ok',
-                data: result,
-            });
-        } catch (e) {
-            console.error('getUserConversations error:', e);
-            reject(e);
-        }
-    });
+        return {
+            errCode: 0,
+            errMessage: 'ok',
+            data: conversations
+        };
+    } catch (e) {
+        console.error('getUserConversations error:', e);
+        return { errCode: -1, errMessage: 'Internal error' };
+    }
 };
+
 
 
 

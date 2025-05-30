@@ -91,6 +91,34 @@ let getPackageBookingsByManager = async (req, res) => {
     }
 }
 
+
+let getListPatientForPackageManager = async (req, res) => {
+    try {
+        let data = await clinicManagerService.getListPatientForPackageManager(req.query.managerId, req.query.date);
+        return res.status(200).json(data);
+    } catch (e) {
+        console.log("Error getListPatientForPackageManager:", e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+let sendRemedyForPackage = async (req, res) => {
+    try {
+        let infor = await clinicManagerService.sendRemedyForPackage(req.body);
+        return res.status(200).json(infor);
+
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
+
 module.exports = {
     getDetailClinicByManagerUserId: getDetailClinicByManagerUserId,
     getClinicByManager: getClinicByManager,
@@ -98,5 +126,7 @@ module.exports = {
     getUserBookingsByManager: getUserBookingsByManager,
     getAllClinicManager: getAllClinicManager,
     assignClinicToManager: assignClinicToManager,
-    getPackageBookingsByManager: getPackageBookingsByManager
+    getPackageBookingsByManager: getPackageBookingsByManager,
+    getListPatientForPackageManager: getListPatientForPackageManager,
+    sendRemedyForPackage: sendRemedyForPackage
 };

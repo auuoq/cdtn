@@ -110,3 +110,21 @@
         }
     }
 }
+.package-list {
+    margin-top: 40px;
+
+    h2 {
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #333;
+    }
+}
+.filter-container {
+    select {
+        height: 30px;
+        padding: 5px 10px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+}

@@ -1,32 +1,33 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
 import './Manager_Booking.scss';
-import { getDetailClinicByManager } from '../../../services/userService'; // API mới
-import ProfileDoctor from '../../Patient/Doctor/ProfileDoctor'; // Import ProfileDoctor component
-import DoctorSchedule from '../../Patient/Doctor/DoctorSchedule'; // Import DoctorSchedule component
-import DoctorExtraInfor from '../../Patient/Doctor/DoctorExtraInfor'; // Import DoctorExtraInfor component
+import { getDetailClinicByManager, getExamPackagesDetailByManager } from '../../../services/userService';
+import ProfileDoctor from '../../Patient/Doctor/ProfileDoctor';
+import DoctorSchedule from '../../Patient/Doctor/DoctorSchedule';
+import DoctorExtraInfor from '../../Patient/Doctor/DoctorExtraInfor';
+import PackageItem from '../../Patient/ExamPackage/PackageItem'; // component gói khám mới
 
 class Manage_Booking extends Component {
-
     constructor(props) {
         super(props);
         this.state = {
-            arrDoctorId: [],
-            dataDetailClinic: {},
+            arrDoctorId: [],       // danh sách doctorId của phòng khám
+            dataDetailClinic: {},  // thông tin phòng khám
+            arrPackages: [],       // danh sách gói khám của phòng khám
+            filterType: 'all',     // loại lọc: 'all' | 'doctors' | 'packages'
         };
     }
 
     async componentDidMount() {
-        const { userId } = this.props; // Lấy userId từ props (có thể lấy từ redux hoặc props)
-        let res = await getDetailClinicByManager({
-            userId: userId.id, // Chuyển userId vào API để lọc phòng khám và bác sĩ
-        });
+        const { userId } = this.props;
 
-        if (res && res.errCode === 0) {
-            let data = res.data;
+        // Lấy thông tin phòng khám và bác sĩ
+        let resClinic = await getDetailClinicByManager({ userId: userId.id });
+        if (resClinic && resClinic.errCode === 0) {
+            let data = resClinic.data;
             let arrDoctorId = [];
             if (data && data.doctorClinic && data.doctorClinic.length > 0) {
-                arrDoctorId = data.doctorClinic.map(item => item.doctorId); // Lấy danh sách doctorId
+                arrDoctorId = data.doctorClinic.map(item => item.doctorId);
             }
 
             this.setState({
@@ -34,14 +35,29 @@ class Manage_Booking extends Component {
                 arrDoctorId: arrDoctorId,
             });
         }
+
+        // Lấy gói khám của phòng khám mà user quản lý
+        let resPackages = await getExamPackagesDetailByManager(userId.id);
+        if (resPackages && resPackages.errCode === 0) {
+            this.setState({
+                arrPackages: resPackages.data
+            });
+        }
+    }
+
+    // Xử lý thay đổi filter
+    handleFilterChange = (event) => {
+        this.setState({ filterType: event.target.value });
     }
 
     render() {
-        let { arrDoctorId, dataDetailClinic } = this.state;
+        let { arrDoctorId, dataDetailClinic, arrPackages, filterType } = this.state;
 
         return (
             <div className="detail-specialty-container">
                 <div className="detail-specialty-body">
+
+                    {/* Thông tin phòng khám */}
                     <div className="clinic-info-container">
                         {dataDetailClinic && dataDetailClinic.name && (
                             <>
@@ -60,50 +76,75 @@ class Manage_Booking extends Component {
                                         <p>{dataDetailClinic.address}</p>
                                     </div>
                                 </div>
-
-                                {/* <div className="description">
-                                    <div>Giới thiệu</div>
-                                    <div dangerouslySetInnerHTML={{ __html: dataDetailClinic.descriptionHTML }} />
-                                </div> */}
                             </>
                         )}
                     </div>
 
-                    {arrDoctorId && arrDoctorId.length > 0 &&
-                        arrDoctorId.map((item, index) => {
-                            return (
-                                <div className="each-doctor" key={index}>
-                                    <div className="dt-content-left">
-                                        <div className="profile-doctor">
-                                            <ProfileDoctor
-                                                doctorId={item}
-                                                isShowDescriptionDoctor={true}
-                                                isSHowLinkDetail={true}
-                                                isShowPrice={false}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="dt-content-right">
-                                        <div className="doctor-schedule">
-                                            <DoctorSchedule doctorIdFromParent={item} />
-                                        </div>
-                                        <div className="doctor-extra-infor">
-                                            <DoctorExtraInfor doctorIdFromParent={item} />
-                                        </div>
+                    {/* Filter chọn loại hiển thị */}
+                    <div className="filter-container" style={{ marginBottom: '20px' }}>
+                        <label htmlFor="filter-select" style={{ marginRight: '10px' }}>Lọc: </label>
+                        <select
+                            id="filter-select"
+                            onChange={this.handleFilterChange}
+                            value={filterType}
+                        >
+                            <option value="all">Tất cả</option>
+                            <option value="doctors">Bác sĩ</option>
+                            <option value="packages">Gói khám</option>
+                        </select>
+                    </div>
+
+                    {/* Danh sách bác sĩ (hiển thị nếu filter là all hoặc doctors) */}
+                    {(filterType === 'all' || filterType === 'doctors') && arrDoctorId && arrDoctorId.length > 0 && (
+                        arrDoctorId.map((doctorId, index) => (
+                            <div className="each-doctor" key={index}>
+                                <div className="dt-content-left">
+                                    <div className="profile-doctor">
+                                        <ProfileDoctor
+                                            doctorId={doctorId}
+                                            isShowDescriptionDoctor={true}
+                                            isSHowLinkDetail={true}
+                                            isShowPrice={false}
+                                        />
                                     </div>
                                 </div>
-                            );
-                        })}
+                                <div className="dt-content-right">
+                                    <div className="doctor-schedule">
+                                        <DoctorSchedule doctorIdFromParent={doctorId} />
+                                    </div>
+                                    <div className="doctor-extra-infor">
+                                        <DoctorExtraInfor doctorIdFromParent={doctorId} />
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+
+                    {/* Danh sách gói khám (hiển thị nếu filter là all hoặc packages) */}
+                    {(filterType === 'all' || filterType === 'packages') && (
+                        <div className="package-list">
+                            <h2>Danh sách gói khám</h2>
+                            {arrPackages && arrPackages.length > 0 ? (
+                                arrPackages.map((item, index) => (
+                                    <PackageItem key={index} detailPackage={item} />
+                                ))
+                            ) : (
+                                <p>Không có gói khám nào</p>
+                            )}
+                        </div>
+                    )}
+
                 </div>
             </div>
         );
     }
 }
 
+// Lấy dữ liệu từ redux store
 const mapStateToProps = state => {
     return {
         language: state.app.language,
-        userId: state.user.userInfo, // Thêm userId từ redux nếu có
+        userId: state.user.userInfo,
     };
 };
 

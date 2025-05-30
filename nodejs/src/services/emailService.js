@@ -123,6 +123,42 @@ let sendAttachment = async (dataSend) => {
     });
 }
 
+let sendAttachmentForPackage = async (dataSend) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let transporter = nodemailer.createTransport({
+                host: "smtp.gmail.com",
+                port: 587,
+                secure: false,
+                auth: {
+                    user: process.env.EMAIL_APP,
+                    pass: process.env.EMAIL_APP_PASSWORD,
+                },
+            });
+
+            let info = await transporter.sendMail({
+                from: '"BKCare 👨‍⚕️" <serndev523@gmail.com>',
+                to: dataSend.email,
+                subject: "Kết quả gói khám sức khỏe",
+                html: getBodyHTMLEmailRemedy(dataSend),
+                attachments: [
+                    {
+                        filename: `remedy-${dataSend.patientId}-${new Date().getTime()}.png`,
+                        content: dataSend.imgBase64.split("base64,")[1],
+                        encoding: 'base64'
+                    }
+                ]
+            });
+
+            resolve(true);
+
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+
 let getBodyHTMLEmailRemedy = (dataSend) => {
     let result = '';
     if (dataSend.language === 'vi') {
@@ -205,6 +241,7 @@ module.exports = {
     sendAttachment: sendAttachment,
     sendPasswordResetEmail: sendPasswordResetEmail,
     getBodyHTMLEmailResetPassword: getBodyHTMLEmailResetPassword,
+    sendAttachmentForPackage: sendAttachmentForPackage
 
 
 };

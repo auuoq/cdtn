@@ -229,7 +229,6 @@ let getUserBookingsByManager = (userId) => {
                 where: { userId: userId },
                 attributes: ['clinicId']
             });
-
             if (!clinicManagerRecord) {
                 return resolve({
                     errCode: 2,
@@ -239,22 +238,28 @@ let getUserBookingsByManager = (userId) => {
             }
 
             // Lấy doctorId từ clinicId
-            const doctorId = await db.Doctor_Infor.findOne({
+            const doctorRecords = await db.Doctor_Infor.findAll({
                 where: { clinicId: clinicManagerRecord.clinicId },
                 attributes: ['doctorId']
             });
 
-            if (!doctorId) {
+            const doctorIds = doctorRecords.map(d => d.doctorId);
+
+            if (doctorIds.length === 0) {
                 return resolve({
                     errCode: 3,
-                    errMessage: 'Doctor not found',
-                    data: {}
+                    errMessage: 'No doctors found for this clinic',
+                    data: []
                 });
             }
 
             // Lấy danh sách các lịch hẹn (booking)
             let bookings = await db.Booking.findAll({
-                where: { doctorId: doctorId.doctorId },
+                where: {
+                    doctorId: {
+                        [db.Sequelize.Op.in]: doctorIds
+                    }
+                },
                 attributes: ['id', 'doctorId', 'patientId', 'date', 'timeType', 'statusId', 'reason'],
                 order: [['createdAt', 'DESC']],
                 include: [
@@ -511,7 +516,124 @@ let assignClinicToManager = (data) => {
     });
 };
 
+let getListPatientForPackageManager = async (managerId, date) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!managerId || !date) {
+                return resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                });
+            }
 
+            // Tìm phòng khám mà user này quản lý
+            let clinicManager = await db.Clinic_Manager.findOne({
+                where: { userId: managerId },
+            });
+
+            if (!clinicManager) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Manager does not manage any clinic'
+                });
+            }
+
+            const clinicId = clinicManager.clinicId;
+
+            // Tìm các gói khám thuộc phòng khám này
+            let packages = await db.ExamPackage.findAll({
+                where: { clinicId: clinicId },
+                attributes: ['id'],
+            });
+
+            let packageIds = packages.map(p => p.id);
+
+            // Tìm tất cả các booking của các gói khám này, với status S2 và đúng ngày
+            let data = await db.BookingPackage.findAll({
+                where: {
+                    statusId: 'S2',
+                    date: date,
+                    packageId: packageIds
+                },
+                include: [
+                    {
+                        model: db.User,
+                        as: 'patientData',
+                        attributes: ['email', 'firstName', 'lastName', 'address', 'gender'],
+                    },
+                    {
+                        model: db.ExamPackage,
+                        as: 'packageData',
+                        attributes: ['name'],
+                    },
+                    {
+                        model: db.Allcode,
+                        as: 'timeTypeDataPatient',
+                        attributes: ['valueEn', 'valueVi'],
+                    }
+                ],
+                raw: false,
+                nest: true
+            });
+
+            resolve({
+                errCode: 0,
+                data: data
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+
+let sendRemedyForPackage = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (
+                !data.email || !data.packageId || !data.patientId ||
+                !data.timeType || !data.imgBase64 || !data.diagnosis
+            ) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                });
+            } else {
+                // Tìm lịch gói khám có trạng thái đã xác nhận
+                let appointment = await db.BookingPackage.findOne({
+                    where: {
+                        packageId: data.packageId,
+                        patientId: data.patientId,
+                        timeType: data.timeType,
+                        statusId: 'S2'
+                    },
+                    raw: false
+                });
+
+                if (appointment) {
+                    appointment.statusId = 'S3'; // Hoàn thành
+                    appointment.diagnosis = data.diagnosis;
+                    await appointment.save();
+                } else {
+                    return resolve({
+                        errCode: 2,
+                        errMessage: 'No matching appointment found'
+                    });
+                }
+
+                // Gửi email
+                await emailService.sendAttachmentForPackage(data);
+
+                resolve({
+                    errCode: 0,
+                    errMessage: 'ok'
+                });
+            }
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
 
 
 
@@ -522,5 +644,7 @@ module.exports = {
     getUserBookingsByManager: getUserBookingsByManager,
     getAllClinicManager: getAllClinicManager,
     assignClinicToManager: assignClinicToManager,
-    getPackageBookingsByManager: getPackageBookingsByManager
+    getPackageBookingsByManager: getPackageBookingsByManager,
+    getListPatientForPackageManager: getListPatientForPackageManager,
+    sendRemedyForPackage: sendRemedyForPackage
 };

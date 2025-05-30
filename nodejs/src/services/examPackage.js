@@ -182,14 +182,25 @@ let getExamPackagesDetailByManager = (userId) => {
                 return;
             }
 
+            // Truy vấn tất cả các gói khám thuộc clinicId và include thông tin phòng khám
             let packages = await db.ExamPackage.findAll({
-                where: { clinicId: manager.clinicId }
+                where: { clinicId: manager.clinicId },
+                include: [
+                    {
+                        model: db.Clinic,
+                        as: 'clinicInfo',
+                        attributes: ['name', 'address', 'image']
+                    }
+                ]
             });
 
             if (packages && packages.length > 0) {
                 packages = packages.map(item => {
                     if (item.image) {
                         item.image = new Buffer(item.image, 'base64').toString('binary');
+                    }
+                    if (item.clinicInfo && item.clinicInfo.image) {
+                        item.clinicInfo.image = new Buffer(item.clinicInfo.image, 'base64').toString('binary');
                     }
                     return item;
                 });
@@ -206,6 +217,7 @@ let getExamPackagesDetailByManager = (userId) => {
         }
     });
 };
+
 
 
 
@@ -339,8 +351,6 @@ let getSchedulePackageByDate = (packageId, date) => {
                     errMessage: 'Missing required parameter'
                 });
             } else {
-                console.log('packageId', packageId);
-                console.log('date', date);
                 let dataSchedule = await db.SchedulePackage.findAll({
                     where: {
                         packageId: packageId,

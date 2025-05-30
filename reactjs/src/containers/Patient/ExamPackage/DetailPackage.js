@@ -1,4 +1,4 @@
-// DetailExamPackage.js
+// DetailPackage.js
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import HomeHeader from '../../HomePage/HomeHeader';
@@ -6,62 +6,38 @@ import './DetailPackage.scss';
 import { getDetailExamPackageById } from '../../../services/userService';
 import PackageSchedule from './PackageSchedule';
 import PackageExtraInfor from './PackageExtraInfor';
-import BookingModal from './BookingModal';
 import ChatBox from '../../../components/chatbox';
 
 class DetailPackage extends Component {
     state = {
         detailPackage: {},
-        isOpenModalBooking: false,
-        dataScheduleTimeModal: {}
-    };
-    state = {
-        detailPackage: {},
-        isOpenModalBooking: false,
-        dataScheduleTimeModal: {},
-        showChatbox: false, 
+        showChatbox: false,
     };
 
     toggleChatbox = () => {
-        this.setState((prevState) => ({
+        this.setState(prevState => ({
             showChatbox: !prevState.showChatbox,
         }));
     };
 
-
     async componentDidMount() {
-        if (this.props.match?.params?.id) {
-            const id = this.props.match.params.id;
-            let res = await getDetailExamPackageById(id);
+        const { match } = this.props;
+        if (match?.params?.id) {
+            const res = await getDetailExamPackageById(match.params.id);
             if (res && res.errCode === 0) {
                 this.setState({ detailPackage: res.data });
             }
         }
     }
 
-    handleClickScheduleTime = (time) => {
-        this.setState({
-            isOpenModalBooking: true,
-            dataScheduleTimeModal: time
-        })
-    }
-
-    closeBookingModal = () => {
-        this.setState({
-            isOpenModalBooking: false
-        })
-    }
-
     render() {
-        const { detailPackage, isOpenModalBooking, dataScheduleTimeModal } = this.state;
+        const { detailPackage, showChatbox } = this.state;
         const {
             name,
             image,
             description,
             contentHTML,
             clinicInfo,
-            provinceTypeData,
-            categoryTypeData,
             paymentTypeData,
             price,
         } = detailPackage;
@@ -70,7 +46,7 @@ class DetailPackage extends Component {
             <>
                 <HomeHeader isShowBanner={false} />
                 <div className="exam-package-detail-container">
-                    {/* Header Section */}
+                    {/* Header */}
                     <div className="package-header">
                         <div className="header-image" style={{ backgroundImage: `url(${image || ''})` }} />
                         <div className="header-content">
@@ -82,26 +58,23 @@ class DetailPackage extends Component {
                         </div>
                     </div>
 
-                    {/* Main Content */}
+                    {/* Body */}
                     <div className="package-body">
                         <div className="main-content">
-                            {/* Schedule Section */}
                             <div className="schedule-section">
                                 <h2 className="section-title">Lịch khám</h2>
                                 <PackageSchedule
                                     packageIdFromParent={this.props.match?.params?.id}
-                                    handleClickScheduleTime={this.handleClickScheduleTime}
+                                    detailPackage={detailPackage}
                                 />
                             </div>
 
-                            {/* Detail Content */}
                             <div className="content-section">
                                 <h2 className="section-title">Chi tiết gói khám</h2>
                                 <div className="detail-content" dangerouslySetInnerHTML={{ __html: contentHTML }} />
                             </div>
                         </div>
 
-                        {/* Sidebar */}
                         <div className="sidebar">
                             <div className="info-card">
                                 <h3 className="card-title">Thông tin cơ bản</h3>
@@ -140,12 +113,6 @@ class DetailPackage extends Component {
                     </div>
                 </div>
 
-                <BookingModal
-                    isOpenModal={isOpenModalBooking}
-                    closeBookingModal={this.closeBookingModal}
-                    dataTime={dataScheduleTimeModal}
-                    detailPackage={detailPackage}
-                />
                 {/* Nút mở chatbox */}
                 <div
                     onClick={this.toggleChatbox}
@@ -171,8 +138,7 @@ class DetailPackage extends Component {
                     💬
                 </div>
 
-                {/* Hiển thị chatbox nếu bật */}
-                {this.state.showChatbox && (
+                {showChatbox && (
                     <div
                         style={{
                             position: 'fixed',
@@ -190,7 +156,6 @@ class DetailPackage extends Component {
                         <ChatBox />
                     </div>
                 )}
-
             </>
         );
     }

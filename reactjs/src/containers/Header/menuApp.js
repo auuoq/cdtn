@@ -62,6 +62,16 @@ export const doctorMenu = [
             },
 
         ]
+
+    },
+    {
+        name: 'chat',
+        menus: [
+            {
+                name: 'chat', link: '/doctor/chat',
+            },
+        ]
+    
     }
 ];
 
