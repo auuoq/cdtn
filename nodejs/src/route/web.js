@@ -8,6 +8,7 @@ import clinicController from "../controllers/clinicController";
 import clinicManagerController from "../controllers/manage_clinicController";
 import examPackageController from "../controllers/examPackageController";
 import messageController from "../controllers/messagesController";
+import ChatGPTController from "../controllers/ChatGPTController";
 
 let router = express.Router();
 
@@ -53,6 +54,10 @@ let initWebRoutes = (app) => {
     router.get('/api/get-schedule-doctor-by-date', doctorController.getScheduleByDate);
     router.get('/api/get-extra-infor-doctor-by-id', doctorController.getExtraInforDoctorById);
     router.get('/api/get-profile-doctor-by-id', doctorController.getProfileDoctorById);
+    router.get('/api/get-doctor-feedbacks', doctorController.getDoctorFeedbacks);
+    router.post('/api/booking-toggle-isdisplayed', doctorController.toggleIsDisplayedStatus);
+
+
 
     //doctor-manage patient
     router.get('/api/get-list-patient-for-doctor', doctorController.getListPatientForDoctor);
@@ -113,6 +118,9 @@ let initWebRoutes = (app) => {
     router.post('/api/send-message', messageController.sendMessage);
     router.get('/api/get-messages', messageController.getMessagesBetweenUsers);
     router.get('/api/get-messages-by-user', messageController.getUserConversations);
+
+    router.post('/api/chat-bot', ChatGPTController.handleChatRequest);
+
     return app.use("/", router);
 }
 

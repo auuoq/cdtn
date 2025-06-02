@@ -385,65 +385,107 @@ let getSchedulePackageByDate = (packageId, date) => {
     });
 };
 
-let getListAllExamPackagePatientWithStatusS3 = (packageId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (!packageId) {
-                resolve({
-                    errCode: 1,
-                    errMessage: 'Missing required parameters'
-                });
-            } else {
-                let data = await db.BookingPackage.findAll({
-                    where: {
-                        statusId: 'S3',
-                        packageId: packageId
-                    },
-                    include: [
-                        {
-                            model: db.User,
-                            as: 'patientData',
-                            attributes: ['email', 'firstName', 'lastName', 'address', 'gender'],
-                            include: [
-                                {
-                                    model: db.Allcode,
-                                    as: 'genderData',
-                                    attributes: ['valueVi', 'valueEn']
-                                }
-                            ]
-                        },
-                        {
-                            model: db.Allcode,
-                            as: 'timeTypeData',
-                            attributes: ['valueVi', 'valueEn']
-                        },
-                        {
-                            model: db.ExamPackage,
-                            as: 'packageData',
-                            attributes: ['name', 'price'],
-                            include: [
-                                {
-                                    model: db.Clinic,
-                                    as: 'clinicInfo',
-                                    attributes: ['name', 'address']
-                                }
-                            ]
-                        }
-                    ],
-                    raw: false,
-                    nest: true
-                });
+let getListAllExamPackagePatientWithStatusS3 = (managerId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!managerId) {
+        resolve({
+          errCode: 1,
+          errMessage: 'Missing required parameters'
+        });
+        return;
+      }
 
-                resolve({
-                    errCode: 0,
-                    data: data
-                });
-            }
-        } catch (e) {
-            reject(e);
+      // 1. Lấy danh sách clinicId mà manager quản lý
+      let clinicsManaged = await db.Clinic_Manager.findAll({
+        where: { userId: managerId },
+        attributes: ['clinicId']
+      });
+
+      if (!clinicsManaged || clinicsManaged.length === 0) {
+        resolve({
+          errCode: 0,
+          data: []
+        });
+        return;
+      }
+
+      const clinicIds = clinicsManaged.map(item => item.clinicId);
+
+      // 2. Lấy danh sách packageId của các phòng khám trên
+      let examPackages = await db.ExamPackage.findAll({
+        where: { clinicId: clinicIds },
+        attributes: ['id']  // lấy id package
+      });
+
+      if (!examPackages || examPackages.length === 0) {
+        resolve({
+          errCode: 0,
+          data: []
+        });
+        return;
+      }
+
+      const packageIds = examPackages.map(item => item.id);
+
+      // 3. Lấy booking có status S3 và packageId thuộc packageIds
+      let data = await db.BookingPackage.findAll({
+        where: {
+          statusId: 'S3',
+          packageId: packageIds
+        },
+        include: [
+          {
+            model: db.User,
+            as: 'patientData',
+            include: [
+              {
+                model: db.Allcode,
+                as: 'genderData',
+                attributes: ['valueVi', 'valueEn']
+              }
+            ]
+          },
+          {
+            model: db.Allcode,
+            as: 'timeTypeDataPatient',  // chú ý sửa theo alias model bạn đã định nghĩa
+            attributes: ['valueVi', 'valueEn']
+          },
+          {
+            model: db.ExamPackage,
+            as: 'packageData',
+            include: [
+              {
+                model: db.Clinic,
+                as: 'clinicInfo',
+                attributes: ['name', 'address']
+              }
+            ]
+          }
+        ],
+        raw: false,
+        nest: true
+      });
+
+      if (data && data.length > 0) {
+            data.forEach(item => {
+                if (item.patientData.image) {
+                    item.patientData.image = new Buffer(item.patientData.image, 'base64').toString('binary'); // hoặc .toString('utf-8') nếu cần
+                }
+            });
         }
-    });
+
+      resolve({
+        errCode: 0,
+        data: data
+      });
+
+    } catch (e) {
+      reject(e);
+    }
+  });
 };
+
 
 
 

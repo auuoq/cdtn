@@ -1,27 +1,85 @@
-.manage-patient {
-    h2 {
-        font-weight: 600;
-        color: #343a40;
-    }
+.patient-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px;
+}
 
-    table {
-        font-size: 15px;
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
 
-        thead {
-            th {
-                text-align: center;
-                vertical-align: middle;
-            }
-        }
+.search-input {
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
 
-        tbody {
-            tr:hover {
-                background-color: #f9f9f9;
-            }
+.patient-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
 
-            td {
-                vertical-align: middle;
-            }
-        }
-    }
+.patient-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 20px;
+  transition: transform 0.3s;
+}
+
+.patient-card:hover {
+  transform: translateY(-4px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.card-body {
+  font-size: 14px;
+  color: #333;
+}
+
+.diagnosis-toggle {
+  margin-top: 10px;
+}
+
+.diagnosis-detail {
+  margin-top: 8px;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.remedy-image {
+  margin-top: 8px;
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.card-footer {
+  margin-top: 15px;
+  text-align: right;
+}
+
+.display-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #999;
+  color: #fff;
+  cursor: pointer;
+}
+
+.display-btn.active {
+  background-color: #28a745;
 }
