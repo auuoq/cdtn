@@ -300,7 +300,7 @@ let getUserBookings = (userId) => {
                     {
                         model: db.User,
                         as: 'doctorData',
-                        attributes: ['email', 'firstName', 'address', 'gender'],
+                        attributes: ['email', 'firstName', 'address', 'gender', 'phonenumber', 'image', 'lastName'],
                         include: [
                             {
                                 model: db.Allcode, as: 'genderData', attributes: ['valueEn', 'valueVi']
@@ -313,12 +313,38 @@ let getUserBookings = (userId) => {
                     {
                         model: db.Allcode, as: 'statusIdDataPatient', attributes: ['valueEn', 'valueVi']
                     },
+                    {
+                        model: db.Doctor_Infor,
+                        as: 'doctorBooking',
+                        include: [
+                            {
+                                model: db.Specialty,
+                                as: 'specialtyData',
+                                attributes: ['id', 'name', 'descriptionMarkdown', 'descriptionHTML', 'image']
+                            },
+                            {
+                                model: db.Clinic,
+                                as: 'clinicData',
+                                attributes: ['id', 'name', 'address', 'descriptionMarkdown', 'descriptionHTML', 'image']
+                            }
+                        ],
+                        attributes: ['doctorId', 'specialtyId', 'clinicId', 'priceId', 'provinceId', 'paymentId', 'addressClinic', 'nameClinic', 'note']
+                    }
                 ],
                 raw: false,
                 nest: true
-            })
-            
+            });
 
+            // Chuyển đổi image sang binary cho từng booking
+            if (bookings && bookings.length > 0) {
+                bookings = bookings.map(booking => {
+                    if (booking.doctorData && booking.doctorData.image) {
+                        booking.doctorData.image = Buffer.from(booking.doctorData.image, 'base64').toString('binary');
+                    }
+                    // Nếu muốn chuyển ảnh chuyên khoa hoặc phòng khám (nếu có), cũng có thể xử lý tương tự
+                    return booking;
+                });
+            }
             resolve({
                 errCode: 0,
                 errMessage: 'OK',
@@ -329,6 +355,7 @@ let getUserBookings = (userId) => {
         }
     });
 };
+
 
 
 
@@ -467,7 +494,47 @@ const submitFeedback = async (data) => {
     );
 };
 
+const submitFeedbackPackage = async (data) => {
+    return new Promise (async (resolve, reject) => {
+        try {
+            // Kiểm tra dữ liệu đầu vào
+            if (!data.appointmentId || !data.feedback) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                });
+                return;
+            }
 
+            // Tìm cuộc hẹn theo ID
+            let appointment = await db.BookingPackage.findOne({
+                where: { id: data.appointmentId }
+            });
+
+            // Kiểm tra nếu cuộc hẹn tồn tại
+            if (!appointment) {
+                resolve({
+                    errCode: 2,
+                    errMessage: 'Appointment not found'
+                });
+                return;
+            }
+
+            // Cập nhật phản hồi
+            appointment.feedback = data.feedback;
+            await appointment.save();
+
+            resolve({
+                errCode: 0,
+                errMessage: 'Feedback submitted successfully'
+            });
+
+        } catch (e) {
+            console.error('Error in submitFeedback service:', e);
+            reject(e);
+        }
+    });
+}
 
 // 1️⃣ Lấy tất cả các lịch hẹn gói khám của bệnh nhân
 let getUserPackageBookings = (userId) => {
@@ -479,7 +546,7 @@ let getUserPackageBookings = (userId) => {
           {
             model: db.ExamPackage,
             as: 'packageData',
-            attributes: ['id', 'name', 'price', 'description'],
+            attributes: ['id', 'name', 'price', 'description', 'image', 'note'],
             include: [
               {
                 model: db.Clinic,
@@ -498,6 +565,15 @@ let getUserPackageBookings = (userId) => {
         raw: false,
         nest: true
       });
+      // Chuyển đổi image sang binary cho từng booking
+      if (bookings && bookings.length > 0) {
+        bookings = bookings.map(booking => {
+          if (booking.packageData && booking.packageData.image) {
+            booking.packageData.image = Buffer.from(booking.packageData.image, 'base64').toString('binary');
+          }
+          return booking;
+        });
+      }
 
       resolve({
         errCode: 0,
@@ -760,5 +836,6 @@ module.exports = {
     getUserPackageBookings: getUserPackageBookings,
     deletePackageAppointment: deletePackageAppointment,
     getDepositInfoPackage: getDepositInfoPackage,
-    submitFeedback: submitFeedback
+    submitFeedback: submitFeedback,
+    submitFeedbackPackage: submitFeedbackPackage,
 }

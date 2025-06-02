@@ -31,6 +31,10 @@ const submitFeedback = (data) => {
     return axios.post('/api/submit-feedback', data);
 }
 
+const submitFeedbackPackage = (data) => {
+    return axios.post('/api/submit-feedback-package', data);
+}
+
 const getUserPackageBookings = (userId) => {
     return axios.get(`/api/get-user-package-booking?userId=${userId}`);
 }
@@ -237,11 +241,19 @@ const getDetailExamPackageById = (packageId) => {
 const getSchedulePackageByDate = (date, packageId) => {
     return axios.get(`/api/get-schedule-package-by-date?date=${date}&packageId=${packageId}`);
 }
-const getListAllExamPackagePatientWithStatusS3 = (userId) => {
-    return axios.get(`/api/get-list-all-exam-package-patient-with-status-s3?userId=${userId}`);
+const getListAllExamPackagePatientWithStatusS3 = (managerId) => {
+    return axios.get(`/api/get-list-all-exam-package-patients-with-status-s3?managerId=${managerId}`);
 }
 const getListPatientForPackageManager = (data) => {
     return axios.get(`/api/get-list-patient-package?managerId=${data.managerId}&date=${data.date}`);
+}
+
+const getPackageFeedbacks = (packageId) => {
+    return axios.get(`/api/get-package-feedbacks?packageId=${packageId}`);
+}
+
+const toggleIsDisplayedStatusForPackage = (bookingPackageId) => {
+    return axios.patch(`/api/toggle-is-displayed-status-for-package?bookingPackageId=${bookingPackageId}`);
 }
 
 const sendRemedyForPackage = (data) => {
@@ -287,5 +299,5 @@ export {
     createExamPackage, updateExamPackage, deleteExamPackage, getExamPackagesDetailByManager, bulkCreateScheduleForPackage, getDetailExamPackageById,
     getSchedulePackageByDate, getListAllExamPackagePatientWithStatusS3, getPackageDepositInfo, postBookExamPackageAppointment, postVerifyBookExamPackageAppointment,
     getUserPackageBookings, deletePackageAppointment, getPackageBookingsByManager, toggleOnlineStatus, getOnlineDoctors, sendMessage, getMessagesBetweenUsers, getUserConversations, submitFeedback,
-    getListPatientForPackageManager, sendRemedyForPackage, getDoctorFeedbacks, toggleIsDisplayedStatus
+    getListPatientForPackageManager, sendRemedyForPackage, getDoctorFeedbacks, toggleIsDisplayedStatus, getPackageFeedbacks, toggleIsDisplayedStatusForPackage, submitFeedbackPackage
 }

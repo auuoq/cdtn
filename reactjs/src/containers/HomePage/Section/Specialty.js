@@ -28,6 +28,11 @@ class Specialty extends Component {
             this.props.history.push(`/detail-specialty/${item.id}`);
         }
     }
+    handleViewMoreSpecialty = () => {
+        if (this.props.history) {
+            this.props.history.push('/kham-chuyen-khoa');
+        }
+    }
 
     render() {
         let { dataSpecialty } = this.state;
@@ -68,9 +73,10 @@ class Specialty extends Component {
                         <span className='title-section'>
                             <FormattedMessage id="homepage.specialty-popular" />
                         </span>
-                        <button className='btn-section'>
+                        <button className='btn-section' onClick={this.handleViewMoreSpecialty}>
                             <FormattedMessage id="homepage.more-infor" />
                         </button>
+
                     </div>
                     <div className='section-body'>
                         <Slider {...sliderSettings}> {/* Cập nhật props settings */}

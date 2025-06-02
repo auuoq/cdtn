@@ -1,0 +1,72 @@
+.manage-patient-container {
+  .card {
+    border-radius: 12px;
+    transition: 0.3s ease-in-out;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+    &:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  .card-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+    color: #007bff; // primary color
+  }
+
+  .card-text {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 6px;
+    line-height: 1.4;
+    strong {
+      color: #333;
+    }
+  }
+
+  .btn {
+    margin-top: 10px;
+    font-weight: 500;
+    border-radius: 8px;
+  }
+}
+.patient-info-row {
+  display: flex;
+  justify-content: center; /* căn giữa theo chiều ngang */
+  align-items: center; /* căn giữa theo chiều dọc */
+  gap: 40px; /* khoảng cách giữa 2 cột */
+  .patient-info-left,
+  .patient-info-right {
+    flex: 1;
+    max-width: 45%; /* mỗi cột tối đa 45% chiều ngang */
+  }
+  p {
+    margin-bottom: 8px;
+    strong {
+      color: #333;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .patient-info-row {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 15px;
+    .patient-info-left,
+    .patient-info-right {
+      max-width: 100%;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+}

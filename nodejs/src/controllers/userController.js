@@ -147,6 +147,19 @@ let submitFeedback = async (req, res) => {
     }
 }
 
+let submitFeedbackPackage = async (req, res) => {
+    try {
+        let infor = await userService.submitFeedbackPackage(req.body);
+        return res.status(200).json(infor);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({   
+            errCode: -1,
+            errMessage: 'Error from server',
+        });
+    }
+};
+
 
 
 let handleGetUserPackageBookings = async (req, res) => {
@@ -269,4 +282,5 @@ module.exports = {
     handleDeletePackageAppointment: handleDeletePackageAppointment,
     handleGetDepositInfoPackage: handleGetDepositInfoPackage,
     submitFeedback: submitFeedback,
+    submitFeedbackPackage: submitFeedbackPackage,
 }
