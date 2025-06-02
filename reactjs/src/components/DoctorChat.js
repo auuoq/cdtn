@@ -20,6 +20,7 @@ class ChatMessenger extends Component {
       isActive: false,
     };
     this.messagesEndRef = React.createRef();
+    this.messageInterval = null;
   }
 
   componentDidMount() {
@@ -30,6 +31,21 @@ class ChatMessenger extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (prevState.selectedUserId !== this.state.selectedUserId) {
       this.loadMessages();
+
+    
+      if (this.messageInterval) {
+        clearInterval(this.messageInterval);
+      }
+
+      if (this.state.selectedUserId) {
+        this.messageInterval = setInterval(this.loadMessages, 1000);
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.messageInterval) {
+      clearInterval(this.messageInterval);
     }
   }
 
@@ -116,14 +132,16 @@ class ChatMessenger extends Component {
       <div className="messenger-layout">
         <div className="sidebar">
           <div className="sidebar-header">
-            💬 Patient Chat
-            <label>
+            💬 Chat với bệnh nhân
+            <label  class="status-checkbox" style={{
+              marginBottom :0
+            }}>
               <input
                 type="checkbox"
                 checked={isActive}
                 onChange={this.handleToggleOnline}
               />
-              {isActive ? 'Online' : 'Offline'}
+              {isActive ? 'Hoạt động' : 'Offline'}
             </label>
           </div>
           <div className="conversation-list">
@@ -157,29 +175,28 @@ class ChatMessenger extends Component {
             </div>
           )}
 
-        <div className="chat-messages">
-          {messages
-            .filter(msg => msg) // loại bỏ undefined/null
-            .map((msg) => {
-              const isSender = msg.senderId === userInfo.id;
-              return (
-                <div
-                  key={msg.id}
-                  className={`chat-message ${isSender ? 'sent' : 'received'}`}
-                >
-                  {msg.message}
-                  <div className="chat-time">
-                    {new Date(msg.createdAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+          <div className="chat-messages">
+            {messages
+              .filter(msg => msg)
+              .map((msg) => {
+                const isSender = msg.senderId === userInfo.id;
+                return (
+                  <div
+                    key={msg.id}
+                    className={`chat-message ${isSender ? 'sent' : 'received'}`}
+                  >
+                    {msg.message}
+                    <div className="chat-time">
+                      {new Date(msg.createdAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          <div ref={this.messagesEndRef} />
-        </div>
-
+                );
+              })}
+            <div ref={this.messagesEndRef} />
+          </div>
 
           <div className="chat-input">
             <input
