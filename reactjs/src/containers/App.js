@@ -32,6 +32,7 @@ import DetailPackage from './Patient/ExamPackage/DetailPackage.js';
 import AllPackage from './Patient/ExamPackage/AllPackage.js';
 import ChatBox from '../components/chatbox.js';
 import ChatBot from '../components/ChatBot/ChatBot.js';
+import AllSpecialty from './HomePage/AllSpecialty.js';
 
 class App extends Component {
 
@@ -83,6 +84,7 @@ class App extends Component {
                                     <Route path={"/allPacket"} component={AllPackage} />
                                     <Route path={"/chat"} component={userIsAuthenticated(ChatBox)} />
                                     <Route path={"/chat-bot"} component={userIsAuthenticated(ChatBot)} />
+                                    <Route path={"/kham-chuyen-khoa"} component={(AllSpecialty)} />
 
                                 </Switch>
                             </CustomScrollbars>

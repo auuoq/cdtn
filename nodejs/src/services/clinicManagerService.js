@@ -1,5 +1,5 @@
 import db from "../models/index"
-
+import emailService from '../services/emailService'
 
 
 let getDetailClinicByManagerUserId = async (query) => {
@@ -224,11 +224,11 @@ let getUserBookingsByManager = (userId) => {
                 });
             }
 
-            // Tìm clinicId mà manager này phụ trách
             const clinicManagerRecord = await db.Clinic_Manager.findOne({
                 where: { userId: userId },
                 attributes: ['clinicId']
             });
+
             if (!clinicManagerRecord) {
                 return resolve({
                     errCode: 2,
@@ -237,7 +237,6 @@ let getUserBookingsByManager = (userId) => {
                 });
             }
 
-            // Lấy doctorId từ clinicId
             const doctorRecords = await db.Doctor_Infor.findAll({
                 where: { clinicId: clinicManagerRecord.clinicId },
                 attributes: ['doctorId']
@@ -253,11 +252,13 @@ let getUserBookingsByManager = (userId) => {
                 });
             }
 
-            // Lấy danh sách các lịch hẹn (booking)
-            let bookings = await db.Booking.findAll({
+            const bookings = await db.Booking.findAll({
                 where: {
                     doctorId: {
                         [db.Sequelize.Op.in]: doctorIds
+                    },
+                    statusId: {
+                        [db.Sequelize.Op.in]: ['S1', 'S2']
                     }
                 },
                 attributes: ['id', 'doctorId', 'patientId', 'date', 'timeType', 'statusId', 'reason'],
@@ -296,15 +297,12 @@ let getUserBookingsByManager = (userId) => {
                 nest: true
             });
 
-            // Kiểm tra và xử lý BLOB hình ảnh
-            bookings = bookings.map(item => {
-                // Kiểm tra nếu doctorData không phải null và có image
-                if (item.doctorData && item.doctorData.image) {
+            const bookingsWithImage = bookings.map(item => {
+                if (item.doctorData?.image) {
                     item.doctorData.image = new Buffer(item.doctorData.image, 'base64').toString('binary');
                 }
 
-                // Kiểm tra nếu patientData không phải null và có image
-                if (item.patientData && item.patientData.image) {
+                if (item.patientData?.image) {
                     item.patientData.image = new Buffer(item.patientData.image, 'base64').toString('binary');
                 }
 
@@ -314,13 +312,14 @@ let getUserBookingsByManager = (userId) => {
             resolve({
                 errCode: 0,
                 errMessage: 'OK',
-                data: bookings
+                data: bookingsWithImage
             });
         } catch (e) {
             reject(e);
         }
     });
 };
+
 
 let getPackageBookingsByManager = (userId) => {
     return new Promise(async (resolve, reject) => {
@@ -333,7 +332,6 @@ let getPackageBookingsByManager = (userId) => {
                 });
             }
 
-            // Tìm clinicId mà người quản lý phụ trách
             const clinicManager = await db.Clinic_Manager.findOne({
                 where: { userId },
                 attributes: ['clinicId']
@@ -347,7 +345,6 @@ let getPackageBookingsByManager = (userId) => {
                 });
             }
 
-            // Lấy các package thuộc clinic này
             const packages = await db.ExamPackage.findAll({
                 where: { clinicId: clinicManager.clinicId },
                 attributes: ['id']
@@ -363,10 +360,12 @@ let getPackageBookingsByManager = (userId) => {
                 });
             }
 
-            // Lấy danh sách lịch đặt gói khám
             const bookings = await db.BookingPackage.findAll({
                 where: {
-                    packageId: packageIds
+                    packageId: packageIds,
+                    statusId: {
+                        [db.Sequelize.Op.in]: ['S1', 'S2']
+                    }
                 },
                 attributes: ['id', 'packageId', 'patientId', 'date', 'timeType', 'statusId', 'reason'],
                 order: [['createdAt', 'DESC']],
@@ -402,12 +401,12 @@ let getPackageBookingsByManager = (userId) => {
                     },
                     {
                         model: db.Allcode,
-                        as: 'timeTypeData',
+                        as: 'timeTypeDataPatient',
                         attributes: ['valueVi', 'valueEn']
                     },
                     {
                         model: db.Allcode,
-                        as: 'statusData',
+                        as: 'statusIdDataPatient',
                         attributes: ['valueVi', 'valueEn']
                     }
                 ],
@@ -415,12 +414,11 @@ let getPackageBookingsByManager = (userId) => {
                 nest: true
             });
 
-            // Chuyển đổi ảnh base64 sang binary nếu có
             const bookingsWithImage = bookings.map(item => {
-                if (item.packageData && item.packageData.image) {
+                if (item.packageData?.image) {
                     item.packageData.image = new Buffer(item.packageData.image, 'base64').toString('binary');
                 }
-                if (item.patientData && item.patientData.image) {
+                if (item.patientData?.image) {
                     item.patientData.image = new Buffer(item.patientData.image, 'base64').toString('binary');
                 }
                 return item;
@@ -437,6 +435,7 @@ let getPackageBookingsByManager = (userId) => {
         }
     });
 };
+
 
 
 let getAllClinicManager = () => {
@@ -530,7 +529,6 @@ let getListPatientForPackageManager = async (managerId, date) => {
             let clinicManager = await db.Clinic_Manager.findOne({
                 where: { userId: managerId },
             });
-
             if (!clinicManager) {
                 return resolve({
                     errCode: 2,
@@ -564,7 +562,7 @@ let getListPatientForPackageManager = async (managerId, date) => {
                     {
                         model: db.ExamPackage,
                         as: 'packageData',
-                        attributes: ['name'],
+                        attributes: ['id', 'name', 'price', 'image',],
                     },
                     {
                         model: db.Allcode,
@@ -576,9 +574,17 @@ let getListPatientForPackageManager = async (managerId, date) => {
                 nest: true
             });
 
+            const dataWithImage = data.map(item => {
+                if (item.packageData && item.packageData.image) {
+                    item.packageData.image = Buffer.from(item.packageData.image, 'base64').toString('binary');
+                }
+                return item;
+            });
+
             resolve({
                 errCode: 0,
-                data: data
+                data: dataWithImage,
+                errMessage: 'ok'
             });
         } catch (e) {
             reject(e);
@@ -613,6 +619,7 @@ let sendRemedyForPackage = (data) => {
                 if (appointment) {
                     appointment.statusId = 'S3'; // Hoàn thành
                     appointment.diagnosis = data.diagnosis;
+                    appointment.remedyImage = data.imgBase64; // Lưu ảnh đơn thuốc
                     await appointment.save();
                 } else {
                     return resolve({

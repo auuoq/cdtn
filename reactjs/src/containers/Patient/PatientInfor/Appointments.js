@@ -8,7 +8,8 @@ import {
   getUserPackageBookings,
   deleteAppointment,
   deletePackageAppointment,
-  submitFeedback
+  submitFeedback,
+  submitFeedbackPackage
 } from '../../../services/userService';
 import { toast } from 'react-toastify';
 import ChatBox from '../../../components/chatbox';
@@ -143,10 +144,19 @@ class Appointments extends Component {
   handleRatingSubmit = async () => {
     const { selectedAppointment, commentText } = this.state;
     try {
-      const response = await submitFeedback({
-      appointmentId: selectedAppointment.id,
-      feedback: commentText
-    });
+      let response;
+      if (selectedAppointment.type === 'doctor') {
+        response = await submitFeedback({
+          appointmentId: selectedAppointment.id,
+          feedback: commentText
+        });
+      } else if (selectedAppointment.type === 'package') {
+        response = await submitFeedbackPackage({
+          appointmentId: selectedAppointment.id,
+          feedback: commentText
+        });
+      }
+
       if (response?.errCode === 0) {
         toast.success('Đánh giá thành công');
         this.setState({ showRatingModal: false });
@@ -273,23 +283,49 @@ class Appointments extends Component {
                     <div key={index} className="appointment-card card mb-4">
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-md-8">
+                          <div className="col-md-8 d-flex">
+                            <img
+                              src={
+                                appointment.type === 'doctor'
+                                  ? appointment.doctorData?.image
+                                  : appointment.packageData?.image
+                              }
+                              alt="Ảnh"
+                              style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px', marginRight: '15px' }}
+                            />
+
                             <div className="appointment-info">
                               <h4 className="card-title">
                                 {appointment.type === 'doctor'
                                   ? `${appointment.doctorData.firstName} ${appointment.doctorData.lastName}`
                                   : appointment.packageData?.name || 'Gói khám'}
                               </h4>
-                              <div className="appointment-meta mb-3">
+
+                              {/* Chuyên khoa (nếu có) */}
+                              {appointment.type === 'doctor' && appointment.doctorBooking.specialtyData?.name && (
+                                <p className="mb-1 text-muted"><i className="fas fa-stethoscope mr-1"></i>Chuyên khoa: {appointment.doctorBooking.specialtyData.name}</p>
+                              )}
+
+                              {/* Địa chỉ phòng khám */}
+                              <p className="mb-1 text-muted">
+                                <i className="fas fa-map-marker-alt mr-1"></i>
+                                {appointment.type === 'doctor'
+                                  ? appointment.doctorBooking.clinicData?.address
+                                  : appointment.packageData.clinicInfo?.address}
+                              </p>
+
+                              {/* Thông tin thời gian */}
+                              <div className="appointment-meta mb-2">
                                 <div className="meta-item"><i className="fas fa-calendar-alt mr-2"></i>{this.formatDate(appointment.date)}</div>
                                 <div className="meta-item"><i className="fas fa-clock mr-2"></i>{appointment.timeTypeDataPatient?.valueVi}</div>
-                                <div className="meta-item"><i className="fas fa-user-md mr-2"></i>{appointment.type === 'doctor' ? 'Bác sĩ' : 'Gói khám'}</div>
                               </div>
-                              <div className="status-container mb-3">
+
+                              <div className="status-container mb-2">
                                 {this.renderStatusBadge(appointment.statusIdDataPatient?.valueVi || 'Chưa xác định')}
                               </div>
                             </div>
                           </div>
+
                           <div className="col-md-4">
                             <div className="appointment-actions">
                               <button className="btn btn-outline-info btn-sm mb-2" onClick={() => this.handleDetail(appointment)}>

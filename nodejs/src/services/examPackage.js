@@ -438,6 +438,8 @@ let getListAllExamPackagePatientWithStatusS3 = (managerId) => {
           {
             model: db.User,
             as: 'patientData',
+            attributes: ['firstName', 'lastName', 'email', 'phoneNumber'],
+            
             include: [
               {
                 model: db.Allcode,
@@ -469,9 +471,13 @@ let getListAllExamPackagePatientWithStatusS3 = (managerId) => {
 
       if (data && data.length > 0) {
             data.forEach(item => {
-                if (item.patientData.image) {
-                    item.patientData.image = new Buffer(item.patientData.image, 'base64').toString('binary'); // hoặc .toString('utf-8') nếu cần
+                if (item.packageData.image) {
+                    item.packageData.image = new Buffer(item.packageData.image, 'base64').toString('binary'); // hoặc .toString('utf-8') nếu cần
                 }
+                if (item.remedyImage) {
+                    item.remedyImage = new Buffer(item.remedyImage, 'base64').toString('binary'); // hoặc .toString('utf-8') nếu cần
+                }
+                
             });
         }
 
@@ -486,6 +492,80 @@ let getListAllExamPackagePatientWithStatusS3 = (managerId) => {
   });
 };
 
+let getPackageFeedbacks = (packageId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!packageId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                });
+            } else {
+                let feedbacks = await db.BookingPackage.findAll({
+                    where: { packageId: packageId },
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'patientData',
+                            attributes: ['firstName', 'lastName']
+                        },
+                        {
+                            model: db.ExamPackage,
+                            as: 'packageData',
+                            attributes: ['name']
+                        }
+                    ],
+                    raw: false,
+                    nest: true
+                });
+
+                resolve({
+                    errCode: 0,
+                    data: feedbacks
+                });
+            }
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+let toggleIsDisplayedStatusForPackage = (bookingPackageId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!bookingPackageId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                });
+            } else {
+                let booking = await db.BookingPackage.findOne({
+                    where: { id: bookingPackageId },
+                    raw: false
+                });
+
+                if (!booking) {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'BookingPackage not found'
+                    });
+                } else {
+                    booking.isDisplayed = !booking.isDisplayed;
+                    await booking.save();
+
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'Updated successfully',
+                        data: { isActive: booking.isDisplayed }
+                    });
+                }
+            }
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
 
 
 
@@ -498,5 +578,7 @@ module.exports = {
     bulkCreateScheduleForPackage,
     getDetailExamPackageById,
     getSchedulePackageByDate,
-    getListAllExamPackagePatientWithStatusS3
+    getListAllExamPackagePatientWithStatusS3,
+    getPackageFeedbacks,
+    toggleIsDisplayedStatusForPackage
 };

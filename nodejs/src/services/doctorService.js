@@ -17,22 +17,39 @@ let getTopDoctorHome = (limitInput) => {
                 },
                 include: [
                     { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
-                    { model: db.Allcode, as: 'genderData', attributes: ['valueEn', 'valueVi'] }
+                    { model: db.Allcode, as: 'genderData', attributes: ['valueEn', 'valueVi'] },
+                    {
+                        model: db.Doctor_Infor,
+                        attributes: ['specialtyId', 'clinicId', 'nameClinic', 'addressClinic'],
+                        include: [
+                            {
+                                model: db.Specialty,
+                                as: 'specialtyData',
+                                attributes: ['name']
+                            },
+                            {
+                                model: db.Clinic,
+                                as: 'clinicData',
+                                attributes: ['name', 'address']
+                            }
+                        ]
+                    }
                 ],
-                raw: true,
+                raw: false, // cần false để Sequelize build nested object
                 nest: true
-            })
+            });
 
             resolve({
                 errCode: 0,
                 data: users
-            })
+            });
 
         } catch (e) {
             reject(e);
         }
-    })
-}
+    });
+};
+
 let getAllDoctors = () => {
     return new Promise(async (resolve, reject) => {
         try {

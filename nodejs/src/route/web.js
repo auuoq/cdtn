@@ -36,6 +36,7 @@ let initWebRoutes = (app) => {
     router.delete('/api/delete-appointment', userController.deleteAppointment);
     router.get('/api/get-deposit-info', userController.getDepositInfo);
     router.post('/api/submit-feedback', userController.submitFeedback);
+    router.get('/api/submit-feedback-package', userController.submitFeedbackPackage);
     router.get('/api/get-user-package-booking', userController.handleGetUserPackageBookings);
     router.delete('/api/delete-package-appointment', userController.handleDeletePackageAppointment);
     router.get('/api/get-package-deposit-info', userController.handleGetDepositInfoPackage);
@@ -111,7 +112,8 @@ let initWebRoutes = (app) => {
     router.get('/api/get-detail-exam-package-by-id', examPackageController.getDetailExamPackageById);
     router.get('/api/get-schedule-package-by-date', examPackageController.getSchedulePackageByDate); // Lấy lịch khám theo ngày cho gói khá
     router.get('/api/get-list-all-exam-package-patients-with-status-s3', examPackageController.getListAllExamPackagePatientWithStatusS3); // Lấy danh sách bệnh nhân theo gói khám với trạng thái S3
-
+    router.get('/api/get-package-feedbacks', examPackageController.getPackageFeedbacks); // Lấy phản hồi của gói khám
+    router.patch('/api/toggle-is-displayed-status-for-package', examPackageController.toggleIsDisplayedStatusForPackage); // Chuyển đổi trạng thái hiển thị cho gói khám
     //message
     router.patch('/api/toggle-online', messageController.toggleOnlineStatus);
     router.get('/api/get-online-doctors', messageController.getOnlineDoctors);

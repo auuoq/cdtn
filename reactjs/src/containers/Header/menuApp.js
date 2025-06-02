@@ -127,6 +127,12 @@ export const manager_clinicMenu = [
             {
                 name: 'Đặt lịch gói khám', link: '/manage/schedule-package',
             },
+            {
+                name: 'Xác nhận đã khám', link: '/manage/package-s2',
+            },
+            {
+                name: 'lịch sử đã khám', link: '/manage/package-s3',
+            }
         ]
     }
 

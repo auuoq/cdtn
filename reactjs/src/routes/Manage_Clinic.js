@@ -8,6 +8,8 @@ import Schedule_By_Manager from '../containers/System/Manager_Clinic/Schedule_By
 import Booking_Clinic from '../containers/System/Manager_Clinic/Booking_Clinic';
 import ExamPackage from '../containers/System/Manager_Clinic/ExamPackage';
 import Schedule_Package from '../containers/System/Manager_Clinic/Schedule_Package';
+import ManagePackagePatient from '../containers/System/Manager_Clinic/ManagePackagePatient';
+import RecordPackage from '../containers/System/Manager_Clinic/RecordPackage';
 
 
 class ManageClinic extends Component {
@@ -26,6 +28,8 @@ class ManageClinic extends Component {
                             <Route path="/manage/booking" component={Booking_Clinic} />
                             <Route path="/manage/manage-package" component={ExamPackage} />
                             <Route path="/manage/schedule-package" component={Schedule_Package} />
+                            <Route path="/manage/package-s2" component={ManagePackagePatient} />
+                            <Route path="/manage/package-s3" component={RecordPackage} />
                         </Switch>
                     </div>
                 </div>

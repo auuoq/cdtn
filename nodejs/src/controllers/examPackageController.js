@@ -120,7 +120,31 @@ let getListAllExamPackagePatientWithStatusS3 = async (req, res) => {
     }
 }
 
+let getPackageFeedbacks = async (req, res) => {
+    try {
+        let infor = await examPackageService.getPackageFeedbacks(req.query.packageId);
+        return res.status(200).json(infor);
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
 
+let toggleIsDisplayedStatusForPackage = async (req, res) => {
+    try {
+        let response = await examPackageService.toggleIsDisplayedStatusForPackage(req.query.bookingPackageId);
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in handleToggleIsDisplayedForPackage:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
 
 
 module.exports = {
@@ -132,5 +156,7 @@ module.exports = {
     bulkCreateScheduleForPackage,
     getDetailExamPackageById,
     getSchedulePackageByDate,
-    getListAllExamPackagePatientWithStatusS3
+    getListAllExamPackagePatientWithStatusS3,
+    getPackageFeedbacks,
+    toggleIsDisplayedStatusForPackage
 };
