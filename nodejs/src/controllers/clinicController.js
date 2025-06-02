@@ -28,6 +28,21 @@ let getAllClinic = async (req, res) => {
     }
 }
 
+let searchClinicByName = async (req, res) => {
+    try {
+        let keyword = req.query.keyword || '';
+        let infor = await clinicService.searchClinicByName(keyword);
+        return res.status(200).json(infor);
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+
 let getDetailClinicById = async (req, res) => {
     try {
         let infor = await clinicService.getDetailClinicById(req.query.id);
@@ -77,5 +92,6 @@ module.exports = {
     getAllClinic: getAllClinic,
     getDetailClinicById: getDetailClinicById,
     updateClinic: updateClinic,
-    deleteClinic: deleteClinic
+    deleteClinic: deleteClinic,
+    searchClinicByName: searchClinicByName
 }

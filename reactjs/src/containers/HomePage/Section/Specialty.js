@@ -30,7 +30,7 @@ class Specialty extends Component {
     }
     handleViewMoreSpecialty = () => {
         if (this.props.history) {
-            this.props.history.push('/kham-chuyen-khoa');
+            this.props.history.push('/all-specialty');
         }
     }
 

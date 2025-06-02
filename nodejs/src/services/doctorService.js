@@ -2,6 +2,7 @@ import db from "../models/index"
 require('dotenv').config();
 import _ from 'lodash';
 import emailService from '../services/emailService'
+const { Op } = require('sequelize');
 
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
 
@@ -56,7 +57,7 @@ let getAllDoctors = () => {
             let doctors = await db.User.findAll({
                 where: { roleId: 'R2' },
                 attributes: {
-                    exclude: ['password', 'image']
+                    exclude: ['password']
                 },
             })
             resolve({
@@ -68,6 +69,62 @@ let getAllDoctors = () => {
         }
     })
 }
+
+let searchDoctors = (keyword) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let doctors = await db.User.findAll({
+                where: {
+                    roleId: 'R2', // chỉ lấy bác sĩ
+                    [Op.or]: [
+                        { firstName: { [Op.like]: `%${keyword}%` } },
+                        { lastName: { [Op.like]: `%${keyword}%` } },
+                    ]
+                },
+                attributes: { exclude: ['password'] },
+                include: [
+                    { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
+                    { model: db.Allcode, as: 'genderData', attributes: ['valueEn', 'valueVi'] },
+                    {
+                        model: db.Doctor_Infor,
+                        attributes: ['specialtyId', 'clinicId', 'nameClinic', 'addressClinic'],
+                        include: [
+                            {
+                                model: db.Specialty,
+                                as: 'specialtyData',
+                                attributes: ['name'],
+                                where: keyword ? { name: { [Op.like]: `%${keyword}%` } } : undefined,
+                                required: false // để vẫn lấy bác sĩ nếu không có specialty khớp
+                            },
+                            {
+                                model: db.Clinic,
+                                as: 'clinicData',
+                                attributes: ['name', 'address']
+                            }
+                        ]
+                    }
+                ],
+                raw: false,
+                nest: true
+            });
+            if (doctors && doctors.length > 0) {
+                doctors.forEach(doctor => {
+                    if (doctor.image) {
+                        doctor.image = new Buffer.from(doctor.image, 'base64').toString('binary');
+                    }
+                });
+            }
+
+            resolve({
+                errCode: 0,
+                errMessage: 'ok',
+                data: doctors
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
 
 let checkRequiredFields = (inputData) => {
     let arrFields = ['doctorId', 'contentHTML', 'contentMarkdown', 'action',
@@ -650,5 +707,6 @@ module.exports = {
     sendRemedy: sendRemedy,
     getListAllPatientWithStatusS3: getListAllPatientWithStatusS3,
     getDoctorFeedbacks: getDoctorFeedbacks,
-    toggleIsDisplayedStatus: toggleIsDisplayedStatus
+    toggleIsDisplayedStatus: toggleIsDisplayedStatus,
+    searchDoctors: searchDoctors
 }

@@ -54,6 +54,37 @@ let getAllSpecialty = () => {
     })
 }
 
+let searchSpecialtyByName = async (keyword) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let data = await db.Specialty.findAll({
+                where: {
+                    name: {
+                        [db.Sequelize.Op.like]: `%${keyword}%`
+                    }
+                }
+            });
+
+            if (data && data.length > 0) {
+                data.map(item => {
+                    item.image = new Buffer(item.image, 'base64').toString('binary');
+                    return item;
+                });
+            }
+
+            resolve({
+                errCode: 0,
+                errMessage: 'ok',
+                data
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+
+
 let getDetailSpecialtyById = (inputId, location) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -201,6 +232,7 @@ module.exports = {
     getAllSpecialty: getAllSpecialty,
     getDetailSpecialtyById: getDetailSpecialtyById,
     deleteSpecialty: deleteSpecialty,
-    updateSpecialty: updateSpecialty
+    updateSpecialty: updateSpecialty,
+    searchSpecialtyByName: searchSpecialtyByName
     
 }

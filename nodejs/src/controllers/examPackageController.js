@@ -54,6 +54,21 @@ let getAllExamPackages = async (req, res) => {
     }
 };
 
+let searchExamPackageByName = async (req, res) => {
+    try {
+        let keyword = req.query.keyword || '';
+        let result = await examPackageService.searchExamPackageByName(keyword);
+        return res.status(200).json(result);
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+
 let getExamPackagesDetailByManager = async (req, res) => {
     try {
         let infor = await examPackageService.getExamPackagesDetailByManager(req.query.id);
@@ -158,5 +173,6 @@ module.exports = {
     getSchedulePackageByDate,
     getListAllExamPackagePatientWithStatusS3,
     getPackageFeedbacks,
-    toggleIsDisplayedStatusForPackage
+    toggleIsDisplayedStatusForPackage,
+    searchExamPackageByName
 };

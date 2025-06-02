@@ -28,6 +28,20 @@ let getAllSpecialty = async (req, res) => {
     }
 }
 
+let searchSpecialtyByName = async (req, res) => {
+    try {
+        let keyword = req.query.keyword || '';
+        let infor = await specialtyService.searchSpecialtyByName(keyword);
+        return res.status(200).json(infor);
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
 let getDetailSpecialtyById = async (req, res) => {
     try {
         let infor = await specialtyService.getDetailSpecialtyById(req.query.id, req.query.location);
@@ -75,5 +89,6 @@ module.exports = {
     getAllSpecialty: getAllSpecialty,
     getDetailSpecialtyById: getDetailSpecialtyById,
     updateSpecialty: updateSpecialty,
-    deleteSpecialty: deleteSpecialty
+    deleteSpecialty: deleteSpecialty,
+    searchSpecialtyByName: searchSpecialtyByName
 }

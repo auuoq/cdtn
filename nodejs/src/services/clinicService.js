@@ -140,6 +140,36 @@ let getAllClinic = () => {
     })
 }
 
+let searchClinicByName = async (keyword) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let data = await db.Clinic.findAll({
+                where: {
+                    name: {
+                        [db.Sequelize.Op.like]: `%${keyword}%`
+                    }
+                }
+            });
+
+            if (data && data.length > 0) {
+                data.map(item => {
+                    item.image = new Buffer(item.image, 'base64').toString('binary');
+                    return item;
+                });
+            }
+
+            resolve({
+                errCode: 0,
+                errMessage: 'ok',
+                data
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+
 let getDetailClinicById = (inputId) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -198,5 +228,6 @@ module.exports = {
     updateClinic: updateClinic,
     deleteClinic: deleteClinic,
     getAllClinic: getAllClinic,
-    getDetailClinicById: getDetailClinicById
+    getDetailClinicById: getDetailClinicById,
+    searchClinicByName: searchClinicByName
 }
