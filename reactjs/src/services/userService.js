@@ -115,6 +115,13 @@ const postVerifyBookExamPackageAppointment = (data) => {
     return axios.post('/api/verify-book-exam-package-appointment', data);
 }
 
+const getDoctorFeedbacks = (doctorId) => {
+    return axios.get(`/api/get-doctor-feedbacks?doctorId=${doctorId}`);
+}
+
+const toggleIsDisplayedStatus = (bookingId) => {
+    return axios.post(`/api/booking-toggle-isdisplayed?bookingId=${bookingId}`);
+}
 
 const createNewSpecialty = (data) => {
     return axios.post('/api/create-new-specialty', data);
@@ -280,5 +287,5 @@ export {
     createExamPackage, updateExamPackage, deleteExamPackage, getExamPackagesDetailByManager, bulkCreateScheduleForPackage, getDetailExamPackageById,
     getSchedulePackageByDate, getListAllExamPackagePatientWithStatusS3, getPackageDepositInfo, postBookExamPackageAppointment, postVerifyBookExamPackageAppointment,
     getUserPackageBookings, deletePackageAppointment, getPackageBookingsByManager, toggleOnlineStatus, getOnlineDoctors, sendMessage, getMessagesBetweenUsers, getUserConversations, submitFeedback,
-    getListPatientForPackageManager, sendRemedyForPackage
+    getListPatientForPackageManager, sendRemedyForPackage, getDoctorFeedbacks, toggleIsDisplayedStatus
 }

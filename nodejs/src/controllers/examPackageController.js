@@ -109,7 +109,7 @@ let getSchedulePackageByDate = async (req, res) => {
 
 let getListAllExamPackagePatientWithStatusS3 = async (req, res) => {
     try {
-        let infor = await examPackageService.getListAllExamPackagePatientWithStatusS3(req.query.id);
+        let infor = await examPackageService.getListAllExamPackagePatientWithStatusS3(req.query.managerId);
         return res.status(200).json(infor);
     } catch (e) {
         console.log(e);
@@ -119,6 +119,7 @@ let getListAllExamPackagePatientWithStatusS3 = async (req, res) => {
         });
     }
 }
+
 
 
 

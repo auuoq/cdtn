@@ -154,6 +154,34 @@ let sendRemedy = async (req, res) => {
     }
 }
 
+let getDoctorFeedbacks = async (req, res) => {
+    try {
+        let infor = await doctorService.getDoctorFeedbacks(req.query.doctorId);
+        return res.status(200).json(infor);
+
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
+
+let toggleIsDisplayedStatus = async (req, res) => {
+    try {
+        let response = await doctorService.toggleIsDisplayedStatus(req.query.bookingId);
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in handleToggleIsDisplayed:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+
 module.exports = {
     getTopDoctorHome: getTopDoctorHome,
     getAllDoctors: getAllDoctors,
@@ -165,5 +193,7 @@ module.exports = {
     getProfileDoctorById: getProfileDoctorById,
     getListPatientForDoctor: getListPatientForDoctor,
     sendRemedy: sendRemedy,
-    getListAllPatientWithStatusS3: getListAllPatientWithStatusS3
+    getListAllPatientWithStatusS3: getListAllPatientWithStatusS3,
+    getDoctorFeedbacks: getDoctorFeedbacks, 
+    toggleIsDisplayedStatus: toggleIsDisplayedStatus
 }

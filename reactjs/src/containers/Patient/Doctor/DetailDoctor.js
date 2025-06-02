@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import HomeHeader from '../../HomePage/HomeHeader';
 import './DetailDoctor.scss';
-import { getDetailInforDoctor } from '../../../services/userService';
+import { getDetailInforDoctor, getDoctorFeedbacks } from '../../../services/userService';
 import { LANGUAGES } from '../../../utils';
 import DoctorSchedule from '../../Patient/Doctor/DoctorSchedule';
 import DoctorExtraInfor from './DoctorExtraInfor';
@@ -16,15 +16,10 @@ class DetailDoctor extends Component {
       currentDoctorId: -1,
       address: '',
       loadingMap: true,
+      showChatbox: false,
+      feedbacks: [],
     };
   }
-  state = {
-    detailDoctor: {},
-    currentDoctorId: -1,
-    address: '',
-    loadingMap: true,
-    showChatbox: false, 
-  };
 
   toggleChatbox = () => {
     this.setState((prevState) => ({
@@ -32,48 +27,50 @@ class DetailDoctor extends Component {
     }));
   };
 
-
   async componentDidMount() {
     if (this.props.match?.params?.id) {
       let id = this.props.match.params.id;
       this.setState({ currentDoctorId: id });
 
       let res = await getDetailInforDoctor(id);
+      let feedbackRes = await getDoctorFeedbacks(id);
+
       if (res && res.errCode === 0) {
         this.setState({
           detailDoctor: res.data,
           address: res.data.Doctor_Infor.addressClinic || '',
           loadingMap: false,
         });
-      console.log('res', res.data.Doctor_Infor.addressClinic);
       } else {
         this.setState({ loadingMap: false });
+      }
+
+      if (feedbackRes?.errCode === 0) {
+        this.setState({
+          feedbacks: feedbackRes.data,
+        });
       }
     }
   }
 
   render() {
     const { language } = this.props;
-    const { detailDoctor, address, loadingMap } = this.state;
+    const { detailDoctor, address, loadingMap, feedbacks } = this.state;
+
     let nameVi = '', nameEn = '';
     if (detailDoctor && detailDoctor.positionData) {
       nameVi = `${detailDoctor.positionData.valueVi}, ${detailDoctor.lastName} ${detailDoctor.firstName}`;
       nameEn = `${detailDoctor.positionData.valueEn}, ${detailDoctor.firstName} ${detailDoctor.lastName}`;
     }
 
-    // Tạo URL iframe Google Maps Embed
     const mapSrc = `https://www.google.com/maps/embed/v1/place?key=${process.env.REACT_APP_GOOGLE_MAPS_EMBED_KEY}&q=${encodeURIComponent(address)}`;
-    const key = process.env.REACT_APP_GOOGLE_MAPS_EMBED_KEY;
-    console.log('Google Maps API Key:', key);
+
     return (
       <>
         <HomeHeader isShowBanner={false} />
         <div className='doctor-detail-container'>
           <div className='intro-doctor'>
-            <div
-              className='content-left'
-              style={{ backgroundImage: `url(${detailDoctor.image || ''})` }}
-            />
+            <div className='content-left' style={{ backgroundImage: `url(${detailDoctor.image || ''})` }} />
             <div className='content-right'>
               <div className='up'>{language === LANGUAGES.VI ? nameVi : nameEn}</div>
               <div className='down'>
@@ -81,6 +78,7 @@ class DetailDoctor extends Component {
               </div>
             </div>
           </div>
+
           <div className='schedule-doctor'>
             <div className="content-left">
               <DoctorSchedule doctorIdFromParent={this.state.currentDoctorId} />
@@ -89,8 +87,8 @@ class DetailDoctor extends Component {
               <DoctorExtraInfor doctorIdFromParent={this.state.currentDoctorId} />
             </div>
           </div>
-                    {/* Bản đồ Google Maps Embed */}
-          <div style={{ margin: '20px 0', paddingLeft: '50px',paddingRight: '50px', height: '300px', width: '100%', borderRadius: '8px', overflow: 'hidden' }}>
+
+          <div style={{ margin: '20px 0', paddingLeft: '50px', paddingRight: '50px', height: '300px', width: '100%', borderRadius: '8px', overflow: 'hidden' }}>
             {loadingMap ? (
               <p>Đang tải bản đồ...</p>
             ) : (
@@ -105,15 +103,38 @@ class DetailDoctor extends Component {
               />
             )}
           </div>
+
           <div className='detail-infor-doctor'>
             {detailDoctor.Markdown?.contentHTML && (
               <div dangerouslySetInnerHTML={{ __html: detailDoctor.Markdown.contentHTML }} />
             )}
           </div>
 
-          <div className='comment-doctor'></div>
+          <div className='comment-doctor'>
+            <h3>Đánh giá từ bệnh nhân</h3>
+            {feedbacks.filter(item => item.isDisplayed).length > 0 ? (
+              feedbacks
+                .filter(item => item.isDisplayed)
+                .map((item, index) => (
+                  <div className='comment-card' key={index}>
+                    <div className='comment-author'>
+                      <strong>{item.patientData?.lastName} {item.patientData?.firstName}</strong>
+                    </div>
+                    <div className='comment-content'>
+                      {item.feedback}
+                    </div>
+                    <div className='comment-date'>
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))
+            ) : (
+              <p>Chưa có đánh giá nào được hiển thị.</p>
+            )}
+          </div>
+
         </div>
-        {/* Nút mở chatbox */}
+
         <div
           onClick={this.toggleChatbox}
           style={{
@@ -138,7 +159,6 @@ class DetailDoctor extends Component {
           💬
         </div>
 
-        {/* ChatBox hiển thị khi bật */}
         {this.state.showChatbox && (
           <div
             style={{
@@ -157,7 +177,6 @@ class DetailDoctor extends Component {
             <ChatBox />
           </div>
         )}
-
       </>
     );
   }

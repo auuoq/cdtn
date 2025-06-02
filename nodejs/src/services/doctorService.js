@@ -489,6 +489,14 @@ let getListAllPatientWithStatusS3 = (doctorId) => {
                     nest: true
                 });
 
+                if (data && data.length > 0) {
+                    data.forEach(item => {
+                        if (item.remedyImage) {
+                            item.remedyImage = new Buffer(item.remedyImage, 'base64').toString('binary'); // hoặc .toString('utf-8') nếu cần
+                        }
+                    });
+                }
+
                 resolve({
                     errCode: 0,
                     data: data
@@ -524,9 +532,11 @@ let sendRemedy = (data) => {
 
                 if (appointment) {
                     appointment.statusId = 'S3';
-                    appointment.diagnosis = data.diagnosis; // lưu chuẩn đoán
+                    appointment.diagnosis = data.diagnosis;
+                    appointment.remedyImage = data.imgBase64; // <-- lưu ảnh base64
                     await appointment.save();
                 }
+
 
                 // Gửi email hóa đơn/đơn thuốc
                 await emailService.sendAttachment(data);
@@ -542,6 +552,73 @@ let sendRemedy = (data) => {
     });
 };
 
+let getDoctorFeedbacks = (doctorId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                });
+            } else {
+                let feedbacks = await db.Booking.findAll({
+                    where: { doctorId: doctorId },
+                    include: [
+                        { model: db.User, as: 'patientData', attributes: ['firstName', 'lastName'] },
+                        { model: db.User, as: 'doctorData', attributes: ['firstName', 'lastName'] }
+                    ],
+                    raw: false,
+                    nest: true
+                });
+
+                resolve({
+                    errCode: 0,
+                    data: feedbacks
+                });
+            }
+        } catch (e) {
+            reject(e);
+        }
+    });
+}
+
+let toggleIsDisplayedStatus = (bookingId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!bookingId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                });
+            } else {
+                let booking = await db.Booking.findOne({
+                    where: { id: bookingId },
+                    raw: false
+                });
+                if (!booking) {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'Booking not found'
+                    });
+                } else {
+                    booking.isDisplayed = !booking.isDisplayed;
+                    await booking.save();
+
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'Updated successfully',
+                        data: { isActive: booking.isDisplayed }
+                    });
+                }
+            }
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+
+
 
 module.exports = {
     getTopDoctorHome: getTopDoctorHome,
@@ -554,5 +631,7 @@ module.exports = {
     getProfileDoctorById: getProfileDoctorById,
     getListPatientForDoctor: getListPatientForDoctor,
     sendRemedy: sendRemedy,
-    getListAllPatientWithStatusS3: getListAllPatientWithStatusS3
+    getListAllPatientWithStatusS3: getListAllPatientWithStatusS3,
+    getDoctorFeedbacks: getDoctorFeedbacks,
+    toggleIsDisplayedStatus: toggleIsDisplayedStatus
 }
