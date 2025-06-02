@@ -1,6 +1,6 @@
 .chatbox {
   position: fixed;
-  bottom: 66px;
+  bottom: 80px;
   right: 20px;
   width: 400px;
   max-height: 480px;
@@ -11,6 +11,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  z-index: 1003 !important;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   
   
@@ -302,4 +303,74 @@
         white-space: nowrap;     // Không xuống dòng
     }
     }
+}
+@media (max-width: 768px) {
+  .chatbox {
+    width: 90vw;
+    height: 80vh;
+    bottom: 60px;
+    right: 5vw;
+    border-radius: 15px;
+    max-height: none;
+    min-height: 300px;
+  }
+
+  .chatbox__messages {
+    padding: 15px;
+    gap: 10px;
+  }
+
+  // .chatbox__input {
+  //   // flex-direction: column;
+  //   // gap: 8px;
+
+  //   input {
+  //     width: 100%;
+  //     font-size: 14px;
+  //   }
+
+  //   button {
+  //     width: 100%;
+  //     border-radius: 10px;
+  //   }
+  // }
+
+  .chatbox__doctors {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .chatbox__messages-item-bubble {
+    max-width: 85%;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chatbox {
+    width: 95vw;
+    height: 85vh;
+    right: 2.5vw;
+    bottom: 50px;
+    border-radius: 12px;
+  }
+
+  .chatbox__header {
+    font-size: 16px;
+    padding: 12px;
+  }
+
+  .chatbox__messages {
+    padding: 12px;
+  }
+
+  .chatbox__input input {
+    font-size: 13px;
+  }
+
+  .chatbox__input button {
+    font-size: 14px;
+  }
 }

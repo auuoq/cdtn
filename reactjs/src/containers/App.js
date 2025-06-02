@@ -33,6 +33,7 @@ import AllPackage from './Patient/ExamPackage/AllPackage.js';
 import ChatBox from '../components/chatbox.js';
 import ChatBot from '../components/ChatBot/ChatBot.js';
 import AllSpecialty from './HomePage/AllSpecialty.js';
+import ChatButtons from '../components/ChatButtons/ChatButtons.js';
 
 class App extends Component {
 
@@ -87,6 +88,7 @@ class App extends Component {
                                     <Route path={"/kham-chuyen-khoa"} component={(AllSpecialty)} />
 
                                 </Switch>
+                                <ChatButtons />
                             </CustomScrollbars>
                         </div>
 

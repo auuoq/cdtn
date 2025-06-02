@@ -10,7 +10,7 @@ const API_KEY = "AIzaSyBvHL-oNWEQG9xx1IkpNgP-0CqnZ61hZ8c";
 function ChatBot() {
   const [messages, setMessages] = useState([
     {
-      message: "Hello, I'm Gemini! Ask me anything!",
+      message: "Chào mừng bạn đến với TDH Booking, bạn có câu hỏi nào không ?",
       sentTime: "just now",
       sender: "Gemini"
     }
@@ -74,12 +74,13 @@ function ChatBot() {
 
   return (
     <div className="App">
-      <div style={{ position: "relative", height: "800px", width: "700px" }}>
+      <div style={{ position: "relative", height: "380px", width: "100%" }}>
+
         <MainContainer>
           <ChatContainer>
             <MessageList
               scrollBehavior="smooth"
-              typingIndicator={isTyping ? <TypingIndicator content="Gemini is typing..." /> : null}
+              typingIndicator={isTyping ? <TypingIndicator content="Gemini đang soạn tin..." /> : null}
             >
               {messages.map((message, i) => (
                 <Message key={i} model={{
@@ -90,7 +91,7 @@ function ChatBot() {
                 }} />
               ))}
             </MessageList>
-            <MessageInput placeholder="Type message here" onSend={handleSend} />
+            <MessageInput placeholder="Nhập tin nhắn" onSend={handleSend} />
           </ChatContainer>
         </MainContainer>
       </div>
