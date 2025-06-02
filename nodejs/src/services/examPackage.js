@@ -157,6 +157,44 @@ let getAllExamPackages = () => {
     });
 };
 
+let searchExamPackageByName = (keyword) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let packages = await db.ExamPackage.findAll({
+                where: {
+                    name: {
+                        [db.Sequelize.Op.like]: `%${keyword}%`
+                    }
+                },
+                include: [
+                    { model: db.Clinic, as: 'clinicInfo' },
+                    { model: db.Allcode, as: 'provinceTypeData' },
+                    { model: db.Allcode, as: 'paymentTypeData' },
+                    { model: db.Allcode, as: 'categoryTypeData' }
+                ]
+            });
+
+            if (packages && packages.length > 0) {
+                packages = packages.map(item => {
+                    if (item.image) {
+                        item.image = new Buffer(item.image, 'base64').toString('binary');
+                    }
+                    return item;
+                });
+            }
+
+            resolve({
+                errCode: 0,
+                errMessage: 'ok',
+                data: packages
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+
 let getExamPackagesDetailByManager = (userId) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -580,5 +618,6 @@ module.exports = {
     getSchedulePackageByDate,
     getListAllExamPackagePatientWithStatusS3,
     getPackageFeedbacks,
-    toggleIsDisplayedStatusForPackage
+    toggleIsDisplayedStatusForPackage,
+    searchExamPackageByName
 };

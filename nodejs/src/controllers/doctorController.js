@@ -28,6 +28,21 @@ let getAllDoctors = async (req, res) => {
     }
 }
 
+let searchDoctorsController = async (req, res) => {
+    try {
+        let keyword = req.query.keyword || '';
+        let result = await doctorService.searchDoctors(keyword);
+        return res.status(200).json(result);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+
 let postInforDoctor = async (req, res) => {
     try {
         let response = await doctorService.saveDetailInforDoctor(req.body);
@@ -195,5 +210,6 @@ module.exports = {
     sendRemedy: sendRemedy,
     getListAllPatientWithStatusS3: getListAllPatientWithStatusS3,
     getDoctorFeedbacks: getDoctorFeedbacks, 
-    toggleIsDisplayedStatus: toggleIsDisplayedStatus
+    toggleIsDisplayedStatus: toggleIsDisplayedStatus,
+    searchDoctorsController: searchDoctorsController
 }

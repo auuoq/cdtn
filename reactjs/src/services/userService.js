@@ -79,6 +79,11 @@ const getAllDoctors = () => {
     return axios.get(`/api/get-all-doctors`)
 }
 
+const searchDoctors = (keyword) => {
+    return axios.get(`/api/search-doctors?keyword=${keyword}`);
+};
+
+
 const saveDetailDoctorService = (data) => {
     return axios.post('/api/save-infor-doctors', data);
 }
@@ -134,6 +139,11 @@ const createNewSpecialty = (data) => {
 const getAllSpecialty = () => {
     return axios.get(`/api/get-specialty`);
 }
+
+const searchSpecialty = (keyword) => {
+    return axios.get(`/api/search-specialty?keyword=${keyword}`);
+};
+
 const updateSpecialty = (data) => {
     return axios.put('/api/update-specialty', data);
 }
@@ -153,6 +163,11 @@ const createNewClinic = (data) => {
 const getAllClinic = () => {
     return axios.get(`/api/get-clinic`);
 }
+
+const searchClinic = (keyword) => {
+    return axios.get(`/api/search-clinic?keyword=${keyword}`);
+};
+
 
 const getAllDetailClinicById = (data) => {
     return axios.get(`/api/get-detail-clinic-by-id?id=${data.id}`);
@@ -229,6 +244,12 @@ const deleteExamPackage = (packageId, userId) => {
 const getAllExamPackages = () => {
     return axios.get('/api/get-all-exam-packages');
 }
+
+const searchExamPackage = (keyword) => {
+    return axios.get(`/api/search-exam-package?keyword=${keyword}`);
+};
+
+
 const getExamPackagesDetailByManager = (userId) => {
     return axios.get(`/api/get-exam-package-detail-by-manager?id=${userId}`);
 }
@@ -299,5 +320,5 @@ export {
     createExamPackage, updateExamPackage, deleteExamPackage, getExamPackagesDetailByManager, bulkCreateScheduleForPackage, getDetailExamPackageById,
     getSchedulePackageByDate, getListAllExamPackagePatientWithStatusS3, getPackageDepositInfo, postBookExamPackageAppointment, postVerifyBookExamPackageAppointment,
     getUserPackageBookings, deletePackageAppointment, getPackageBookingsByManager, toggleOnlineStatus, getOnlineDoctors, sendMessage, getMessagesBetweenUsers, getUserConversations, submitFeedback,
-    getListPatientForPackageManager, sendRemedyForPackage, getDoctorFeedbacks, toggleIsDisplayedStatus, getPackageFeedbacks, toggleIsDisplayedStatusForPackage, submitFeedbackPackage
+    getListPatientForPackageManager, sendRemedyForPackage,searchDoctors, getDoctorFeedbacks, toggleIsDisplayedStatus, getPackageFeedbacks, toggleIsDisplayedStatusForPackage, submitFeedbackPackage,searchClinic,searchSpecialty,searchExamPackage
 }

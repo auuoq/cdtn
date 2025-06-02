@@ -34,6 +34,8 @@ import ChatBox from '../components/chatbox.js';
 import ChatBot from '../components/ChatBot/ChatBot.js';
 import AllSpecialty from './HomePage/AllSpecialty.js';
 import ChatButtons from '../components/ChatButtons/ChatButtons.js';
+import { components } from 'react-select/dist/react-select.cjs.prod.js';
+import AllClinics from './HomePage/AllClinics.js';
 
 class App extends Component {
 
@@ -85,8 +87,8 @@ class App extends Component {
                                     <Route path={"/allPacket"} component={AllPackage} />
                                     <Route path={"/chat"} component={userIsAuthenticated(ChatBox)} />
                                     <Route path={"/chat-bot"} component={userIsAuthenticated(ChatBot)} />
-                                    <Route path={"/kham-chuyen-khoa"} component={(AllSpecialty)} />
-
+                                    <Route path={"/all-specialty"} component={(AllSpecialty)} />
+                                    <Route path={"/all-clinic"} component={(AllClinics)} />
                                 </Switch>
                                 <ChatButtons />
                             </CustomScrollbars>

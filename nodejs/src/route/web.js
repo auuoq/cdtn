@@ -57,6 +57,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-profile-doctor-by-id', doctorController.getProfileDoctorById);
     router.get('/api/get-doctor-feedbacks', doctorController.getDoctorFeedbacks);
     router.post('/api/booking-toggle-isdisplayed', doctorController.toggleIsDisplayedStatus);
+    router.get('/api/search-doctors', doctorController.searchDoctorsController);
 
 
 
@@ -80,6 +81,8 @@ let initWebRoutes = (app) => {
     router.get('/api/get-detail-specialty-by-id', specialtyController.getDetailSpecialtyById);
     router.put('/api/update-specialty', specialtyController.updateSpecialty);
     router.delete('/api/delete-specialty', specialtyController.deleteSpecialty);
+    router.get('/api/search-specialty', specialtyController.searchSpecialtyByName);
+
 
 
     //clinic
@@ -88,6 +91,8 @@ let initWebRoutes = (app) => {
     router.get('/api/get-detail-clinic-by-id', clinicController.getDetailClinicById);
     router.put('/api/update-clinic', clinicController.updateClinic);
     router.delete('/api/delete-clinic', clinicController.deleteClinic);
+    router.get('/api/search-clinic', clinicController.searchClinicByName);
+
 
     //Clinic_Manager
     router.get('/api/get-clinic-manager', clinicManagerController.getDetailClinicByManagerUserId);
@@ -114,6 +119,8 @@ let initWebRoutes = (app) => {
     router.get('/api/get-list-all-exam-package-patients-with-status-s3', examPackageController.getListAllExamPackagePatientWithStatusS3); // Lấy danh sách bệnh nhân theo gói khám với trạng thái S3
     router.get('/api/get-package-feedbacks', examPackageController.getPackageFeedbacks); // Lấy phản hồi của gói khám
     router.patch('/api/toggle-is-displayed-status-for-package', examPackageController.toggleIsDisplayedStatusForPackage); // Chuyển đổi trạng thái hiển thị cho gói khám
+    router.get('/api/search-exam-package', examPackageController.searchExamPackageByName);
+
     //message
     router.patch('/api/toggle-online', messageController.toggleOnlineStatus);
     router.get('/api/get-online-doctors', messageController.getOnlineDoctors);
