@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { FormattedMessage } from 'react-intl';
 import Slider from "react-slick";
-
 
 class HandBook extends Component {
     render() {
@@ -10,29 +8,68 @@ class HandBook extends Component {
             dots: false,
             infinite: true,
             speed: 500,
-            slidesToShow: 4, // Mặc định hiển thị 4 slide
+            slidesToShow: 4,
             slidesToScroll: 1,
             responsive: [
                 {
-                    breakpoint: 1024, // Màn hình <= 1024px
+                    breakpoint: 1024,
                     settings: {
-                        slidesToShow: 3, // Hiển thị 3 slide
+                        slidesToShow: 3,
                     }
                 },
                 {
-                    breakpoint: 768, // Màn hình <= 768px
+                    breakpoint: 768,
                     settings: {
-                        slidesToShow: 2, // Hiển thị 2 slide
+                        slidesToShow: 2,
                     }
                 },
                 {
-                    breakpoint: 480, // Màn hình <= 480px
+                    breakpoint: 480,
                     settings: {
-                        slidesToShow: 2, // Hiển thị 1 slide
+                        slidesToShow: 1,
                     }
                 }
             ]
         };
+
+        const handbooks = [
+            {
+                id: 1,
+                title: 'Thoái hóa khớp',
+                link: 'https://tamanhhospital.vn/cac-benh-co-xuong-khop/',
+                image: 'https://cdn-icons-png.flaticon.com/512/3064/3064197.png' // ví dụ ảnh xương khớp
+            },
+            {
+                id: 2,
+                title: 'Viêm khớp dạng thấp',
+                link: 'https://umcclinic.com.vn/benh-co-xuong-khop',
+                image: 'https://cdn-icons-png.flaticon.com/512/2921/2921822.png' // ví dụ ảnh khớp
+            },
+            {
+                id: 3,
+                title: 'Thoát vị đĩa đệm',
+                link: 'https://bvnguyentriphuong.com.vn/dieu-duong/tham-kham-lam-sang-va-can-lam-sang-co-xuong-khop',
+                image: 'https://cdn-icons-png.flaticon.com/512/187/187726.png' // ví dụ ảnh cột sống
+            },
+            {
+                id: 4,
+                title: 'Loãng xương',
+                link: 'https://vinmec.com/vie/bai-viet/top-7-can-benh-xuong-khop-pho-bien-o-nguoi-viet-nam-vi',
+                image: 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png' // ảnh xương
+            },
+            {
+                id: 5,
+                title: 'Đau thần kinh tọa',
+                link: 'https://optimal365.vn/cac-benh-co-xuong-khop/',
+                image: 'https://cdn-icons-png.flaticon.com/512/181/181541.png' // ảnh dây thần kinh
+            },
+            {
+                id: 6,
+                title: 'Bệnh khác',
+                link: '#',
+                image: 'https://cdn-icons-png.flaticon.com/512/126/126486.png' // ảnh mặc định
+            },
+        ];
 
         return (
             <div className='section-share section-handbook'>
@@ -43,39 +80,30 @@ class HandBook extends Component {
                     </div>
                     <div className='section-body'>
                         <Slider {...sliderSettings}>
-                            <div className="section-customize">
-                                <div className="bg-image section-handbook" />
-                                <div>Cơ xương khớp 1</div>
-                            </div>
-                            <div className="section-customize">
-                                <div className="bg-image section-handbook" />
-                                <div>Cơ xương khớp 2</div>
-                            </div>
-                            <div className="section-customize">
-                                <div className="bg-image section-handbook" />
-                                <div>Cơ xương khớp 3</div>
-                            </div>
-                            <div className="section-customize">
-                                <div className="bg-image section-handbook" />
-                                <div>Cơ xương khớp 4</div>
-                            </div>
-                            <div className="section-customize">
-                                <div className="bg-image section-handbook" />
-                                <div>Cơ xương khớp 5</div>
-                            </div>
-                            <div className="section-customize">
-                                <div className="bg-image section-handbook" />
-                                <div>Cơ xương khớp 6</div>
-                            </div>
-
+                            {handbooks.map(item => (
+                                <div key={item.id} className="section-customize" style={{ cursor: 'pointer' }}>
+                                    <a href={item.link} style={{ textDecoration: 'none', color: 'inherit' }} target="_blank" rel="noopener noreferrer">
+                                        <div 
+                                            className="bg-image section-handbook" 
+                                            style={{ 
+                                                backgroundImage: `url(${item.image})`, 
+                                                backgroundSize: 'contain',
+                                                backgroundRepeat: 'no-repeat',
+                                                backgroundPosition: 'center',
+                                                height: '150px',
+                                                marginBottom: '10px',
+                                            }} 
+                                        />
+                                        <div style={{ textAlign: 'center', fontWeight: 'bold' }}>{item.title}</div>
+                                    </a>
+                                </div>
+                            ))}
                         </Slider>
                     </div>
-
                 </div>
             </div>
         );
     }
-
 }
 
 const mapStateToProps = state => {
@@ -85,9 +113,4 @@ const mapStateToProps = state => {
     };
 };
 
-const mapDispatchToProps = dispatch => {
-    return {
-    };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(HandBook);
+export default connect(mapStateToProps)(HandBook);

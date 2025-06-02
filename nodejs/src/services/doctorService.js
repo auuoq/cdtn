@@ -54,20 +54,51 @@ let getTopDoctorHome = (limitInput) => {
 let getAllDoctors = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            let doctors = await db.User.findAll({
+            let users = await db.User.findAll({
                 where: { roleId: 'R2' },
                 attributes: {
-                    exclude: ['password']
+                    exclude: ['password', 'image']
                 },
-            })
+                include: [
+                    { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
+                    { model: db.Allcode, as: 'genderData', attributes: ['valueEn', 'valueVi'] },
+                    {
+                        model: db.Doctor_Infor,
+                        attributes: ['specialtyId', 'clinicId', 'nameClinic', 'addressClinic'],
+                        include: [
+                            {
+                                model: db.Specialty,
+                                as: 'specialtyData',
+                                attributes: ['name']
+                            },
+                            {
+                                model: db.Clinic,
+                                as: 'clinicData',
+                                attributes: ['name', 'address']
+                            }
+                        ]
+                    }
+                ],
+                raw: false, // cần false để Sequelize build nested object
+                nest: true
+            });
+            if (users && users.length > 0) {
+                users.forEach(user => {
+                    if (user.image) {
+                        user.image = new Buffer.from(user.image, 'base64').toString('binary');
+                    }
+                });
+            }
+
             resolve({
                 errCode: 0,
-                data: doctors
+                data: users
             });
+
         } catch (e) {
-            reject(e)
+            reject(e);
         }
-    })
+    });
 }
 
 let searchDoctors = (keyword) => {
