@@ -15,7 +15,13 @@ class HomeHeader extends Component {
         this.state = {
             isMenuOpen: false, // Trạng thái mở/đóng menu
         };
+        this.state = {
+            isMenuOpen: false,
+            searchKeyword: "",
+            searchType: "doctor", // Mặc định là tìm bác sĩ
+        };
     }
+    
 
     changeLanguage = (language) => {
         this.props.changeLanguageAppRedux(language);
@@ -77,9 +83,35 @@ class HomeHeader extends Component {
         }
     }
 
+    handleSearch = () => {
+        const { searchKeyword, searchType } = this.state;
+
+        if (!searchKeyword.trim()) return;
+
+        switch (searchType) {
+            case 'doctor':
+                this.props.history.push(`/search-doctor?keyword=${encodeURIComponent(searchKeyword.trim())}`);
+                break;
+            case 'clinic':
+                this.props.history.push(`/search-clinic?keyword=${encodeURIComponent(searchKeyword.trim())}`);
+                break;
+            case 'service':
+                this.props.history.push(`/search-service?keyword=${encodeURIComponent(searchKeyword.trim())}`);
+                break;
+            case 'packet':
+                this.props.history.push(`/search-packet?keyword=${encodeURIComponent(searchKeyword.trim())}`);
+                break;
+            default:
+                break;
+        }
+    }
+
+
     render() {
         const { language, isLoggedIn,processLogout } = this.props;
         const { isMenuOpen } = this.state;
+
+
 
         return (
             <React.Fragment>
@@ -139,10 +171,107 @@ class HomeHeader extends Component {
                         <div className='content-up'>
                             <div className='title1'><FormattedMessage id="banner.title1" /></div>
                             <div className='title2'><FormattedMessage id="banner.title2" /></div>
-                            <div className='search'>
-                                <i className="fas fa-search"></i>
-                                <input type="text" placeholder='Tìm chuyên khoa khám bệnh' />
+                            <div
+                            className="search"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#fdd800',
+                                borderRadius: '50px',
+                                padding: '0 16px',
+                                height: '48px',
+                                width: 'fit-content',
+                                gap: '8px',
+                            }}
+                            >
+                            <i
+                                className="fas fa-search"
+                                onClick={this.handleSearch}
+                                style={{
+                                marginRight: '8px',
+                                cursor: 'pointer',
+                                fontSize: '18px',
+                                color: 'black',
+                                lineHeight: '1',
+                                }}
+                            ></i>
+
+                            <input
+                                type="text"
+                                placeholder="Nhập từ khóa tìm kiếm"
+                                value={this.state.searchKeyword}
+                                onChange={(e) => this.setState({ searchKeyword: e.target.value })}
+                                onKeyDown={(e) => e.key === 'Enter' && this.handleSearch()}
+                                style={{
+                                border: 'none',
+                                outline: 'none',
+                                background: 'transparent',
+                                fontSize: '16px',
+                                lineHeight: '1',
+                                height: '100%',
+                                padding: 0,
+                                minWidth: '150px',
+                                }}
+                            />
+
+                            <div
+                                className="vertical-line"
+                                style={{
+                                height: '60%',
+                                width: '1px',
+                                backgroundColor: 'black',
+                                }}
+                            />
+
+                            <div
+                                className="select-wrapper"
+                                style={{
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'center',
+                                }}
+                            >
+                                <select
+                                value={this.state.searchType}
+                                onChange={(e) => this.setState({ searchType: e.target.value })}
+                                className="search-type-select"
+                                style={{
+                                    border: 'none',
+                                    background: 'transparent',
+                                    fontSize: '16px',
+                                    height: '100%',
+                                    lineHeight: '1',
+                                    cursor: 'pointer',
+                                    padding: '8px 24px 8px 8px',
+                                    appearance: 'none',
+                                    WebkitAppearance: 'none',
+                                    MozAppearance: 'none',
+                                    outline :'none'
+                                }}
+                                >
+                                <option value="doctor">Bác sĩ</option>
+                                <option value="clinic">Phòng khám</option>
+                                <option value="service">Chuyên khoa</option>
+                                <option value="packet">Gói khám</option>
+                                </select>
+
+                                <i
+                                className="fas fa-chevron-down arrow-icon"
+                                style={{
+                                    position: 'absolute',
+                                    right: '8px',
+                                    pointerEvents: 'none',
+                                    fontSize: '12px',
+                                    color: 'black',
+                                }}
+                                ></i>
                             </div>
+                            </div>
+
+
+
+
                         </div>
                         <div className='content-down'>
                             <div className='options'>

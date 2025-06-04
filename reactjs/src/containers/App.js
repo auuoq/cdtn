@@ -36,7 +36,10 @@ import AllSpecialty from './HomePage/AllSpecialty.js';
 import ChatButtons from '../components/ChatButtons/ChatButtons.js';
 import { components } from 'react-select/dist/react-select.cjs.prod.js';
 import AllClinics from './HomePage/AllClinics.js';
-
+import SearchDoctor from '../components/Search/SearchDoctor.js'
+import SearchClinic from '../components/Search/SearchClinic.js'
+import SearchSpecility from '../components/Search/SearchSpecility.js'
+import SearhPacket from '../components/Search/SearchPacket.js'
 class App extends Component {
 
     handlePersistorState = () => {
@@ -89,6 +92,10 @@ class App extends Component {
                                     <Route path={"/chat-bot"} component={userIsAuthenticated(ChatBot)} />
                                     <Route path={"/all-specialty"} component={(AllSpecialty)} />
                                     <Route path={"/all-clinic"} component={(AllClinics)} />
+                                    <Route path="/search-doctor" component={SearchDoctor} />
+                                    <Route path="/search-clinic" component={SearchClinic} />
+                                    <Route path="/search-service" component={SearchSpecility} />
+                                    <Route path="/search-packet" component={SearhPacket} />
                                 </Switch>
                                 <ChatButtons />
                             </CustomScrollbars>
