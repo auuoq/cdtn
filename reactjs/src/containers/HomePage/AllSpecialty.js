@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { getAllSpecialty } from '../../services/userService';
 import './AllSpecialty.scss';
 import { withRouter } from 'react-router';
+import HomeHeader from './HomeHeader';
 
 class AllSpecialty extends Component {
     constructor(props) {
@@ -28,22 +29,39 @@ class AllSpecialty extends Component {
         let { dataSpecialty } = this.state;
 
         return (
-            <div className="all-specialty-container">
-                <h2 className="title">Danh sách chuyên khoa</h2>
-                <div className="specialty-grid">
-                    {dataSpecialty && dataSpecialty.length > 0 &&
-                        dataSpecialty.map((item, index) => (
-                            <div
-                                key={index}
-                                className="specialty-card"
-                                onClick={() => this.handleViewDetailSpecialty(item)}
-                            >
-                                <div className="bg-image" style={{ backgroundImage: `url(${item.image})` }} />
-                                <div className="name">{item.name}</div>
-                            </div>
-                        ))}
+            <>
+                <HomeHeader/>
+                <div className="all-specialty-container">
+                    <nav aria-label="breadcrumb bg-white ">
+                        <ol className="breadcrumb bg-transparent shadow-sm">
+                        <li className="breadcrumb-item" >
+                            <a href="/home" style={{
+                                color :"#707070"
+                            }}>Trang chủ</a>
+                        </li>
+                        <li className="breadcrumb-item">
+                            <a href="#"  style={{
+                                color :"#707070"
+                            }}>Danh sách chuyên khoa</a>
+                        </li>
+
+                        </ol>
+                    </nav>
+                    <div className="specialty-grid">
+                        {dataSpecialty && dataSpecialty.length > 0 &&
+                            dataSpecialty.map((item, index) => (
+                                <div
+                                    key={index}
+                                    className="specialty-card"
+                                    onClick={() => this.handleViewDetailSpecialty(item)}
+                                >
+                                    <div className="bg-image" style={{ backgroundImage: `url(${item.image})` }} />
+                                    <div className="name">{item.name}</div>
+                                </div>
+                            ))}
+                    </div>
                 </div>
-            </div>
+            </>
         );
     }
 }

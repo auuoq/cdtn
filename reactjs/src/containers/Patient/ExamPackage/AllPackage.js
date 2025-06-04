@@ -47,7 +47,7 @@ const AllPackage = () => {
           <nav aria-label="breadcrumb bg-white ">
             <ol className="breadcrumb bg-transparent shadow-sm">
               <li className="breadcrumb-item" >
-                <a href="/" style={{
+                <a href="/home" style={{
                     color :"#707070"
                 }}>Trang chủ</a>
               </li>
