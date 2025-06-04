@@ -15,7 +15,7 @@ function ChatBot() {
   const [doctorsData, setDoctorsData] = useState([]);
   const [messages, setMessages] = useState([
     {
-      message: "Hello, tôi là trợ lý ảo, bạn muốn hỏi gì?",
+      message: "Chào mừng bạn đến với TDH Booking, bạn có câu hỏi nào không ?",
       sentTime: "just now",
       sender: "Gemini",
     },
@@ -144,14 +144,13 @@ function ChatBot() {
 
   return (
     <div className="App">
-      <div style={{ position: "relative", height: "800px", width: "700px" }}>
+      <div style={{ position: "relative", height: "380px", width: "100%" }}>
+
         <MainContainer>
           <ChatContainer>
             <MessageList
               scrollBehavior="smooth"
-              typingIndicator={
-                isTyping ? <TypingIndicator content="Gemini is typing..." /> : null
-              }
+              typingIndicator={isTyping ? <TypingIndicator content="Gemini đang soạn tin..." /> : null}
             >
               {messages.map((message, i) => (
                 <Message
@@ -165,7 +164,7 @@ function ChatBot() {
                 />
               ))}
             </MessageList>
-            <MessageInput placeholder="Type message here" onSend={handleSend} />
+            <MessageInput placeholder="Nhập tin nhắn" onSend={handleSend} />
           </ChatContainer>
         </MainContainer>
       </div>

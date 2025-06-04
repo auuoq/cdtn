@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Slider from "react-slick";
+import thoaihoakhop from "../../../assets/imagecamnang/thoaihoakhop.png"
+import viemkhop from "../../../assets/imagecamnang/viemkhop.png"
+import thoatvidiadem from "../../../assets/imagecamnang/thoatvidiadem.png"
 
 class HandBook extends Component {
     render() {
@@ -37,25 +40,26 @@ class HandBook extends Component {
                 id: 1,
                 title: 'Thoái hóa khớp',
                 link: 'https://tamanhhospital.vn/cac-benh-co-xuong-khop/',
-                image: 'https://cdn-icons-png.flaticon.com/512/3064/3064197.png' // ví dụ ảnh xương khớp
+                image: thoaihoakhop
             },
             {
                 id: 2,
                 title: 'Viêm khớp dạng thấp',
                 link: 'https://umcclinic.com.vn/benh-co-xuong-khop',
-                image: 'https://cdn-icons-png.flaticon.com/512/2921/2921822.png' // ví dụ ảnh khớp
+                image: viemkhop// ví dụ ảnh khớp
             },
             {
                 id: 3,
                 title: 'Thoát vị đĩa đệm',
                 link: 'https://bvnguyentriphuong.com.vn/dieu-duong/tham-kham-lam-sang-va-can-lam-sang-co-xuong-khop',
-                image: 'https://cdn-icons-png.flaticon.com/512/187/187726.png' // ví dụ ảnh cột sống
+                image: thoatvidiadem 
+// ví dụ ảnh cột sống
             },
             {
                 id: 4,
                 title: 'Loãng xương',
                 link: 'https://vinmec.com/vie/bai-viet/top-7-can-benh-xuong-khop-pho-bien-o-nguoi-viet-nam-vi',
-                image: 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png' // ảnh xương
+                image: 'https://production-cdn.pharmacity.io/digital/original/plain/blog/loang-xuong-1.jpg' // ảnh xương
             },
             {
                 id: 5,
@@ -76,7 +80,7 @@ class HandBook extends Component {
                 <div className='section-container'>
                     <div className='section-header'>
                         <span className='title-section'>Cẩm nang</span>
-                        <button className='btn-section'>Xem thêm</button>
+                        {/* <button className='btn-section'>Xem thêm</button> */}
                     </div>
                     <div className='section-body'>
                         <Slider {...sliderSettings}>

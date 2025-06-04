@@ -152,7 +152,7 @@ class ChatBox extends Component {
         <div className="chatbox">
         {!selectedDoctorId ? (
             <>
-            <div className="chatbox__header">💬 Doctor Chat</div>
+            <div className="chatbox__header">💬 Nhắn tin với bác sĩ </div>
 
             {/* Online Doctors */}
             <div className="chatbox__doctors">
@@ -175,7 +175,6 @@ class ChatBox extends Component {
 
             {/* Conversation History */}
             <div className="chatbox__history">
-                <h4>🕑 Previous Conversations</h4>
                 {previousConversations.map((user) => (
                 <button
                     key={user.id}
@@ -206,7 +205,7 @@ class ChatBox extends Component {
                 className="chatbox__back-button"
                 onClick={() => this.setState({ selectedDoctorId: null })}
                 >
-                ⬅ Back
+                ⬅ 
                 </button>
                 <img
                 src={selectedDoctor?.image || 'https://www.w3schools.com/w3images/avatar2.png'}
@@ -223,7 +222,7 @@ class ChatBox extends Component {
             {/* Chat Messages */}
             <div className="chatbox__messages">
                 {messages.length === 0 && (
-                <div className="chatbox__messages-empty">No messages yet.</div>
+                <div className="chatbox__messages-empty">Chưa có tin nhắn nào</div>
                 )}
 
                 {messages.map((msg) => {
@@ -269,7 +268,7 @@ class ChatBox extends Component {
                 value={newMessage}
                 onChange={(e) => this.setState({ newMessage: e.target.value })}
                 onKeyDown={(e) => e.key === 'Enter' && this.handleSend()}
-                placeholder="Type a message..."
+                placeholder="Nhập tin nhắn..."
                 disabled={loading || !selectedDoctorId}
                 />
                 <button

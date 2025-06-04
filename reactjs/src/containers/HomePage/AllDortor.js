@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { getAllClinic } from '../../services/userService';
+import { getAllClinic, getAllDoctors } from '../../services/userService';
 import './AllClinics.scss';
 import { withRouter } from 'react-router';
 import HomeHeader from './HomeHeader';
 
-class AllSpecialty extends Component {
+class AllDoctor extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -13,7 +13,7 @@ class AllSpecialty extends Component {
     }
 
     async componentDidMount() {
-        let res = await getAllClinic();
+        let res = await getAllDoctors();
         if (res && res.errCode === 0) {
             this.setState({ dataSpecialty: res.data || [] });
         }
@@ -21,7 +21,7 @@ class AllSpecialty extends Component {
 
     handleViewDetailSpecialty = (item) => {
         if (this.props.history) {
-            this.props.history.push(`/detail-clinic/${item.id}`);
+            this.props.history.push(`/detail-doctor/${item.id}`);
         }
     }
 
@@ -32,21 +32,21 @@ class AllSpecialty extends Component {
             <>
                 <HomeHeader/>
                 <div className="all-specialty-container">
-                <nav aria-label="breadcrumb bg-white ">
-                    <ol className="breadcrumb bg-transparent shadow-sm">
-                    <li className="breadcrumb-item" >
-                        <a href="/home" style={{
-                            color :"#707070"
-                        }}>Trang chủ</a>
-                    </li>
-                    <li className="breadcrumb-item">
-                        <a href="#"  style={{
-                            color :"#707070"
-                        }}>Danh sách phòng khám</a>
-                    </li>
+                    <nav aria-label="breadcrumb bg-white ">
+                        <ol className="breadcrumb bg-transparent shadow-sm">
+                        <li className="breadcrumb-item" >
+                            <a href="/home" style={{
+                                color :"#707070"
+                            }}>Trang chủ</a>
+                        </li>
+                        <li className="breadcrumb-item">
+                            <a href="#"  style={{
+                                color :"#707070"
+                            }}>Danh sách bác sĩ</a>
+                        </li>
 
-                    </ol>
-                </nav>
+                        </ol>
+                    </nav>
                     <div className="specialty-grid">
                         {dataSpecialty && dataSpecialty.length > 0 &&
                             dataSpecialty.map((item, index) => (
@@ -55,8 +55,8 @@ class AllSpecialty extends Component {
                                     className="specialty-card"
                                     onClick={() => this.handleViewDetailSpecialty(item)}
                                 >
-                                    <div className="bg-image" style={{ backgroundImage: `url(${item.image})` }} />
-                                    <div className="name">{item.name}</div>
+                                    <div className="bg-image" style={{ backgroundImage: `url(https://benhvientantao.com/wp-content/uploads/2022/07/chi-co-bac-si-moi-giup-duoc-e93.jpg)` }} />
+                                    <div className="name">{`${item.firstName} ${item.lastName}`}</div>
                                 </div>
                             ))}
                     </div>
@@ -66,4 +66,4 @@ class AllSpecialty extends Component {
     }
 }
 
-export default withRouter(AllSpecialty);
+export default withRouter(AllDoctor);

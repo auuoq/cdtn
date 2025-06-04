@@ -47,7 +47,7 @@ const AllPackage = () => {
           <nav aria-label="breadcrumb bg-white ">
             <ol className="breadcrumb bg-transparent shadow-sm">
               <li className="breadcrumb-item" >
-                <a href="/" style={{
+                <a href="/home" style={{
                     color :"#707070"
                 }}>Trang chủ</a>
               </li>
@@ -98,50 +98,7 @@ const AllPackage = () => {
           </div>
         </div>
       </section>
-      {/* Nút mở chatbox */}
-      <div
-        onClick={toggleChatbox}
-        style={{
-          position: 'fixed',
-          bottom: '10px',
-          right: '20px',
-          width: '50px',
-          height: '50px',
-          borderRadius: '50%',
-          backgroundColor: '#007bff',
-          color: 'white',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          cursor: 'pointer',
-          zIndex: 1001,
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-          fontSize: '24px',
-        }}
-        title="Nhắn tin với bác sĩ"
-      >
-        💬
-      </div>
-
-      {/* ChatBox hiển thị khi bật */}
-      {showChatbox && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: '100px',
-            right: '20px',
-            zIndex: 1000,
-            width: '320px',
-            maxHeight: '500px',
-            background: 'white',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-            borderRadius: '8px',
-            overflow: 'hidden',
-          }}
-        >
-          <ChatBox />
-        </div>
-      )}
+ 
 
     </div>
   );

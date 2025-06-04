@@ -132,14 +132,16 @@ class ChatMessenger extends Component {
       <div className="messenger-layout">
         <div className="sidebar">
           <div className="sidebar-header">
-            💬 Patient Chat
-            <label>
+            💬 Chat với bệnh nhân
+            <label  class="status-checkbox" style={{
+              marginBottom :0
+            }}>
               <input
                 type="checkbox"
                 checked={isActive}
                 onChange={this.handleToggleOnline}
               />
-              {isActive ? 'Online' : 'Offline'}
+              {isActive ? 'Hoạt động' : 'Offline'}
             </label>
           </div>
           <div className="conversation-list">
