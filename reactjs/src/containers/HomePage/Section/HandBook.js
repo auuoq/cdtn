@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Slider from "react-slick";
-import thoaihoakhop from "../../../assets/imagecamnang/thoaihoakhop.png"
-import viemkhop from "../../../assets/imagecamnang/viemkhop.png"
-import thoatvidiadem from "../../../assets/imagecamnang/thoatvidiadem.png"
+import tamthan from "../../../assets/imagecamnang/tamthan.png"
+import benhkhac from "../../../assets/imagecamnang/benhkhac.png"
+import than from "../../../assets/imagecamnang/than.png"
+import mat from "../../../assets/imagecamnang/mat.png"
+import tieuhoa from "../../../assets/imagecamnang/tieuhoa.png"
+import tuyengiap from "../../../assets/imagecamnang/tuyengiap.png"
 
 class HandBook extends Component {
     render() {
@@ -40,38 +43,38 @@ class HandBook extends Component {
                 id: 1,
                 title: 'Thoái hóa khớp',
                 link: 'https://tamanhhospital.vn/cac-benh-co-xuong-khop/',
-                image: thoaihoakhop
+                image: mat
             },
             {
                 id: 2,
                 title: 'Viêm khớp dạng thấp',
                 link: 'https://umcclinic.com.vn/benh-co-xuong-khop',
-                image: viemkhop// ví dụ ảnh khớp
+                image: tamthan// ví dụ ảnh khớp
             },
             {
                 id: 3,
                 title: 'Thoát vị đĩa đệm',
                 link: 'https://bvnguyentriphuong.com.vn/dieu-duong/tham-kham-lam-sang-va-can-lam-sang-co-xuong-khop',
-                image: thoatvidiadem 
+                image: than 
 // ví dụ ảnh cột sống
             },
             {
                 id: 4,
                 title: 'Loãng xương',
                 link: 'https://vinmec.com/vie/bai-viet/top-7-can-benh-xuong-khop-pho-bien-o-nguoi-viet-nam-vi',
-                image: 'https://production-cdn.pharmacity.io/digital/original/plain/blog/loang-xuong-1.jpg' // ảnh xương
+                image: tieuhoa
             },
             {
                 id: 5,
                 title: 'Đau thần kinh tọa',
                 link: 'https://optimal365.vn/cac-benh-co-xuong-khop/',
-                image: 'https://cdn-icons-png.flaticon.com/512/181/181541.png' // ảnh dây thần kinh
+                image: tuyengiap
             },
             {
                 id: 6,
                 title: 'Bệnh khác',
                 link: '#',
-                image: 'https://cdn-icons-png.flaticon.com/512/126/126486.png' // ảnh mặc định
+                image: benhkhac
             },
         ];
 
