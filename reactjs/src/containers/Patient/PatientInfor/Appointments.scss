@@ -277,3 +277,25 @@
   color: #555;
   margin-top: 5px;
 }
+.reschedule-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); // overlay
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+
+  .reschedule-content {
+    max-width: 800px;
+    width: 100%;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}

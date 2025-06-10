@@ -47,20 +47,35 @@ class AssignClinicToManager extends Component {
     handleManagerChange = async (e) => {
         const selectedManager = e.target.value;
         this.setState({ selectedManager });
-        console.log("Selected manager:", selectedManager);
 
-        // Tìm phòng khám mà người quản lý này đang phụ trách
         if (selectedManager) {
-            const manager = this.state.managers.find(manager => manager.id === Number(selectedManager));            const clinics = this.state.clinics.find(clinic => clinic.id === manager.managedClinics[0].clinicId);
-            if (manager && manager.managedClinics[0].clinicId) {
-                this.setState({ selectedClinic: clinics.id });
+            const manager = this.state.managers.find(
+                (manager) => manager.id === Number(selectedManager)
+            );
+
+            if (
+                manager &&
+                manager.managedClinics &&
+                manager.managedClinics.length > 0 &&
+                manager.managedClinics[0].clinicId
+            ) {
+                const assignedClinic = this.state.clinics.find(
+                    (clinic) => clinic.id === manager.managedClinics[0].clinicId
+                );
+                if (assignedClinic) {
+                    this.setState({ selectedClinic: assignedClinic.id });
+                } else {
+                    this.setState({ selectedClinic: '' });
+                }
             } else {
+                // Nếu chưa có phòng khám nào được gán
                 this.setState({ selectedClinic: '' });
             }
         } else {
             this.setState({ selectedClinic: '' });
         }
     };
+
 
     handleSubmit = async () => {
         const { selectedManager, selectedClinic } = this.state;

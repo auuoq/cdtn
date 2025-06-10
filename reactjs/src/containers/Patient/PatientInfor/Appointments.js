@@ -9,40 +9,39 @@ import {
   deleteAppointment,
   deletePackageAppointment,
   submitFeedback,
-  submitFeedbackPackage
+  submitFeedbackPackage,
+  updateBookingSchedule,      // API mới
 } from '../../../services/userService';
 import { toast } from 'react-toastify';
 import ChatBox from '../../../components/chatbox';
+import ProfileDoctor from '../Doctor/ProfileDoctor';
+import DoctorSchedule from '../Doctor/DoctorSchedule';
+import DoctorExtraInfor from '../Doctor/DoctorExtraInfor';
+import UpdateSchedule from '../Doctor/UpdateSchedule';
 
 class Appointments extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      appointments: [],
-      loading: true,
-      selectedStatus: 'all',
-      statuses: [],
-      typeFilter: 'all',
-      showRatingModal: false,
-      selectedAppointment: null,
-      commentText: '',
-      showDiagnosisForId: null,
-    };
-  }
-    state = {
-    detailDoctor: {},
-    currentDoctorId: -1,
-    address: '',
-    loadingMap: true,
-    showChatbox: false, // <-- thêm dòng này
+  state = {
+    // Danh sách lịch
+    appointments: [],
+    loading: true,
+    // Filter
+    selectedStatus: 'all',
+    statuses: [],
+    typeFilter: 'all',
+    // Modal đánh giá
+    showRatingModal: false,
+    selectedAppointment: null,
+    commentText: '',
+    // Hiển thị chẩn đoán
+    showDiagnosisForId: null,
+    // Chatbox
+    showChatbox: false,
+    // Modal thay đổi giờ hẹn
+    showRescheduleModal: false,
+    rescheduleBooking: null,
+    newDate: '',
+    newTimeType: '',
   };
-
-  toggleChatbox = () => {
-    this.setState((prevState) => ({
-      showChatbox: !prevState.showChatbox,
-    }));
-  };
-
 
   async componentDidMount() {
     await this.fetchAppointments();
@@ -50,246 +49,346 @@ class Appointments extends Component {
 
   fetchAppointments = async () => {
     const { userInfo } = this.props;
-    if (userInfo && userInfo.id) {
-      try {
-        const [res1, res2] = await Promise.all([
-          getUserBookings(userInfo.id),
-          getUserPackageBookings(userInfo.id)
-        ]);
+    if (!userInfo?.id) return;
 
-        const appointments = [
-          ...(res1?.data?.map(item => ({ ...item, type: 'doctor' })) || []),
-          ...(res2?.data?.map(item => ({ ...item, type: 'package' })) || [])
-        ];
+    this.setState({ loading: true });
+    try {
+      const [res1, res2] = await Promise.all([
+        getUserBookings(userInfo.id),
+        getUserPackageBookings(userInfo.id),
+      ]);
 
-        const statuses = [...new Set(appointments.map(a => a.statusIdDataPatient?.valueVi || 'Chưa xác định'))];
-        this.setState({
-          appointments,
-          statuses: ['all', ...statuses],
-          loading: false
-        });
-      } catch (error) {
-        console.error('Error fetching appointments:', error);
-        toast.error('Đã xảy ra lỗi khi tải dữ liệu');
-        this.setState({ loading: false });
-      }
+      const appointments = [
+        ...(res1?.data?.map(item => ({ ...item, type: 'doctor' })) || []),
+        ...(res2?.data?.map(item => ({ ...item, type: 'package' })) || []),
+      ];
+
+      const statuses = [
+        ...new Set(
+          appointments.map(a => a.statusIdDataPatient?.valueVi || 'Chưa xác định')
+        ),
+      ];
+
+      this.setState({
+        appointments,
+        statuses: ['all', ...statuses],
+        loading: false,
+      });
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      toast.error('Đã xảy ra lỗi khi tải lịch hẹn');
+      this.setState({ loading: false });
     }
-  }
+  };
 
-  handleStatusChange = (status) => {
-    this.setState({ selectedStatus: status });
-  }
+  // Filter handlers
+  handleStatusChange = selectedStatus => {
+    this.setState({ selectedStatus });
+  };
+  handleTypeFilterChange = typeFilter => {
+    this.setState({ typeFilter });
+  };
 
-  handleTypeFilterChange = (type) => {
-    this.setState({ typeFilter: type });
-  }
+  // Format ngày
+  formatDate = timestamp => {
+    if (!timestamp) return 'N/A';
+    const d = new Date(+timestamp);
+    return d.toLocaleDateString('vi-VN');
+  };
 
-  formatDate = (timestamp) => {
-    if (!timestamp || isNaN(timestamp)) return "N/A";
-    const date = new Date(parseInt(timestamp, 10));
-    return date.toLocaleDateString('vi-VN');
-  }
-
-  handleDetail = (appointment) => {
+  // Chi tiết
+  handleDetail = appointment => {
     if (appointment.type === 'doctor') {
       window.open(`/detail-doctor/${appointment.doctorId}`, '_blank');
     } else {
       window.open(`/detail-exam-package/${appointment.packageId}`, '_blank');
     }
-  }
+  };
 
-  handleCancel = async (appointment) => {
-    try {
-      const confirm = window.confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');
-      if (!confirm) return;
-
-      let response = {};
-      if (appointment.type === 'package') {
-        response = await deletePackageAppointment(appointment.id);
-      } else {
-        response = await deleteAppointment(appointment.id);
-      }
-
-      if (response?.errCode === 0) {
-        toast.success('Hủy lịch hẹn thành công');
-        await this.fetchAppointments();
-      } else {
-        toast.error(response?.errMessage || 'Hủy lịch hẹn thất bại');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Đã xảy ra lỗi khi hủy lịch hẹn');
+  // Hủy lịch
+  handleCancel = async appointment => {
+    if (!window.confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?')) return;
+    let res;
+    if (appointment.type === 'package') {
+      res = await deletePackageAppointment(appointment.id);
+    } else {
+      res = await deleteAppointment(appointment.id);
     }
-  }
-
-  handleDeposit = (appointmentId) => {
-    this.props.history.push(`/deposit/${appointmentId}`);
-  }
-
-  handleOpenRatingModal = (appointment) => {
-    this.setState({
-      showRatingModal: true,
-      selectedAppointment: appointment,
-      ratingValue: 5,
-      commentText: ''
-    });
-  }
-
-  handleCloseRatingModal = () => {
-    this.setState({
-      showRatingModal: false,
-      selectedAppointment: null
-    });
-  }
-
-  handleRatingSubmit = async () => {
-    const { selectedAppointment, commentText } = this.state;
-    try {
-      let response;
-      if (selectedAppointment.type === 'doctor') {
-        response = await submitFeedback({
-          appointmentId: selectedAppointment.id,
-          feedback: commentText
-        });
-      } else if (selectedAppointment.type === 'package') {
-        response = await submitFeedbackPackage({
-          appointmentId: selectedAppointment.id,
-          feedback: commentText
-        });
-      }
-
-      if (response?.errCode === 0) {
-        toast.success('Đánh giá thành công');
-        this.setState({ showRatingModal: false });
-        await this.fetchAppointments();
-      } else {
-        toast.error(response?.errMessage || 'Gửi đánh giá thất bại');
-      }
-    } catch (err) {
-      console.error('Rating error:', err);
-      toast.error('Lỗi khi gửi đánh giá');
+    if (res?.errCode === 0) {
+      toast.success('Hủy lịch hẹn thành công');
+      await this.fetchAppointments();
+    } else {
+      toast.error(res?.errMessage || 'Hủy lịch thất bại');
     }
   };
 
+  // Đặt cọc
+  handleDeposit = appointmentId => {
+    this.props.history.push(`/deposit/${appointmentId}`);
+  };
 
+  // Đánh giá
+  handleOpenRatingModal = appointment => {
+    this.setState({
+      showRatingModal: true,
+      selectedAppointment: appointment,
+      commentText: '',
+    });
+  };
+  handleCloseRatingModal = () => {
+    this.setState({ showRatingModal: false, selectedAppointment: null });
+  };
+  handleRatingSubmit = async () => {
+    const { selectedAppointment, commentText } = this.state;
+    let res;
+    if (selectedAppointment.type === 'doctor') {
+      res = await submitFeedback({
+        appointmentId: selectedAppointment.id,
+        feedback: commentText,
+      });
+    } else {
+      res = await submitFeedbackPackage({
+        appointmentId: selectedAppointment.id,
+        feedback: commentText,
+      });
+    }
+    if (res?.errCode === 0) {
+      toast.success('Đánh giá thành công');
+      this.handleCloseRatingModal();
+      await this.fetchAppointments();
+    } else {
+      toast.error(res?.errMessage || 'Gửi đánh giá thất bại');
+    }
+  };
+
+  // Toggle UI
+  toggleChatbox = () => {
+    this.setState(st => ({ showChatbox: !st.showChatbox }));
+  };
+  handleToggleDiagnosis = appointmentId => {
+    this.setState(st => ({
+      showDiagnosisForId:
+        st.showDiagnosisForId === appointmentId ? null : appointmentId,
+    }));
+  };
+
+  // Sắp xếp và lọc
   getFilteredAppointments = () => {
     const { appointments, selectedStatus, typeFilter } = this.state;
-
-    const statusOrder = {
+    const order = {
       'Lịch hẹn mới': 1,
       'Đã xác nhận': 2,
       'Đã khám xong': 3,
-      'Đã hủy': 4
+      'Đã hủy': 4,
     };
-
     return appointments
-      .filter(app => {
-        const matchStatus = selectedStatus === 'all' || app.statusIdDataPatient?.valueVi === selectedStatus;
-        const matchType = typeFilter === 'all' || app.type === typeFilter;
-        return matchStatus && matchType;
+      .filter(a => {
+        const s = a.statusIdDataPatient?.valueVi || '';
+        return (
+          (selectedStatus === 'all' || s === selectedStatus) &&
+          (typeFilter === 'all' || a.type === typeFilter)
+        );
       })
       .sort((a, b) => {
-        const statusA = a.statusIdDataPatient?.valueVi || 'Khác';
-        const statusB = b.statusIdDataPatient?.valueVi || 'Khác';
-
-        const orderA = statusOrder[statusA] || 99;
-        const orderB = statusOrder[statusB] || 99;
-
-        return orderA - orderB;
+        const sa = order[a.statusIdDataPatient?.valueVi] || 99;
+        const sb = order[b.statusIdDataPatient?.valueVi] || 99;
+        return sa - sb;
       });
-  }
+  };
 
+  renderStatusBadge = status => {
+    let cls = 'badge-secondary';
+    if (status === 'Lịch hẹn mới') cls = 'badge-primary';
+    if (status === 'Đã xác nhận') cls = 'badge-success';
+    if (status === 'Đã khám xong') cls = 'badge-info';
+    if (status === 'Đã hủy') cls = 'badge-danger';
+    return <span className={`badge ${cls}`}>{status}</span>;
+  };
 
-  renderStatusBadge = (status) => {
-    let badgeClass = '';
-    switch (status) {
-      case 'Lịch hẹn mới':
-        badgeClass = 'badge-primary';
-        break;
-      case 'Đã xác nhận':
-        badgeClass = 'badge-success';
-        break;
-      case 'Đã khám xong':
-        badgeClass = 'badge-info';
-        break;
-      case 'Đã hủy':
-        badgeClass = 'badge-danger';
-        break;
-      default:
-        badgeClass = 'badge-secondary';
+  // ==== Reschedule ====
+  openReschedule = appointment => {
+    this.setState({
+      showRescheduleModal: true,
+      rescheduleBooking: appointment,
+      newDate: appointment.date,
+      newTimeType: appointment.timeType,
+    });
+    // Reset new date and time type to current booking values
+    console.log('Opening reschedule for:', appointment);    
+  };
+  closeReschedule = () => {
+    this.setState({ showRescheduleModal: false, rescheduleBooking: null });
+  };
+  handleRescheduleChange = e => {
+    this.setState({ [e.target.name]: e.target.value });
+  };
+  submitReschedule = async () => {
+    const { rescheduleBooking, newDate, newTimeType } = this.state;
+    const payload = {
+      bookingId: rescheduleBooking.id,
+      newDate,
+      newTimeType,
+    };
+    const res = await updateBookingSchedule(payload);
+    if (res.errCode === 0) {
+      toast.success('Thay đổi giờ hẹn thành công');
+      this.closeReschedule();
+      await this.fetchAppointments();
+    } else {
+      toast.error(res.errMessage || 'Thay đổi thất bại');
     }
-    return <span className={`badge ${badgeClass}`}>{status}</span>;
-  }
+  };
+  renderRescheduleModal() {
+    const {
+      showRescheduleModal,
+      rescheduleBooking,
+      newDate,
+      newTimeType,
+    } = this.state;
+    if (!showRescheduleModal || !rescheduleBooking) return null;
+    return (
+      <div className="reschedule-modal">
+        <div className="reschedule-content card p-4">
+          <h5>Thay đổi lịch hẹn</h5>
 
-  handleToggleDiagnosis = (appointmentId) => {
-    this.setState((prevState) => ({
-      showDiagnosisForId: prevState.showDiagnosisForId === appointmentId ? null : appointmentId
-    }));
+          {/* Thông tin bác sĩ + lịch cũ */}
+          <ProfileDoctor
+            doctorId={rescheduleBooking.doctorId}
+            isShowDescriptionDoctor={false}
+            isSHowLinkDetail={false}
+            isShowPrice={false}
+          />
+          <div className="dt-content-right">
+              <div className="doctor-schedule">
+                  <UpdateSchedule 
+                  doctorIdFromParent={rescheduleBooking.doctorId}
+                  bookingId={rescheduleBooking.id}
+                   />
+              </div>
+              <div className="doctor-extra-infor">
+                  <DoctorExtraInfor doctorIdFromParent={rescheduleBooking.doctorId} />
+              </div>
+          </div>
+          <hr />
+          <div className="text-right">
+            <button
+              className="btn btn-secondary mr-2"
+              onClick={this.closeReschedule}
+            >
+              Hủy
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={this.submitReschedule}
+            >
+              Lưu thay đổi
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
+  // ==== End Reschedule ====
 
-  renderRatingModal = () => {
+
+  renderRatingModal() {
     const { showRatingModal, commentText } = this.state;
     if (!showRatingModal) return null;
-
     return (
       <div className="rating-modal">
         <div className="rating-content">
           <h5>Đánh giá cuộc hẹn</h5>
           <label>Nhận xét:</label>
           <textarea
-            value={commentText}
-            onChange={e => this.setState({ commentText: e.target.value })}
             className="form-control mb-3"
             rows="4"
+            value={commentText}
+            onChange={e => this.setState({ commentText: e.target.value })}
           />
-          <button className="btn btn-primary mr-2" onClick={this.handleRatingSubmit}>Gửi đánh giá</button>
-          <button className="btn btn-secondary" onClick={this.handleCloseRatingModal}>Hủy</button>
+          <button
+            className="btn btn-primary mr-2"
+            onClick={this.handleRatingSubmit}
+          >
+            Gửi đánh giá
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={this.handleCloseRatingModal}
+          >
+            Hủy
+          </button>
         </div>
       </div>
     );
   }
 
+
   render() {
-    const { loading, statuses, selectedStatus, typeFilter } = this.state;
-    const filteredAppointments = this.getFilteredAppointments();
+    const {
+      loading,
+      statuses,
+      selectedStatus,
+      typeFilter,
+      appointments,
+      showChatbox,
+    } = this.state;
+    const filtered = this.getFilteredAppointments();
 
     return (
       <>
         <HomeHeader />
+
+        {/* Modals */}
         {this.renderRatingModal()}
+        {this.renderRescheduleModal()}
+
         <div className="appointments-page container-fluid py-4">
           <div className="row">
             <div className="col-12">
-              <div className="appointments-header mb-4 d-flex justify-content-between align-items-center">
+              {/* Filter */}
+              <div className="appointments-header mb-4 d-flex justify-content-between">
                 <div className="btn-group">
-                  {statuses.map(status => (
+                  {statuses.map(s => (
                     <button
-                      key={status}
-                      type="button"
-                      className={`btn ${selectedStatus === status ? 'btn-primary' : 'btn-outline-primary'}`}
-                      onClick={() => this.handleStatusChange(status)}
+                      key={s}
+                      className={`btn ${
+                        selectedStatus === s ? 'btn-primary' : 'btn-outline-primary'
+                      }`}
+                      onClick={() => this.handleStatusChange(s)}
                     >
-                      {status === 'all' ? 'Tất cả' : status}
+                      {s === 'all' ? 'Tất cả' : s}
                     </button>
                   ))}
                 </div>
-
                 <div className="btn-group">
                   <button
-                    className={`btn ${typeFilter === 'all' ? 'btn-primary' : 'btn-outline-primary'}`}
+                    className={`btn ${
+                      typeFilter === 'all' ? 'btn-primary' : 'btn-outline-primary'
+                    }`}
                     onClick={() => this.handleTypeFilterChange('all')}
-                  >Tất cả</button>
+                  >
+                    Tất cả
+                  </button>
                   <button
-                    className={`btn ${typeFilter === 'doctor' ? 'btn-primary' : 'btn-outline-primary'}`}
+                    className={`btn ${
+                      typeFilter === 'doctor' ? 'btn-primary' : 'btn-outline-primary'
+                    }`}
                     onClick={() => this.handleTypeFilterChange('doctor')}
-                  >Bác sĩ</button>
+                  >
+                    Bác sĩ
+                  </button>
                   <button
-                    className={`btn ${typeFilter === 'package' ? 'btn-primary' : 'btn-outline-primary'}`}
+                    className={`btn ${
+                      typeFilter === 'package' ? 'btn-primary' : 'btn-outline-primary'
+                    }`}
                     onClick={() => this.handleTypeFilterChange('package')}
-                  >Gói khám</button>
+                  >
+                    Gói khám
+                  </button>
                 </div>
               </div>
 
+              {/* Nội dung */}
               {loading ? (
                 <div className="text-center py-5">
                   <div className="spinner-border text-primary" role="status">
@@ -297,122 +396,180 @@ class Appointments extends Component {
                   </div>
                   <p className="mt-2">Đang tải dữ liệu...</p>
                 </div>
-              ) : filteredAppointments.length === 0 ? (
+              ) : filtered.length === 0 ? (
                 <div className="empty-state text-center py-5">
-                  <i className="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                  <i className="fas fa-calendar-alt fa-3x text-muted mb-3" />
                   <h4>Không có lịch hẹn nào</h4>
                   <p className="text-muted">Bạn chưa có lịch hẹn nào trong mục này</p>
                 </div>
               ) : (
                 <div className="appointments-list">
-                  {filteredAppointments.map((appointment, index) => (
-                    <div key={index} className="appointment-card card mb-4">
-                      <div className="card-body">
-                        <div className="row">
-                          <div className="col-md-8 d-flex">
-                            <img
-                              src={
-                                appointment.type === 'doctor'
-                                  ? appointment.doctorData?.image
-                                  : appointment.packageData?.image
-                              }
-                              alt="Ảnh"
-                              style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px', marginRight: '15px' }}
-                            />
-
-                            <div className="appointment-info">
-                              <h4 className="card-title">
-                                {appointment.type === 'doctor'
-                                  ? `${appointment.doctorData.firstName} ${appointment.doctorData.lastName}`
-                                  : appointment.packageData?.name || 'Gói khám'}
-                              </h4>
-
-                              {/* Chuyên khoa (nếu có) */}
-                              {appointment.type === 'doctor' && appointment.doctorBooking.specialtyData?.name && (
-                                <p className="mb-1 text-muted"><i className="fas fa-stethoscope mr-1"></i>Chuyên khoa: {appointment.doctorBooking.specialtyData.name}</p>
-                              )}
-
-                              {/* Địa chỉ phòng khám */}
+                  {filtered.map((app, idx) => (
+                    <div key={idx} className="appointment-card card mb-4">
+                      <div className="card-body row">
+                        {/* Ảnh + info */}
+                        <div className="col-md-8 d-flex">
+                          <img
+                            src={
+                              app.type === 'doctor'
+                                ? app.doctorData?.image
+                                : app.packageData?.image
+                            }
+                            alt=""
+                            style={{
+                              width: 100,
+                              height: 100,
+                              objectFit: 'cover',
+                              borderRadius: 8,
+                              marginRight: 15,
+                            }}
+                          />
+                          <div className="appointment-info">
+                            <h4 className="card-title">
+                              {app.type === 'doctor'
+                                ? `${app.doctorData.firstName} ${app.doctorData.lastName}`
+                                : app.packageData?.name}
+                            </h4>
+                            {app.type === 'doctor' && (
                               <p className="mb-1 text-muted">
-                                <i className="fas fa-map-marker-alt mr-1"></i>
-                                {appointment.type === 'doctor'
-                                  ? appointment.doctorBooking.clinicData?.address
-                                  : appointment.packageData.clinicInfo?.address}
+                                <i className="fas fa-stethoscope mr-1" />
+                                {app.doctorBooking?.specialtyData?.name}
                               </p>
-
-                              {/* Thông tin thời gian */}
-                              <div className="appointment-meta mb-2">
-                                <div className="meta-item"><i className="fas fa-calendar-alt mr-2"></i>{this.formatDate(appointment.date)}</div>
-                                <div className="meta-item"><i className="fas fa-clock mr-2"></i>{appointment.timeTypeDataPatient?.valueVi}</div>
+                            )}
+                            <p className="mb-1 text-muted">
+                              <i className="fas fa-map-marker-alt mr-1" />
+                              {app.type === 'doctor'
+                                ? app.doctorBooking?.clinicData?.address
+                                : app.packageData?.clinicInfo?.address}
+                            </p>
+                            <div className="appointment-meta mb-2">
+                              <div className="meta-item">
+                                <i className="fas fa-calendar-alt mr-2" />
+                                {this.formatDate(app.date)}
                               </div>
-
-                              <div className="status-container mb-2">
-                                {this.renderStatusBadge(appointment.statusIdDataPatient?.valueVi || 'Chưa xác định')}
+                              <div className="meta-item">
+                                <i className="fas fa-clock mr-2" />
+                                {app.timeTypeDataPatient?.valueVi}
                               </div>
                             </div>
-                          </div>
-
-                          <div className="col-md-4">
-                            <div className="appointment-actions">
-
-                              <button className="btn btn-outline-info btn-sm mb-2" onClick={() => this.handleDetail(appointment)}>
-                                <i className="fas fa-info-circle mr-1"></i>
-                                Chi tiết {appointment.type === 'doctor' ? 'bác sĩ' : 'gói khám'}
-                              </button>
-
-                              {['Lịch hẹn mới', 'Đã xác nhận'].includes(appointment.statusIdDataPatient?.valueVi) && (
-                                <button className="btn btn-danger btn-sm mb-2" onClick={() => this.handleCancel(appointment)}>
-                                  <i className="fas fa-times mr-1"></i>Hủy lịch
-                                </button>
-                              )}
-
-                              {/* Chỉnh sửa phần đặt cọc / text ở đây */}
-                              {appointment.packageData &&
-                                appointment.statusIdDataPatient?.valueVi === 'Lịch hẹn mới' &&
-                                appointment.packageData?.isDepositRequired && (
-                                  <button className="btn btn-primary btn-sm mb-2" onClick={() => this.handleDeposit(appointment.id)}>
-                                    <i className="fas fa-money-bill-wave mr-1"></i>Đặt cọc
-                                  </button>
-                              )}
-
-                              {appointment.statusIdDataPatient?.valueVi === 'Lịch hẹn mới' &&
-                                (!appointment.packageData || !appointment.packageData?.isDepositRequired) && (
-                                  <div className="text-info mb-2" style={{ fontWeight: '600' }}>
-                                    Vui lòng xác nhận qua email
-                                  </div>
-                              )}
-
-                              {appointment.statusIdDataPatient?.valueVi === 'Đã khám xong' && (
-                                <button className="btn btn-success btn-sm" onClick={() => this.handleOpenRatingModal(appointment)}>
-                                  <i className="fas fa-star mr-1"></i>Đánh giá
-                                </button>
-                              )}
-                              {appointment.statusIdDataPatient?.valueVi === 'Đã khám xong' && (
-                                <button
-                                  className="btn btn-secondary btn-sm"
-                                  onClick={() => this.handleToggleDiagnosis(appointment.id)}
-                                >
-                                  <i className="fas fa-file-medical-alt mr-1"></i>
-                                  {this.state.showDiagnosisForId === appointment.id ? 'Ẩn' : 'Xem'} chẩn đoán
-                                </button>
+                            <div className="status-container mb-2">
+                              {this.renderStatusBadge(
+                                app.statusIdDataPatient?.valueVi
                               )}
                             </div>
                           </div>
-                          {/* Phần hiển thị chẩn đoán nếu toggle bật */}
-                          {this.state.showDiagnosisForId === appointment.id && (
-                            <div className="diagnosis-section mt-3 p-3 border rounded bg-light">
-                              <h6>Chẩn đoán:</h6>
-                              <p>{appointment.diagnosis || 'Chưa có chẩn đoán'}</p>
-                              <p>
-                                <img
-                                  src={appointment.remedyImage || 'https://via.placeholder.com/150'}
-                                  alt="Chẩn đoán"
-                                  style={{ maxWidth: '300px', borderRadius: '8px' }}
-                                />
-                              </p>
-                            </div>
-                          )}
                         </div>
+
+                        {/* Actions */}
+                        <div className="col-md-4">
+                          <div className="appointment-actions">
+                            <button
+                              className="btn btn-outline-info btn-sm mb-2"
+                              onClick={() => this.handleDetail(app)}
+                            >
+                              <i className="fas fa-info-circle mr-1" />
+                              Chi tiết
+                            </button>
+
+                            {['Lịch hẹn mới', 'Đã xác nhận'].includes(
+                              app.statusIdDataPatient?.valueVi
+                            ) && (
+                              <button
+                                className="btn btn-danger btn-sm mb-2"
+                                onClick={() => this.handleCancel(app)}
+                              >
+                                <i className="fas fa-times mr-1" />
+                                Hủy lịch
+                              </button>
+                            )}
+
+                            {/* Đặt cọc nếu cần */}
+                            {app.packageData &&
+                              app.statusIdDataPatient?.valueVi ===
+                                'Lịch hẹn mới' &&
+                              app.packageData?.isDepositRequired && (
+                                <button
+                                  className="btn btn-primary btn-sm mb-2"
+                                  onClick={() => this.handleDeposit(app.id)}
+                                >
+                                  <i className="fas fa-money-bill-wave mr-1" />
+                                  Đặt cọc
+                                </button>
+                              )}
+
+                            {/* Thông báo email nếu không cần cọc */}
+                            {app.statusIdDataPatient?.valueVi ===
+                              'Lịch hẹn mới' &&
+                              (!app.packageData ||
+                                !app.packageData?.isDepositRequired) && (
+                                <div
+                                  className="text-info mb-2"
+                                  style={{ fontWeight: 600 }}
+                                >
+                                  Vui lòng xác nhận qua email
+                                </div>
+                              )}
+
+                            {/* Đánh giá */}
+                            {app.statusIdDataPatient?.valueVi ===
+                              'Đã khám xong' && (
+                              <button
+                                className="btn btn-success btn-sm mb-2"
+                                onClick={() => this.handleOpenRatingModal(app)}
+                              >
+                                <i className="fas fa-star mr-1" />
+                                Đánh giá
+                              </button>
+                            )}
+
+                            {/* Xem chẩn đoán */}
+                            {app.statusIdDataPatient?.valueVi ===
+                              'Đã khám xong' && (
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() =>
+                                  this.handleToggleDiagnosis(app.id)
+                                }
+                              >
+                                <i className="fas fa-file-medical-alt mr-1" />
+                                {this.state.showDiagnosisForId === app.id
+                                  ? 'Ẩn'
+                                  : 'Xem'}{' '}
+                                chẩn đoán
+                              </button>
+                            )}
+
+                            {/* Thay đổi giờ hẹn */}
+                            {app.statusIdDataPatient?.valueVi ===
+                              'Đã xác nhận' && (
+                              <button
+                                className="btn btn-warning btn-sm mb-2"
+                                onClick={() => this.openReschedule(app)}
+                              >
+                                <i className="fas fa-edit mr-1" />
+                                Thay đổi giờ hẹn
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Chẩn đoán (toggle) */}
+                        {this.state.showDiagnosisForId === app.id && (
+                          <div className="diagnosis-section mt-3 p-3 border rounded bg-light">
+                            <h6>Chẩn đoán:</h6>
+                            <p>{app.diagnosis || 'Chưa có chẩn đoán'}</p>
+                            <img
+                              src={app.remedyImage || 'https://via.placeholder.com/150'}
+                              alt="Chẩn đoán"
+                              style={{
+                                width: 120,
+                                height: 100,
+                                objectFit: 'cover',
+                                borderRadius: 8,
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -421,7 +578,8 @@ class Appointments extends Component {
             </div>
           </div>
         </div>
-        {/* Nút mở chatbox */}
+
+        {/* Nút chatbox */}
         <div
           onClick={this.toggleChatbox}
           style={{
@@ -437,20 +595,20 @@ class Appointments extends Component {
             justifyContent: 'center',
             alignItems: 'center',
             cursor: 'pointer',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+            boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
           }}
           title="Chat với bác sĩ"
         >
-          <i className="fas fa-comments fa-lg"></i>
+          <i className="fas fa-comments fa-lg" />
         </div>
-        {this.state.showChatbox && <ChatBox />}
+        {showChatbox && <ChatBox />}
       </>
     );
   }
 }
 
 const mapStateToProps = state => ({
-  userInfo: state.user.userInfo
+  userInfo: state.user.userInfo,
 });
 
 export default withRouter(connect(mapStateToProps)(Appointments));
