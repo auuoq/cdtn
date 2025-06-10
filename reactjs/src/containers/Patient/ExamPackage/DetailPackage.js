@@ -5,7 +5,6 @@ import HomeHeader from '../../HomePage/HomeHeader';
 import './DetailPackage.scss';
 import { getDetailExamPackageById } from '../../../services/userService';
 import PackageSchedule from './PackageSchedule';
-import PackageExtraInfor from './PackageExtraInfor';
 import ChatBox from '../../../components/chatbox';
 
 class DetailPackage extends Component {
@@ -40,7 +39,27 @@ class DetailPackage extends Component {
             clinicInfo,
             paymentTypeData,
             price,
+            isDepositRequired,
+            depositPercent,
         } = detailPackage;
+
+        const formattedPrice = price
+            ? Number(price).toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+              })
+            : '';
+
+        const depositAmount = isDepositRequired && price
+            ? Number(price) * (depositPercent / 100)
+            : 0;
+
+        const formattedDeposit = depositAmount
+            ? depositAmount.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+              })
+            : '';
 
         return (
             <>
@@ -48,13 +67,23 @@ class DetailPackage extends Component {
                 <div className="exam-package-detail-container">
                     {/* Header */}
                     <div className="package-header">
-                        <div className="header-image" style={{ backgroundImage: `url(${image || ''})` }} />
+                        <div
+                            className="header-image"
+                            style={{ backgroundImage: `url(${image || ''})` }}
+                        />
                         <div className="header-content">
                             <h1 className="package-title">{name}</h1>
                             <p className="package-description">{description}</p>
-                            <div className="price-tag">
-                                {new Intl.NumberFormat('vi-VN').format(price)} VND
-                            </div>
+                            <div className="price-tag">{formattedPrice}</div>
+                            {isDepositRequired ? (
+                                <div className="deposit-info" style={{ marginTop: '8px', fontSize: '16px', color: '#ff8800' }}>
+                                    Đặt cọc: {depositPercent}% - {formattedDeposit}
+                                </div>
+                            ) : (
+                                <div className="deposit-info" style={{ marginTop: '8px', fontSize: '16px', color: 'green' }}>
+                                    Không cần đặt cọc
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -71,7 +100,10 @@ class DetailPackage extends Component {
 
                             <div className="content-section">
                                 <h2 className="section-title">Chi tiết gói khám</h2>
-                                <div className="detail-content" dangerouslySetInnerHTML={{ __html: contentHTML }} />
+                                <div
+                                    className="detail-content"
+                                    dangerouslySetInnerHTML={{ __html: contentHTML }}
+                                />
                             </div>
                         </div>
 
@@ -107,13 +139,31 @@ class DetailPackage extends Component {
                                             <div className="info-value">{paymentTypeData?.valueVi}</div>
                                         </div>
                                     </div>
+
+                                    {/* Đặt cọc */}
+                                    <div className="info-item">
+                                        <i className="fas fa-coins icon"></i>
+                                        <div>
+                                            <div className="info-label">Yêu cầu đặt cọc</div>
+                                            {isDepositRequired ? (
+                                                <div className="info-value text-warning">
+                                                    {depositPercent}% - {formattedDeposit}
+                                                </div>
+                                            ) : (
+                                                <div className="info-value text-success">
+                                                    Không cần đặt cọc
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Nút mở chatbox */}
+                {/* Chatbox toggle button */}
                 <div
                     onClick={this.toggleChatbox}
                     style={{

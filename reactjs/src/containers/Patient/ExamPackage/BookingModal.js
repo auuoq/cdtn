@@ -103,7 +103,7 @@ class BookingModal extends Component {
       email,
       address,
       reason,
-      date: dateTimestamp,
+      date: this.props.dataTime.date,
       birthday: dateTimestamp,
       selectedGender: selectedGender?.value,
       timeType,

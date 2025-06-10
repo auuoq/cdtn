@@ -178,8 +178,6 @@ const getUserConversations = async (userId) => {
             order: [['createdAt', 'DESC']],
             raw: true
         });
-        console.log('messages:', messages);
-
         // Xác định danh sách userId đã trò chuyện
         userId = Number(userId);
         const userIds = new Set();
@@ -195,7 +193,6 @@ const getUserConversations = async (userId) => {
                 attributes: ['id', 'firstName', 'lastName', 'image', 'isActive'],
                 raw: true
             });
-        console.log('user:', user);
 
             const lastMsg = await db.Message.findOne({
                 where: {

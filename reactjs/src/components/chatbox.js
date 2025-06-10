@@ -1,32 +1,64 @@
-
 import React, { Component } from 'react';
+import './chatbox.scss';
+import { PaperPlaneIcon } from '@radix-ui/react-icons';
 import {
   getMessagesBetweenUsers,
   sendMessage,
   getOnlineDoctors,
   getUserConversations,
 } from '../services/userService';
-import { PaperPlaneIcon } from '@radix-ui/react-icons';
 import { connect } from 'react-redux';
 import { io } from 'socket.io-client';
-
-import './chatbox.scss';
 
 class ChatBox extends Component {
   state = {
     selectedDoctorId: null,
-    messages: [],
-    newMessage: '',
     doctors: [],
     previousConversations: [],
+    messages: [],
+    newMessage: '',
     loading: false,
   };
 
-  socket = null; // 👈 Thêm biến socket
+  socket = null;
+  messagesEnd = null;
 
   componentDidMount() {
+    const { userInfo } = this.props;
     this.loadOnlineDoctors();
     this.loadUserConversations();
+
+    // Khởi tạo socket
+    this.socket = io(process.env.REACT_APP_BACKEND_URL);
+    // Request notification permission
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+    // Join room
+    this.socket.emit('join', userInfo.id);
+
+    // Lắng nghe event newMessage
+    this.socket.on('newMessage', (message) => {
+      // Popup notification
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(
+          `Tin nhắn mới từ ${message.senderId === userInfo.id ? 'Bạn' : 'Bác sĩ'}`,
+          { body: message.message }
+        );
+      }
+
+      // Cập nhật UI nếu đúng cuộc hội thoại đang mở
+      const { selectedDoctorId } = this.state;
+      const isRelevant =
+        (message.senderId === selectedDoctorId && message.receiverId === userInfo.id) ||
+        (message.senderId === userInfo.id && message.receiverId === selectedDoctorId);
+      if (isRelevant) {
+        this.setState(
+          (prev) => ({ messages: [...prev.messages, message] }),
+          this.scrollToBottom
+        );
+      }
+    });
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -35,44 +67,28 @@ class ChatBox extends Component {
     }
   }
 
+  componentWillUnmount() {
+    if (this.socket) this.socket.disconnect();
+  }
+
   loadOnlineDoctors = async () => {
-    try {
-      const res = await getOnlineDoctors();
-      if (res.errCode === 0) {
-        this.setState({ doctors: res.data });
-      }
-    } catch (e) {
-      console.error('Error loading online doctors', e);
-    }
+    const res = await getOnlineDoctors();
+    if (res.errCode === 0) this.setState({ doctors: res.data });
   };
 
   loadUserConversations = async () => {
-    const { userInfo } = this.props;
-    if (!userInfo?.id) return;
-
-    try {
-        const res = await getUserConversations(userInfo.id);
-        if (res.errCode === 0) {
-            this.setState({ previousConversations: res.data });
-        }
-    } catch (e) {
-        console.error('Error loading conversation history', e);
-    }
-};
-
+    const { id } = this.props.userInfo;
+    const res = await getUserConversations(id);
+    if (res.errCode === 0) this.setState({ previousConversations: res.data });
+  };
 
   loadMessages = async () => {
-    const { userInfo } = this.props;
+    const { id } = this.props.userInfo;
     const { selectedDoctorId } = this.state;
-    if (!userInfo?.id || !selectedDoctorId) return;
-
-    try {
-      const res = await getMessagesBetweenUsers(userInfo.id, selectedDoctorId);
-      if (res.errCode === 0) {
-        this.setState({ messages: res.data }, this.scrollToBottom);
-      }
-    } catch (e) {
-      console.error('Error loading messages', e);
+    if (!selectedDoctorId) return;
+    const res = await getMessagesBetweenUsers(id, selectedDoctorId);
+    if (res.errCode === 0) {
+      this.setState({ messages: res.data }, this.scrollToBottom);
     }
   };
 
@@ -84,206 +100,175 @@ class ChatBox extends Component {
 
   handleSend = async () => {
     const { userInfo } = this.props;
-    const { selectedDoctorId, newMessage } = this.state;
+    const { selectedDoctorId, newMessage, messages } = this.state;
     if (!newMessage.trim()) return;
 
-    const tempId = Date.now();
-    const optimisticMessage = {
-      id: tempId,
+    // Optimistic UI
+    const temp = {
+      id: Date.now(),
       senderId: userInfo.id,
       receiverId: selectedDoctorId,
       message: newMessage.trim(),
       createdAt: new Date().toISOString(),
     };
-
     this.setState(
-      (prev) => ({
-        messages: [...prev.messages, optimisticMessage],
-        newMessage: '',
-      }),
+      { messages: [...messages, temp], newMessage: '' },
       this.scrollToBottom
     );
 
-    try {
-      const res = await sendMessage({
-        senderId: userInfo.id,
-        receiverId: selectedDoctorId,
-        message: newMessage.trim(),
-      });
-
-      if (res.data?.errCode === 0) {
-        // 👉 Gửi qua socket nếu thành công
-        if (this.socket) {
-          this.socket.emit('sendMessage', res.data);
-        }
-
-        this.setState((prev) => ({
-          messages: prev.messages.map((msg) =>
-            msg.id === tempId ? res.data : msg
-          ),
-        }));
-      }
-    } catch (e) {
-      console.error('Send message failed', e);
+    // Gửi server
+    const res = await sendMessage({
+      senderId: userInfo.id,
+      receiverId: selectedDoctorId,
+      message: newMessage.trim(),
+    });
+    if (res.errCode === 0) {
+      this.socket.emit('sendMessage', res.data);
     }
   };
 
   render() {
     const {
-        doctors,
-        selectedDoctorId,
-        messages,
-        newMessage,
-        loading,
-        previousConversations,
+      doctors,
+      previousConversations,
+      selectedDoctorId,
+      messages,
+      newMessage,
     } = this.state;
     const { userInfo } = this.props;
 
-    const combinedDoctors = [
-        ...doctors,
-        ...previousConversations.filter(
-        (conv) => !doctors.some((doc) => doc.id === conv.id)
-        ),
+    const combined = [
+      ...doctors,
+      ...previousConversations.filter((c) => !doctors.find((d) => d.id === c.id)),
     ];
-
-    const selectedDoctor = combinedDoctors.find((d) => d.id === selectedDoctorId);
+    const selected = combined.find((d) => d.id === selectedDoctorId);
 
     return (
-        <div className="chatbox">
+      <div className="chatbox">
         {!selectedDoctorId ? (
-            <>
-            <div className="chatbox__header">💬 Nhắn tin với bác sĩ </div>
-
-            {/* Online Doctors */}
+          <>
+            <div className="chatbox__header">💬 Nhắn tin với bác sĩ</div>
             <div className="chatbox__doctors">
-                {doctors.map((doc) => (
+              {doctors.map((doc) => (
                 <button
-                    key={doc.id}
-                    onClick={() =>
+                  key={doc.id}
+                  onClick={() =>
                     this.setState({ selectedDoctorId: doc.id, messages: [] })
-                    }
-                    className="chatbox__doctors-button"
+                  }
+                  className="chatbox__doctors-button"
                 >
-                    <img
+                  <img
                     src={doc.image || 'https://www.w3schools.com/w3images/avatar2.png'}
                     alt="doctor"
-                    />
-                    <span>{doc.firstName}</span>
+                  />
+                  <span>{`${doc.firstName} ${doc.lastName}`}</span>
                 </button>
-                ))}
+              ))}
             </div>
-
-            {/* Conversation History */}
             <div className="chatbox__history">
-                {previousConversations.map((user) => (
+              {previousConversations.map((user) => (
                 <button
-                    key={user.id}
-                    onClick={() =>
+                  key={user.id}
+                  onClick={() =>
                     this.setState({ selectedDoctorId: user.id }, this.loadMessages)
-                    }
-                    className="chatbox__doctors-button"
+                  }
+                  className="chatbox__doctors-button"
                 >
-                    <img
+                  <img
                     src={user.image || 'https://www.w3schools.com/w3images/avatar2.png'}
                     alt="doctor"
-                    />
-                    <div className="chatbox__history-content">
-                    <span>{user.firstName}</span>
+                  />
+                  <div className="chatbox__history-content">
+                    <span>{`${user.firstName} ${user.lastName}`}</span>
                     <small className="chatbox__history-preview">
-                        {user.lastMessage?.slice(0, 30)}...
+                      {user.lastMessage?.slice(0, 30)}...
                     </small>
-                    </div>
+                  </div>
                 </button>
-                ))}
+              ))}
             </div>
-            </>
+          </>
         ) : (
-            <>
-            {/* Chat Header with Doctor Info */}
+          <>
             <div className="chatbox__header chatbox__chat-header">
-                <button
+              <button
                 className="chatbox__back-button"
                 onClick={() => this.setState({ selectedDoctorId: null })}
-                >
-                ⬅ 
-                </button>
-                <img
-                src={selectedDoctor?.image || 'https://www.w3schools.com/w3images/avatar2.png'}
+              >
+                ⬅
+              </button>
+              <img
+                src={selected?.image || 'https://www.w3schools.com/w3images/avatar2.png'}
                 alt="avatar"
-                />
-                <div className="chatbox__doctor-info">
-                <strong>{selectedDoctor?.firstName}</strong>
-                <span className={selectedDoctor?.isActive ? 'online' : 'offline'}>
-                    {selectedDoctor?.isActive ? 'Online' : 'Offline'}
+              />
+              <div className="chatbox__doctor-info">
+                <strong>{`${selected?.firstName} ${selected?.lastName}`}</strong>
+                <span className={selected?.isActive ? 'online' : 'offline'}>
+                  {selected?.isActive ? 'Online' : 'Offline'}
                 </span>
-                </div>
+              </div>
             </div>
-
-            {/* Chat Messages */}
             <div className="chatbox__messages">
-                {messages.length === 0 && (
+              {messages.length === 0 && (
                 <div className="chatbox__messages-empty">Chưa có tin nhắn nào</div>
-                )}
-
-                {messages.map((msg) => {
+              )}
+              {messages.map((msg) => {
                 const isSender = msg.senderId === userInfo.id;
-                const senderInfo = combinedDoctors.find((d) => d.id === msg.senderId);
+                const sender = combined.find((d) => d.id === msg.senderId);
                 return (
-                    <div
+                  <div
                     key={msg.id}
-                    className={`chatbox__messages-item ${isSender ? 'sender' : 'receiver'}`}
-                    >
+                    className={`chatbox__messages-item ${
+                      isSender ? 'sender' : 'receiver'
+                    }`}
+                  >
                     {!isSender && (
-                        <img
+                      <img
                         src={
-                            senderInfo?.image || 'https://www.w3schools.com/w3images/avatar2.png'
+                          sender?.image ||
+                          'https://www.w3schools.com/w3images/avatar2.png'
                         }
                         alt="avatar"
-                        />
+                      />
                     )}
                     <div
-                        className={`chatbox__messages-item-bubble ${isSender ? 'sender' : 'receiver'}`}
+                      className={`chatbox__messages-item-bubble ${
+                        isSender ? 'sender' : 'receiver'
+                      }`}
                     >
-                        {msg.message}
-                        <div
+                      {msg.message}
+                      <div
                         className={`chatbox__messages-item-bubble-time ${
-                            isSender ? 'sender' : 'receiver'
+                          isSender ? 'sender' : 'receiver'
                         }`}
-                        >
+                      >
                         {new Date(msg.createdAt).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
                         })}
-                        </div>
+                      </div>
                     </div>
-                    </div>
+                  </div>
                 );
-                })}
-                <div ref={(el) => (this.messagesEnd = el)} />
+              })}
+              <div ref={(el) => (this.messagesEnd = el)} />
             </div>
-
-            {/* Message Input */}
             <div className="chatbox__input">
-                <input
+              <input
                 value={newMessage}
                 onChange={(e) => this.setState({ newMessage: e.target.value })}
                 onKeyDown={(e) => e.key === 'Enter' && this.handleSend()}
                 placeholder="Nhập tin nhắn..."
-                disabled={loading || !selectedDoctorId}
-                />
-                <button
-                onClick={this.handleSend}
-                disabled={loading || !selectedDoctorId}
-                >
+              />
+              <button onClick={this.handleSend}>
                 <PaperPlaneIcon />
-                </button>
+              </button>
             </div>
-            </>
+          </>
         )}
-        </div>
+      </div>
     );
-    }
-
+  }
 }
 
 const mapStateToProps = (state) => ({

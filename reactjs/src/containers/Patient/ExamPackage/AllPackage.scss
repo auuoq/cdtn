@@ -1,0 +1,49 @@
+.filter-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  .form-select,
+  .form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.3s;
+
+    &:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  }
+
+  .btn-primary {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    border: none;
+
+    &:hover {
+      background-color: #0056b3;
+    }
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+}
+.filter-section {
+  .form-select,
+  .form-control {
+    max-width: 100%; // tránh tràn
+  }
+
+  select,
+  input {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

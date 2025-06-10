@@ -1,8 +1,9 @@
 import db from "../models/index"
 import bcrypt from 'bcryptjs'
-import { Op } from 'sequelize'
 import emailService from './emailService'
 import { console } from "inspector";
+const { Op, Sequelize } = require('sequelize');
+
 
 const crypto = require('crypto');
 const salt = bcrypt.genSaltSync(10);
@@ -341,6 +342,9 @@ let getUserBookings = (userId) => {
                     if (booking.doctorData && booking.doctorData.image) {
                         booking.doctorData.image = Buffer.from(booking.doctorData.image, 'base64').toString('binary');
                     }
+                    if (booking && booking.remedyImage) {
+                        booking.remedyImage = Buffer.from(booking.remedyImage, 'base64').toString('binary');
+                    }
                     // Nếu muốn chuyển ảnh chuyên khoa hoặc phòng khám (nếu có), cũng có thể xử lý tương tự
                     return booking;
                 });
@@ -546,7 +550,7 @@ let getUserPackageBookings = (userId) => {
           {
             model: db.ExamPackage,
             as: 'packageData',
-            attributes: ['id', 'name', 'price', 'description', 'image', 'note'],
+            attributes: ['id', 'name', 'price', 'description', 'image', 'note', 'isDepositRequired', 'depositPercent'],
             include: [
               {
                 model: db.Clinic,
@@ -571,6 +575,10 @@ let getUserPackageBookings = (userId) => {
           if (booking.packageData && booking.packageData.image) {
             booking.packageData.image = Buffer.from(booking.packageData.image, 'base64').toString('binary');
           }
+          //remedyImage
+         if (booking && booking.remedyImage) {
+             booking.remedyImage = Buffer.from(booking.remedyImage, 'base64').toString('binary');
+         }
           return booking;
         });
       }
@@ -637,11 +645,11 @@ let getDepositInfoPackage = async (appointmentId) => {
         {
           model: db.ExamPackage,
           as: 'packageData',
-          attributes: ['id', 'name', 'price', 'note'],
+          attributes: ['id', 'name', 'price', 'note','isDepositRequired', 'depositPercent','image'],
           include: [
             {
               model: db.Allcode,
-              as: 'paymentTypeData',    // hình thức thanh toán
+              as: 'paymentTypeData',    
               attributes: ['valueEn', 'valueVi']
             },
             {
@@ -661,7 +669,15 @@ let getDepositInfoPackage = async (appointmentId) => {
       nest: true
     });
 
-    // không cần convert image ở đây vì gói khám không lưu image trong BookingPackage
+    // Chuyển đổi image sang binary cho từng booking
+    if (bookings && bookings.length > 0) {
+      bookings = bookings.map(booking => {
+        if (booking.packageData && booking.packageData.image) {
+          booking.packageData.image = Buffer.from(booking.packageData.image, 'base64').toString('binary');
+        }
+        return booking;
+      });
+    }
 
     return {
       errCode: 0,
@@ -818,6 +834,228 @@ let handleChangePassword = (userId, currentPassword, newPassword) => {
 };
 
 
+let getDepositReport = (from, to) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!from || !to) {
+        return resolve({
+          errCode: 1,
+          errMessage: "Missing 'from' or 'to' parameters"
+        });
+      }
+
+      const fromDate = new Date(from).getTime();
+      const toDate = new Date(to).getTime();
+
+      if (isNaN(fromDate) || isNaN(toDate)) {
+        return resolve({
+          errCode: 2,
+          errMessage: "Invalid date format for 'from' or 'to'"
+        });
+      }
+
+      // 1. Tổng tiền chỉ của giao dịch PENDING theo clinicId
+      const pendingTotals = await db.DepositTransaction.findAll({
+        attributes: [
+          'clinicId',
+          [Sequelize.fn('SUM', Sequelize.col('amount')), 'totalAmount']
+        ],
+        where: {
+          paymentTime: { [Op.between]: [fromDate, toDate] },
+          status: 'PENDING'
+        },
+        group: ['clinicId']
+      });
+
+      const pendingMap = {};
+      for (let item of pendingTotals) {
+        pendingMap[item.clinicId] = Number(item.dataValues.totalAmount);
+      }
+
+      // 2. Lấy toàn bộ giao dịch (PENDING và SETTLED)
+      const allTransactions = await db.DepositTransaction.findAll({
+        where: {
+          paymentTime: { [Op.between]: [fromDate, toDate] }
+        },
+        include: [
+          {
+            model: db.Clinic,
+            as: 'clinicInfo',
+            attributes: ['id', 'name', 'address']
+          }
+        ],
+        order: [['paymentTime', 'DESC']]
+      });
+
+      // 3. Gom giao dịch theo clinicId
+      const transactionsByClinic = {};
+      for (let tx of allTransactions) {
+        const clinicId = tx.clinicId;
+        if (!transactionsByClinic[clinicId]) {
+          transactionsByClinic[clinicId] = {
+            clinicId,
+            clinicInfo: tx.clinicInfo,
+            detailedTransactions: [],
+            totalAmount: pendingMap[clinicId] || 0
+          };
+        }
+        transactionsByClinic[clinicId].detailedTransactions.push(tx);
+      }
+
+      // 4. Chuyển object thành array
+      const combinedData = Object.values(transactionsByClinic);
+
+      resolve({
+        errCode: 0,
+        errMessage: 'OK',
+        reportPeriod: { from, to },
+        clinicReports: combinedData
+      });
+
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+
+let getDepositReportByClinic = (clinicId, from, to) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!clinicId || !from || !to) {
+        return resolve({
+          errCode: 1,
+          errMessage: "Missing 'clinicId', 'from' or 'to' parameters"
+        });
+      }
+
+      const fromDate = new Date(from).getTime();
+      const toDate = new Date(to).getTime();
+
+      if (isNaN(fromDate) || isNaN(toDate)) {
+        return resolve({
+          errCode: 2,
+          errMessage: "Invalid date format for 'from' or 'to'"
+        });
+      }
+
+      // Tổng số tiền của phòng khám
+      const total = await db.DepositTransaction.findOne({
+        attributes: [
+          [Sequelize.fn('SUM', Sequelize.col('amount')), 'totalAmount']
+        ],
+        where: {
+          clinicId,
+          paymentTime: { [Op.between]: [fromDate, toDate] },
+          status: 'PENDING'
+        }
+      });
+
+      const detailedTransactions = await db.DepositTransaction.findAll({
+        where: {
+          clinicId,
+          paymentTime: { [Op.between]: [fromDate, toDate] }
+        },
+        include: [
+          {
+            model: db.Clinic,
+            as: 'clinicInfo',
+            attributes: ['name', 'address']
+          }
+        ],
+        order: [['paymentTime', 'DESC']]
+      });
+
+      resolve({
+        errCode: 0,
+        errMessage: 'OK',
+        reportPeriod: { from, to },
+        clinicId,
+        clinicInfo: detailedTransactions[0]?.clinicInfo || {},
+        totalAmount: total?.dataValues?.totalAmount || 0,
+        detailedTransactions
+      });
+
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const toggleTransactionStatus = (transactionId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let transaction = await db.DepositTransaction.findByPk(transactionId);
+            if (!transaction) {
+                return resolve({
+                    errCode: 1,
+                    errMessage: 'Transaction not found'
+                });
+            }
+
+            if (transaction.status === 'PENDING') {
+                transaction.status = 'SETTLED';
+            } else if (transaction.status === 'SETTLED') {
+                transaction.status = 'PENDING';
+            } else {
+                return resolve({
+                    errCode: 2,
+                    errMessage: `Only transactions with status PENDING or SETTLED can be toggled. Current status: ${transaction.status}`
+                });
+            }
+
+            await transaction.save();
+            resolve({
+                errCode: 0,
+                errMessage: 'Transaction status updated successfully',
+                data: transaction
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+}
+
+const toggleStatusForClinic = async (clinicId, from, to) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const fromDate = new Date(from);
+            const toDate = new Date(to);
+
+            let transactions = await db.DepositTransaction.findAll({
+                where: {
+                    clinicId: clinicId,
+                    paymentTime: {
+                        [Op.between]: [fromDate, toDate],
+                    },
+                },
+            });
+
+            if (!transactions || transactions.length === 0) {
+                return resolve({
+                    errCode: 1,
+                    errMessage: 'Không có giao dịch nào trong khoảng thời gian này',
+                });
+            }
+
+            for (let transaction of transactions) {
+                transaction.status = (transaction.status === 'PENDING') ? 'SETTLED' : 'PENDING';
+                await transaction.save();
+            }
+
+            return resolve({
+                errCode: 0,
+                errMessage: 'Cập nhật trạng thái thành công',
+                updatedCount: transactions.length
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+
+
 
 module.exports = {
     handleUserLogin: handleUserLogin,
@@ -838,4 +1076,9 @@ module.exports = {
     getDepositInfoPackage: getDepositInfoPackage,
     submitFeedback: submitFeedback,
     submitFeedbackPackage: submitFeedbackPackage,
+    getDepositReport: getDepositReport,
+    getDepositReportByClinic: getDepositReportByClinic,
+    toggleTransactionStatus: toggleTransactionStatus,
+    toggleStatusForClinic: toggleStatusForClinic
+
 }

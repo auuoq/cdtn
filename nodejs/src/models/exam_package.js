@@ -44,6 +44,18 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true,
         },
+        isDepositRequired: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+        },
+        depositPercent: {
+            type: DataTypes.INTEGER, // giá trị từ 0 đến 100
+            allowNull: true,
+            validate: {
+            min: 0,
+            max: 100,
+            },
+        },
     }, {
         sequelize,
         modelName: 'ExamPackage',

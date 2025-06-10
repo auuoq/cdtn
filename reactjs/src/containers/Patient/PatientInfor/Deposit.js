@@ -1,155 +1,135 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
 import './Deposit.scss';
-import { getDepositInfo, postVerifyBookAppointment } from '../../../services/userService';
+import { getPackageDepositInfo, paymentMomo } from '../../../services/userService';
 import HomeHeader from '../../HomePage/HomeHeader';
 
 class Deposit extends Component {
-
     constructor(props) {
         super(props);
         this.state = {
-            appointmentId: null, // Lưu appointmentId lấy từ URL
-            depositAmount: '', // Số tiền đặt cọc
-            depositInfo: null, // Dữ liệu đặt cọc từ API
-            loading: true, // Trạng thái tải dữ liệu
-            error: null, // Lưu lỗi nếu có
-            successMessage: '', // Lưu thông báo thành công
+            appointmentId: null,
+            depositAmount: '',
+            depositInfo: null,
+            loading: true,
+            error: null,
+            successMessage: '',
         };
     }
 
     async componentDidMount() {
-        // Lấy appointmentId từ URL params
         const { appointmentId } = this.props.match.params;
         this.setState({ appointmentId });
 
         try {
-            let response = await getDepositInfo(appointmentId);
-            if (response && response.data.errCode === 0) {
-                const depositInfo = response.data.data[0]; // Lấy phần tử đầu tiên của mảng data
-                let price = parseFloat(depositInfo.doctorBooking.priceTypeData.valueVi.replace(/,/g, '')); // Chuyển giá thành số
+            const response = await getPackageDepositInfo(appointmentId);
+            if (response && response.errCode === 0) {
+                const depositInfo = response.data[0];
 
-                // Check if timeType is T9, T10, T11, T12, or T13, increase price by 50%
-                if (['T9', 'T10', 'T11', 'T12', 'T13'].includes(depositInfo.timeType)) {
-                    price = price * 1.5; // Increase price by 50%
-                }
+                const packagePrice = parseFloat(depositInfo.packageData.price);
+                const depositPercent = depositInfo.packageData.depositPercent || 0;
+                const depositAmount = ((packagePrice * depositPercent) / 100).toFixed(0);
 
-                const depositAmount = (price / 2).toFixed(0); // Tính số tiền cọc (50%)
-
-                this.setState({ 
+                this.setState({
                     depositInfo,
                     depositAmount,
-                    adjustedPrice: price, // Lưu giá đã tăng vào state để hiển thị
-                    loading: false 
+                    adjustedPrice: packagePrice,
+                    loading: false,
                 });
             } else {
-                this.setState({ 
-                    error: response.data.errMessage || 'Error retrieving data',
-                    loading: false 
+                this.setState({
+                    error: response.errMessage || 'Error retrieving data',
+                    loading: false,
                 });
             }
         } catch (error) {
-            console.log('Error fetching appointments:', error);
-            this.setState({ 
+            console.error('Error fetching deposit info:', error);
+            this.setState({
                 error: 'Failed to fetch deposit information',
-                loading: false 
+                loading: false,
             });
         }
     }
 
     handleSubmit = async (event) => {
         event.preventDefault();
-        const { appointmentId, depositAmount } = this.state;
+        const { depositAmount, depositInfo } = this.state;
 
         try {
-            const data = {
-                token: this.state.depositInfo.token,
-                doctorId: this.state.depositInfo.doctorId
-            };
+            const res = await paymentMomo({
+                deposit: depositAmount,
+                token: depositInfo.token,
+                packageId: depositInfo.packageId,
+            });
 
-            const response = await postVerifyBookAppointment(data);
-
-            if (response && response.errCode === 0) {
-                this.setState({ 
-                    successMessage: 'Đặt cọc thành công!', 
-                    error: null 
-                });
+            if (res && res.payUrl) {
+                window.location.href = res.payUrl; // Redirect tới trang thanh toán MoMo
             } else {
-                this.setState({ 
-                    error: response.errMessage || 'Error verifying appointment', 
-                    successMessage: null 
-                });
+                this.setState({ error: 'Không thể tạo thanh toán MoMo' });
             }
         } catch (error) {
-            console.log('Error verifying appointment:', error);
-            this.setState({ 
-                error: 'Failed to verify appointment',
-                successMessage: null 
-            });
+            console.error('Error initiating MoMo payment:', error);
+            this.setState({ error: 'Lỗi trong quá trình thanh toán' });
         }
     };
+
 
     render() {
         const { appointmentId, depositAmount, depositInfo, adjustedPrice, loading, error, successMessage } = this.state;
-    
+
         if (loading) {
             return <div className="loading">Loading...</div>;
         }
-    
+
+        const packageData = depositInfo?.packageData;
+
         return (
             <>
-            <HomeHeader />
-            <div className="deposit-container">
-                <header className="deposit-header">
-                    <h1>Thông tin đặt cọc</h1>
-                </header>
-                <div className="deposit-content">
-                    <h2>Đặt cọc cho lịch hẹn #{appointmentId}</h2>
-                    {depositInfo && depositInfo.doctorBooking && (
-                        <div className="deposit-info">
-                            <p><strong>Thông tin bác sĩ:</strong></p>
-                            {depositInfo.doctorData.image && (
-                                <div className="doctor-image">
-                                    <img 
-                                        src={depositInfo.doctorData.image} 
-                                        alt={`${depositInfo.doctorData.firstName} ${depositInfo.doctorData.lastName}`} 
-                                    />
-                                </div>
-                            )}
-                            <p>Họ tên: {depositInfo.doctorData.firstName} {depositInfo.doctorData.lastName}</p>
-                            <p>Tên phòng khám: {depositInfo.doctorBooking.nameClinic}</p>
-                            <p>Địa chỉ phòng khám: {depositInfo.doctorBooking.addressClinic}</p>
-                            <p>Giá: {adjustedPrice.toLocaleString()} VND</p> {/* Hiển thị giá đã tăng */}
-                            <p><strong>Số tiền đặt cọc (50%): {depositAmount} VND</strong></p> {/* Hiển thị số tiền cọc */}
-                        </div>
-                    )}
-                    <form onSubmit={this.handleSubmit} className="deposit-form">
-                        <label>Số tiền đặt cọc:</label>
-                        <p>{depositAmount} VND</p> {/* Hiển thị số tiền cọc */} 
-                        <button type="submit">Xác nhận đặt cọc</button>
-                    </form>
-                    {successMessage && (
-                        <div className="success-message">
-                            <p>{successMessage}</p>
-                        </div>
-                    )}
-                    {error && <div className="error-message">{error}</div>}
+                <HomeHeader />
+                <div className="deposit-container">
+                    <header className="deposit-header">
+                        <h1>Thông tin đặt cọc</h1>
+                    </header>
+                    <div className="deposit-content">
+                        <h2>Đặt cọc cho lịch hẹn #{appointmentId}</h2>
+
+                        {packageData && (
+                            <div className="deposit-info">
+                                <p><strong>Thông tin gói khám:</strong></p>
+                                {packageData.image && (
+                                    <div className="package-image">
+                                        <img src={packageData.image} alt={packageData.name} />
+                                    </div>
+                                )}
+                                <p><strong>Tên gói:</strong> {packageData.name}</p>
+                                <p><strong>Phòng khám:</strong> {packageData.clinicInfo.name}</p>
+                                <p><strong>Địa chỉ:</strong> {packageData.clinicInfo.address}</p>
+                                <p><strong>Giá gói:</strong> {adjustedPrice.toLocaleString()} VND</p>
+                                <p><strong>Số tiền đặt cọc ({packageData.depositPercent}%):</strong> {depositAmount} VND</p>
+                            </div>
+                        )}
+
+                        <form onSubmit={this.handleSubmit} className="deposit-form">
+                            <label>Số tiền đặt cọc:</label>
+                            <p>{depositAmount} VND</p>
+                            <button type="submit">Xác nhận đặt cọc</button>
+                        </form>
+
+                        {successMessage && (
+                            <div className="success-message">
+                                <p>{successMessage}</p>
+                            </div>
+                        )}
+                        {error && <div className="error-message">{error}</div>}
+                    </div>
                 </div>
-            </div></>
+            </>
         );
     }
-}    
+}
 
-const mapStateToProps = state => {
-    return {
-        language: state.app.language,
-    };
-};
+const mapStateToProps = state => ({
+    language: state.app.language,
+});
 
-const mapDispatchToProps = dispatch => {
-    return {
-
-    };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Deposit);
+export default connect(mapStateToProps)(Deposit);

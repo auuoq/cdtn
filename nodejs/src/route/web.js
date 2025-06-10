@@ -9,6 +9,7 @@ import clinicManagerController from "../controllers/manage_clinicController";
 import examPackageController from "../controllers/examPackageController";
 import messageController from "../controllers/messagesController";
 import ChatGPTController from "../controllers/ChatGPTController";
+import MomoController from "../controllers/MomoController";
 
 let router = express.Router();
 
@@ -74,6 +75,7 @@ let initWebRoutes = (app) => {
     router.post('/api/verify-book-appointment', patientController.postVerifyBookAppointment);
     router.post('/api/patient-book-exam-package-appointment', patientController.postBookExamPackageAppointment); // Đặt lịch khám cho gói khám
     router.post('/api/verify-book-exam-package-appointment', patientController.postVerifyBookExamPackageAppointment); // Xác nhận lịch khám cho gói khám
+    router.post('/api/patient-verify-deposit', patientController.postVerifyDeposit); // Xác nhận đặt cọc
 
     //specialty
     router.post('/api/create-new-specialty', specialtyController.createSpecialty);
@@ -129,6 +131,16 @@ let initWebRoutes = (app) => {
     router.get('/api/get-messages-by-user', messageController.getUserConversations);
 
     router.post('/api/chat-bot', ChatGPTController.handleChatRequest);
+
+    //payment
+    router.post('/payment', MomoController.paymentMomo); // Tạo thanh toán Momo
+    router.post('/callback', MomoController.callback); // Callback từ Momo
+    router.post('/transaction-status', MomoController.transactionStatus); // Xử lý giao dịch Momo
+    router.get('/api/deposit-report', userController.getDepositReport);
+    router.get('/api/deposit-report-by-clinic', userController.GetDepositReportByClinic);
+    router.get('/api/deposit-report-by-manager', clinicManagerController.getDepositReportByManager);
+    router.put('/api/toggle-status', userController.toggleTransactionStatus);
+    router.put('/api/toggle-status-by-clinic', userController.toggleStatusForClinic);
 
     return app.use("/", router);
 }

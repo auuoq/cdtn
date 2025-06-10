@@ -264,6 +264,77 @@ let handleChangePassword = async (req, res) => {
     return res.status(200).json(response);
 };
 
+let getDepositReport = async (req, res) => {
+  try {
+    const { from, to } = req.query;
+    const data = await userService.getDepositReport(from, to);
+
+    if (data.errCode !== 0) {
+      return res.status(400).json(data);
+    }
+
+    return res.status(200).json(data);
+
+  } catch (e) {
+    console.error('Error in getDepositReport:', e);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: 'Internal server error'
+    });
+  }
+};
+
+let GetDepositReportByClinic = async (req, res) => {
+  const { clinicId, from, to } = req.query;
+  try {
+    const data = await userService.getDepositReportByClinic(clinicId, from, to);
+    return res.status(200).json(data);
+  } catch (e) {
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: 'Server error',
+    });
+  }
+};
+
+let toggleTransactionStatus = async (req, res) => {
+    try {
+        let result = await userService.toggleTransactionStatus(req.query.transactionId);
+        return res.status(200).json(result);
+    } catch (e) {
+        console.error('Failed to toggle transaction status:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server',
+        });
+    }
+};
+
+let toggleStatusForClinic = async (req, res) => {
+    try {
+        let { clinicId, from, to } = req.query;
+
+        if (!clinicId || !from || !to) {
+            return res.status(400).json({
+                errCode: 1,
+                errMessage: 'Thiếu tham số bắt buộc'
+            });
+        }
+
+        let result = await userService.toggleStatusForClinic(clinicId, from, to);
+        return res.status(200).json(result);
+
+    } catch (e) {
+        console.error('Error in toggleStatusForClinic:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Lỗi từ server',
+        });
+    }
+};
+
+
+
 module.exports = {
     handleLogin: handleLogin,
     handleGetAllUsers: handleGetAllUsers,
@@ -283,4 +354,8 @@ module.exports = {
     handleGetDepositInfoPackage: handleGetDepositInfoPackage,
     submitFeedback: submitFeedback,
     submitFeedbackPackage: submitFeedbackPackage,
+    getDepositReport: getDepositReport,
+    GetDepositReportByClinic: GetDepositReportByClinic,
+    toggleTransactionStatus: toggleTransactionStatus,
+    toggleStatusForClinic: toggleStatusForClinic
 }

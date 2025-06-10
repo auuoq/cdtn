@@ -112,6 +112,7 @@ const postPatientBookAppointment = (data) => {
     return axios.post('/api/patient-book-appointment', data);
 }
 
+
 const postVerifyBookAppointment = (data) => {
     return axios.post('/api/verify-book-appointment', data);
 }
@@ -122,6 +123,10 @@ const postBookExamPackageAppointment = (data) => {
 
 const postVerifyBookExamPackageAppointment = (data) => {
     return axios.post('/api/verify-book-exam-package-appointment', data);
+}
+
+const postVerifyDeposit = (data) => {
+    return axios.post('/api/patient-verify-deposit', data);
 }
 
 const getDoctorFeedbacks = (doctorId) => {
@@ -302,6 +307,36 @@ const getUserConversations = (userId) => {
 }
 
 
+const paymentMomo = (data) => {
+    return axios.post('/payment', data);
+}
+
+const callbackMomo = (data) => {
+    return axios.post('/callback', data);
+}
+
+const transactionStatusMomo = (data) => {
+    return axios.post('/transaction-status', data);
+}
+
+const getDepositReport = (from, to) => {
+    return axios.get(`/api/deposit-report?from=${from}&to=${to}`);
+}
+
+const getDepositReportByManager = (userId, from, to) => {
+    return axios.get(`/api/deposit-report-by-manager?userId=${userId}&from=${from}&to=${to}`);
+}
+
+const getDepositReportByClinic = (clinicId, from, to) => {
+    return axios.get(`/api/deposit-report-by-clinic?clinicId=${clinicId}&from=${from}&to=${to}`);
+}
+const toggleTransactionStatus = (transactionId) => {
+    return axios.put(`/api/toggle-status?transactionId=${transactionId}`);
+}
+const toggleStatusForClinic = (clinicId, from, to) => {
+    return axios.put(`/api/toggle-status-by-clinic?clinicId=${clinicId}&from=${from}&to=${to}`);
+}
+
 export {
     handleLoginApi, getAllUsers,
     createNewUserService, deleteUserService,
@@ -317,8 +352,15 @@ export {
     getUserInfoByEmail, getUserBookings, deleteAppointment, getDepositInfo,
     sendPasswordResetEmail, resetPassword, getDetailClinicByManager, getClinicByManager, getAllDoctorsByMagager,
     getUserBookingsByManager, deleteSpecialty, updateSpecialty, getAllClinicManager, assignClinicToManager, getAllExamPackages,
-    createExamPackage, updateExamPackage, deleteExamPackage, getExamPackagesDetailByManager, bulkCreateScheduleForPackage, getDetailExamPackageById,
-    getSchedulePackageByDate, getListAllExamPackagePatientWithStatusS3, getPackageDepositInfo, postBookExamPackageAppointment, postVerifyBookExamPackageAppointment,
-    getUserPackageBookings, deletePackageAppointment, getPackageBookingsByManager, toggleOnlineStatus, getOnlineDoctors, sendMessage, getMessagesBetweenUsers, getUserConversations, submitFeedback,
-    getListPatientForPackageManager, sendRemedyForPackage,searchDoctors, getDoctorFeedbacks, toggleIsDisplayedStatus, getPackageFeedbacks, toggleIsDisplayedStatusForPackage, submitFeedbackPackage,searchClinic,searchSpecialty,searchExamPackage
+    createExamPackage, updateExamPackage, deleteExamPackage, getExamPackagesDetailByManager, bulkCreateScheduleForPackage, 
+    getDetailExamPackageById,getSchedulePackageByDate, getListAllExamPackagePatientWithStatusS3, 
+    getPackageDepositInfo, postBookExamPackageAppointment, postVerifyBookExamPackageAppointment,postVerifyDeposit,
+    getUserPackageBookings, deletePackageAppointment, getPackageBookingsByManager, toggleOnlineStatus, 
+    getOnlineDoctors, sendMessage, getMessagesBetweenUsers, getUserConversations, submitFeedback,
+    getListPatientForPackageManager, sendRemedyForPackage,searchDoctors, getDoctorFeedbacks, 
+    toggleIsDisplayedStatus, getPackageFeedbacks, toggleIsDisplayedStatusForPackage, 
+    submitFeedbackPackage,searchClinic,searchSpecialty,searchExamPackage,
+    paymentMomo, callbackMomo, transactionStatusMomo, getDepositReport, 
+    getDepositReportByManager, getDepositReportByClinic,toggleTransactionStatus,
+    toggleStatusForClinic,
 }

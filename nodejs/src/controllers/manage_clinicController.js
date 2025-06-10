@@ -119,6 +119,21 @@ let sendRemedyForPackage = async (req, res) => {
     }
 }
 
+const getDepositReportByManager = async (req, res) => {
+  try {
+    const { userId, from, to } = req.query;
+    const result = await clinicManagerService.getDepositReportByManager(userId, from, to);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error('Error in getDepositReportByManager:', error);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: 'Lỗi server'
+    });
+  }
+};
+
+
 module.exports = {
     getDetailClinicByManagerUserId: getDetailClinicByManagerUserId,
     getClinicByManager: getClinicByManager,
@@ -128,5 +143,6 @@ module.exports = {
     assignClinicToManager: assignClinicToManager,
     getPackageBookingsByManager: getPackageBookingsByManager,
     getListPatientForPackageManager: getListPatientForPackageManager,
-    sendRemedyForPackage: sendRemedyForPackage
+    sendRemedyForPackage: sendRemedyForPackage,
+    getDepositReportByManager: getDepositReportByManager
 };

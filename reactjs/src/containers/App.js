@@ -41,6 +41,8 @@ import SearchClinic from '../components/Search/SearchClinic.js'
 import SearchSpecility from '../components/Search/SearchSpecility.js'
 import SearhPacket from '../components/Search/SearchPacket.js'
 import AllDortor from './HomePage/AllDortor.js';
+import VerifyPackageEmail from './Patient/VerifyPackageEmail.js';
+import VerifyDeposit from './Patient/VerifyDeposit.js';
 class App extends Component {
 
     handlePersistorState = () => {
@@ -88,6 +90,8 @@ class App extends Component {
                                     <Route path={path.DETAIL_SPECIALTY} component={DetailSpecialty} />
                                     <Route path={path.DETAIL_CLINIC} component={DetailClinic} />
                                     <Route path={path.VERIFY_EMAIL_BOOKING} component={VerifyEmail} />
+                                    <Route path={path.VERIFY_EMAIL_BOOKING_EXAM_PACKAGE} component={VerifyPackageEmail} />
+                                    <Route path={path.VERIFY_DEPOSIT} component={VerifyDeposit}/>
                                     <Route path={"/allPacket"} component={AllPackage} />
                                     <Route path={"/chat"} component={userIsAuthenticated(ChatBox)} />
                                     <Route path={"/chat-bot"} component={userIsAuthenticated(ChatBot)} />

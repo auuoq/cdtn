@@ -1,0 +1,49 @@
+.deposit-report-page {
+  padding: 20px;
+
+  .filters {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: center;
+
+    input[type='date'] {
+      padding: 5px;
+    }
+
+    button {
+      padding: 6px 12px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+  }
+
+  .error {
+    color: red;
+    margin-top: 10px;
+  }
+
+  .report-section {
+    margin-top: 20px;
+
+    h4 {
+      margin-top: 20px;
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+
+      th, td {
+        padding: 8px;
+        border: 1px solid #ccc;
+      }
+
+      th {
+        background-color: #f0f0f0;
+        text-align: left;
+      }
+    }
+  }
+}

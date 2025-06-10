@@ -35,6 +35,8 @@ module.exports = (sequelize, DataTypes) => {
     diagnosis: DataTypes.STRING,
     isDisplayed: DataTypes.BOOLEAN,
     remedyImage: DataTypes.TEXT,
+    depositStatus: DataTypes.STRING,
+    depositAmount: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'BookingPackage',

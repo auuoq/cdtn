@@ -25,7 +25,8 @@ class Appointments extends Component {
       typeFilter: 'all',
       showRatingModal: false,
       selectedAppointment: null,
-      commentText: ''
+      commentText: '',
+      showDiagnosisForId: null,
     };
   }
     state = {
@@ -173,12 +174,31 @@ class Appointments extends Component {
 
   getFilteredAppointments = () => {
     const { appointments, selectedStatus, typeFilter } = this.state;
-    return appointments.filter(app => {
-      const matchStatus = selectedStatus === 'all' || app.statusIdDataPatient?.valueVi === selectedStatus;
-      const matchType = typeFilter === 'all' || app.type === typeFilter;
-      return matchStatus && matchType;
-    });
+
+    const statusOrder = {
+      'Lịch hẹn mới': 1,
+      'Đã xác nhận': 2,
+      'Đã khám xong': 3,
+      'Đã hủy': 4
+    };
+
+    return appointments
+      .filter(app => {
+        const matchStatus = selectedStatus === 'all' || app.statusIdDataPatient?.valueVi === selectedStatus;
+        const matchType = typeFilter === 'all' || app.type === typeFilter;
+        return matchStatus && matchType;
+      })
+      .sort((a, b) => {
+        const statusA = a.statusIdDataPatient?.valueVi || 'Khác';
+        const statusB = b.statusIdDataPatient?.valueVi || 'Khác';
+
+        const orderA = statusOrder[statusA] || 99;
+        const orderB = statusOrder[statusB] || 99;
+
+        return orderA - orderB;
+      });
   }
+
 
   renderStatusBadge = (status) => {
     let badgeClass = '';
@@ -199,6 +219,12 @@ class Appointments extends Component {
         badgeClass = 'badge-secondary';
     }
     return <span className={`badge ${badgeClass}`}>{status}</span>;
+  }
+
+  handleToggleDiagnosis = (appointmentId) => {
+    this.setState((prevState) => ({
+      showDiagnosisForId: prevState.showDiagnosisForId === appointmentId ? null : appointmentId
+    }));
   }
 
   renderRatingModal = () => {
@@ -328,6 +354,7 @@ class Appointments extends Component {
 
                           <div className="col-md-4">
                             <div className="appointment-actions">
+
                               <button className="btn btn-outline-info btn-sm mb-2" onClick={() => this.handleDetail(appointment)}>
                                 <i className="fas fa-info-circle mr-1"></i>
                                 Chi tiết {appointment.type === 'doctor' ? 'bác sĩ' : 'gói khám'}
@@ -339,10 +366,20 @@ class Appointments extends Component {
                                 </button>
                               )}
 
-                              {appointment.statusIdDataPatient?.valueVi === 'Lịch hẹn mới' && (
-                                <button className="btn btn-primary btn-sm mb-2" onClick={() => this.handleDeposit(appointment.id)}>
-                                  <i className="fas fa-money-bill-wave mr-1"></i>Đặt cọc
-                                </button>
+                              {/* Chỉnh sửa phần đặt cọc / text ở đây */}
+                              {appointment.packageData &&
+                                appointment.statusIdDataPatient?.valueVi === 'Lịch hẹn mới' &&
+                                appointment.packageData?.isDepositRequired && (
+                                  <button className="btn btn-primary btn-sm mb-2" onClick={() => this.handleDeposit(appointment.id)}>
+                                    <i className="fas fa-money-bill-wave mr-1"></i>Đặt cọc
+                                  </button>
+                              )}
+
+                              {appointment.statusIdDataPatient?.valueVi === 'Lịch hẹn mới' &&
+                                (!appointment.packageData || !appointment.packageData?.isDepositRequired) && (
+                                  <div className="text-info mb-2" style={{ fontWeight: '600' }}>
+                                    Vui lòng xác nhận qua email
+                                  </div>
                               )}
 
                               {appointment.statusIdDataPatient?.valueVi === 'Đã khám xong' && (
@@ -350,8 +387,31 @@ class Appointments extends Component {
                                   <i className="fas fa-star mr-1"></i>Đánh giá
                                 </button>
                               )}
+                              {appointment.statusIdDataPatient?.valueVi === 'Đã khám xong' && (
+                                <button
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => this.handleToggleDiagnosis(appointment.id)}
+                                >
+                                  <i className="fas fa-file-medical-alt mr-1"></i>
+                                  {this.state.showDiagnosisForId === appointment.id ? 'Ẩn' : 'Xem'} chẩn đoán
+                                </button>
+                              )}
                             </div>
                           </div>
+                          {/* Phần hiển thị chẩn đoán nếu toggle bật */}
+                          {this.state.showDiagnosisForId === appointment.id && (
+                            <div className="diagnosis-section mt-3 p-3 border rounded bg-light">
+                              <h6>Chẩn đoán:</h6>
+                              <p>{appointment.diagnosis || 'Chưa có chẩn đoán'}</p>
+                              <p>
+                                <img
+                                  src={appointment.remedyImage || 'https://via.placeholder.com/150'}
+                                  alt="Chẩn đoán"
+                                  style={{ maxWidth: '300px', borderRadius: '8px' }}
+                                />
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -366,55 +426,31 @@ class Appointments extends Component {
           onClick={this.toggleChatbox}
           style={{
             position: 'fixed',
-            bottom: '10px',
-            right: '20px',
-            width: '50px',
-            height: '50px',
-            borderRadius: '50%',
+            bottom: 20,
+            right: 20,
             backgroundColor: '#007bff',
-            color: 'white',
+            color: '#fff',
+            borderRadius: '50%',
+            width: 60,
+            height: 60,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             cursor: 'pointer',
-            zIndex: 1001,
-            boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-            fontSize: '24px',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
           }}
-          title="Nhắn tin với bác sĩ"
+          title="Chat với bác sĩ"
         >
-          💬
+          <i className="fas fa-comments fa-lg"></i>
         </div>
-
-        {/* ChatBox hiển thị khi bật */}
-        {this.state.showChatbox && (
-          <div
-            style={{
-              position: 'fixed',
-              bottom: '100px',
-              right: '20px',
-              zIndex: 1000,
-              width: '320px',
-              maxHeight: '500px',
-              background: 'white',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-              borderRadius: '8px',
-              overflow: 'hidden',
-            }}
-          >
-            <ChatBox />
-          </div>
-        )}
-
+        {this.state.showChatbox && <ChatBox />}
       </>
     );
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    userInfo: state.user.userInfo
-  };
-};
+const mapStateToProps = state => ({
+  userInfo: state.user.userInfo
+});
 
 export default withRouter(connect(mapStateToProps)(Appointments));

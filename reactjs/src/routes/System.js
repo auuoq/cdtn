@@ -8,6 +8,7 @@ import ManageDoctor from '../containers/System/Admin/ManageDoctor';
 import ManageSpecialty from '../containers/System/Specialty/ManageSpecialty';
 import ManageClinic from '../containers/System/Clinic/ManageClinic';
 import AssignClinicToManager from '../containers/System/Admin/AssignClinicToManager';
+import DepositReportPage from '../containers/System/Admin/DepositReportPage';
 
 class System extends Component {
     render() {
@@ -25,6 +26,8 @@ class System extends Component {
                             <Route path="/system/manage-specialty" component={ManageSpecialty} />
                             <Route path="/system/manage-clinic" component={ManageClinic} />
                             <Route path="/system/manage-clinicManager" component={AssignClinicToManager} />
+                            <Route path="/system/deposit-report" component={DepositReportPage} />
+                            {/* Add more routes as needed */}
                             <Route component={() => { return (<Redirect to={systemMenuPath} />) }} />
                         </Switch>
                     </div>

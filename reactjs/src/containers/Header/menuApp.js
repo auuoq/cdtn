@@ -41,7 +41,17 @@ export const adminMenu = [
                 name: 'menu.admin.manage-specialty', link: '/system/manage-specialty',
             },
         ]
-    }
+    },
+
+    { //Quản lí đặt cọc
+        name: 'Báo cáo đặt cọc',
+        menus: [
+            {
+                name: 'Báo cáo đặt cọc', link: '/system/deposit-report',
+            },
+        ]
+    },
+    
 ];
 
 export const doctorMenu = [
@@ -134,6 +144,15 @@ export const manager_clinicMenu = [
                 name: 'lịch sử đã khám', link: '/manage/package-s3',
             }
         ]
-    }
+    },
+    { //Quản lí đặt cọc
+        name: 'Báo cáo đặt cọc',
+        menus: [
+            {
+                name: 'Báo cáo đặt cọc', link: '/manage/deposit-report',
+            },
+        ]
+    },
+
 
 ];

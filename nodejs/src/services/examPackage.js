@@ -11,10 +11,19 @@ let createExamPackage = (data, userId) => {
                 where: { userId },
                 attributes: ['clinicId']
             });
-            if (!Clinic_Manager || !data.name || !data.categoryId || !data.price || !data.provinceId || !data.paymentId) {
+
+            if (
+                !Clinic_Manager ||
+                !data.name ||
+                !data.categoryId ||
+                !data.price ||
+                !data.provinceId ||
+                !data.paymentId ||
+                (data.isDepositRequired && (data.depositPercent === undefined || data.depositPercent < 0 || data.depositPercent > 100))
+            ) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Missing parameter'
+                    errMessage: 'Missing or invalid parameter'
                 });
                 return;
             }
@@ -30,7 +39,9 @@ let createExamPackage = (data, userId) => {
                 contentHTML: data.contentHTML,
                 description: data.description,
                 image: data.imageBase64,
-                note: data.note
+                note: data.note,
+                isDepositRequired: data.isDepositRequired || false,
+                depositPercent: data.isDepositRequired ? data.depositPercent : null,
             });
 
             resolve({
@@ -44,15 +55,25 @@ let createExamPackage = (data, userId) => {
     });
 };
 
+
 let updateExamPackage = (data, userId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.packageId || !data.name || !data.clinicId || !data.price || !data.provinceId || !data.paymentId) {
-                resolve({
+            if (
+                !data.packageId ||
+                !data.name ||
+                !data.clinicId ||
+                !data.price ||
+                !data.provinceId ||
+                !data.paymentId ||
+                (data.isDepositRequired && (data.depositPercent === undefined || data.depositPercent < 0 || data.depositPercent > 100))
+            ) {
+                return resolve({
                     errCode: 1,
-                    errMessage: 'Missing parameter'
+                    errMessage: 'Missing or invalid parameter'
                 });
             }
+
             let examPackage = await db.ExamPackage.findOne({
                 where: { id: data.packageId, clinicId: data.clinicId },
                 raw: false
@@ -68,6 +89,8 @@ let updateExamPackage = (data, userId) => {
                 examPackage.contentHTML = data.contentHTML;
                 examPackage.description = data.description;
                 examPackage.note = data.note;
+                examPackage.isDepositRequired = data.isDepositRequired || false;
+                examPackage.depositPercent = data.isDepositRequired ? data.depositPercent : null;
 
                 if (data.imageBase64) {
                     examPackage.image = data.imageBase64;
@@ -91,6 +114,7 @@ let updateExamPackage = (data, userId) => {
         }
     });
 };
+
 
 let deleteExamPackage = (packageId) => {
     return new Promise(async (resolve, reject) => {

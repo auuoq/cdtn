@@ -28,7 +28,10 @@ class ManageExamPackage extends Component {
                 description: '',
                 image: null,
                 note: '',
-                imageBase64: ''
+                imageBase64: '',
+                isDepositRequired: false,
+                depositPercent: '',
+                depositAmount: 0,
             },
             isOpenModal: false,
             isCreateMode: true,
@@ -175,7 +178,10 @@ class ManageExamPackage extends Component {
                 ...examPackage,
                 clinicId: examPackage.clinicId || '',
                 packageId: examPackage.id,
-                imageBase64: examPackage.image || ''
+                imageBase64: examPackage.image || '',
+                // isDepositRequired: !!examPackage.depositPercent,
+                // depositPercent: examPackage.depositPercent || '',
+                // depositAmount: examPackage.depositAmount || 0,
             }
         });
     };
@@ -200,7 +206,8 @@ class ManageExamPackage extends Component {
             // ✅ Gán clinicId từ user đang đăng nhập
             const payload = {
                 ...currentExamPackage,
-                //clinicId: userId.clinicId // Hoặc lấy từ userInfo chứa clinic
+                depositPercent: currentExamPackage.isDepositRequired ? currentExamPackage.depositPercent : '',
+                depositAmount: currentExamPackage.isDepositRequired ? currentExamPackage.depositAmount : 0,
             };
     
             let res;
@@ -462,6 +469,68 @@ class ManageExamPackage extends Component {
                                         onChange={(event) => this.handleOnChangeInput(event, 'note')}
                                     />
                                 </div>
+                                <div className="form-group form-check mt-3">
+                                    <input
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        id="isDepositRequired"
+                                        checked={currentExamPackage.isDepositRequired}
+                                        onChange={(e) =>
+                                            this.setState({
+                                                currentExamPackage: {
+                                                    ...currentExamPackage,
+                                                    isDepositRequired: e.target.checked,
+                                                    // Reset depositPercent if unchecked
+                                                    ...(e.target.checked ? {} : { depositPercent: '', depositAmount: 0 })
+                                                }
+                                            })
+                                        }
+                                    />
+                                    <label className="form-check-label" htmlFor="isDepositRequired">
+                                        Có phải đặt cọc?
+                                    </label>
+                                </div>
+                                {currentExamPackage.isDepositRequired && (
+                                    <>
+                                        <div className="form-group mt-2">
+                                            <label>Phần trăm đặt cọc (%)</label>
+                                            <select
+                                                className="form-control"
+                                                value={currentExamPackage.depositPercent}
+                                                onChange={(e) => {
+                                                    const depositPercent = e.target.value;
+                                                    const depositAmount = currentExamPackage.price
+                                                        ? (currentExamPackage.price * depositPercent) / 100
+                                                        : 0;
+                                                    this.setState({
+                                                        currentExamPackage: {
+                                                            ...currentExamPackage,
+                                                            depositPercent,
+                                                            depositAmount
+                                                        }
+                                                    });
+                                                }}
+                                            >
+                                                <option value="">Chọn phần trăm</option>
+                                                <option value="10">10%</option>
+                                                <option value="20">20%</option>
+                                                <option value="30">30%</option>
+                                                <option value="50">50%</option>
+                                            </select>
+                                        </div>
+
+                                        {currentExamPackage.depositAmount > 0 && (
+                                            <div className="form-group">
+                                                <label>Số tiền cần đặt cọc:</label>
+                                                <div>
+                                                    <strong>{new Intl.NumberFormat('vi-VN').format(currentExamPackage.depositAmount)} VND</strong>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+
                             </div>
                             <div className="modal-footer">
                                 <button

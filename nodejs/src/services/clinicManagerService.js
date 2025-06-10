@@ -1,5 +1,6 @@
 import db from "../models/index"
 import emailService from '../services/emailService'
+import { Sequelize, Op } from 'sequelize';
 
 
 let getDetailClinicByManagerUserId = async (query) => {
@@ -557,7 +558,7 @@ let getListPatientForPackageManager = async (managerId, date) => {
                     {
                         model: db.User,
                         as: 'patientData',
-                        attributes: ['email', 'firstName', 'lastName', 'address', 'gender'],
+                        attributes: ['email', 'firstName', 'lastName', 'address', 'gender','phonenumber'],
                     },
                     {
                         model: db.ExamPackage,
@@ -642,6 +643,102 @@ let sendRemedyForPackage = (data) => {
     });
 };
 
+let getDepositReportByManager = async (userId, from, to) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!userId || !from || !to) {
+        return resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters: userId, from, or to"
+        });
+      }
+
+      const fromDate = new Date(from).getTime();
+      const toDate = new Date(to).getTime();
+
+      if (isNaN(fromDate) || isNaN(toDate)) {
+        return resolve({
+          errCode: 2,
+          errMessage: "Invalid date format for 'from' or 'to'"
+        });
+      }
+
+      // Tìm clinicId mà user quản lý
+      const managedClinic = await db.Clinic_Manager.findOne({
+        where: { userId },
+        attributes: ['clinicId']
+      });
+
+      if (!managedClinic) {
+        return resolve({
+          errCode: 0,
+          errMessage: 'User does not manage any clinics.',
+          reportPeriod: { from, to },
+          clinicReport: null
+        });
+      }
+
+      const clinicId = managedClinic.clinicId;
+
+      // Tổng tiền từ giao dịch PENDING
+      const pendingTotal = await db.DepositTransaction.findOne({
+        attributes: [
+          [Sequelize.fn('SUM', Sequelize.col('amount')), 'totalAmount']
+        ],
+        where: {
+          clinicId,
+          paymentTime: { [Op.between]: [fromDate, toDate] },
+          status: 'PENDING'
+        },
+        raw: true
+      });
+
+      const totalAmount = Number(pendingTotal.totalAmount || 0);
+
+      // Tất cả giao dịch (cả SETTLED + PENDING)
+      const transactions = await db.DepositTransaction.findAll({
+        where: {
+          clinicId,
+          paymentTime: { [Op.between]: [fromDate, toDate] }
+        },
+        include: [
+          {
+            model: db.Clinic,
+            as: 'clinicInfo',
+            attributes: ['id', 'name', 'address']
+          }
+        ],
+        order: [['paymentTime', 'DESC']]
+      });
+
+      if (transactions.length === 0) {
+        return resolve({
+          errCode: 0,
+          errMessage: 'No transactions found in the selected period.',
+          reportPeriod: { from, to },
+          clinicReport: null
+        });
+      }
+
+      const clinicInfo = transactions[0].clinicInfo;
+
+      return resolve({
+        errCode: 0,
+        errMessage: 'OK',
+        reportPeriod: { from, to },
+        clinicReport: {
+          clinicId,
+          clinicInfo,
+          totalAmount,
+          detailedTransactions: transactions
+        }
+      });
+
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
 
 module.exports = {
@@ -653,5 +750,6 @@ module.exports = {
     assignClinicToManager: assignClinicToManager,
     getPackageBookingsByManager: getPackageBookingsByManager,
     getListPatientForPackageManager: getListPatientForPackageManager,
-    sendRemedyForPackage: sendRemedyForPackage
+    sendRemedyForPackage: sendRemedyForPackage,
+    getDepositReportByManager: getDepositReportByManager
 };
