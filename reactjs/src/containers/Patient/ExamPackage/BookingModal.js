@@ -147,6 +147,11 @@ class BookingModal extends Component {
                 src={detailPackage?.image || ''}
                 alt="package"
                 className="booking-package-image"
+                style={{
+                  height:"400px",
+                  width: "100%",
+                  objectFit:"cover"
+                }}
               />
               <h3>{detailPackage?.name}</h3>
               <div className="time">
