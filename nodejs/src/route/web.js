@@ -72,6 +72,7 @@ let initWebRoutes = (app) => {
 
     //patient
     router.post('/api/patient-book-appointment', patientController.postBookAppointment);
+    router.put('/api/update-booking-schedule', patientController.updateBookingSchedule);
     router.post('/api/verify-book-appointment', patientController.postVerifyBookAppointment);
     router.post('/api/patient-book-exam-package-appointment', patientController.postBookExamPackageAppointment); // Đặt lịch khám cho gói khám
     router.post('/api/verify-book-exam-package-appointment', patientController.postVerifyBookExamPackageAppointment); // Xác nhận lịch khám cho gói khám

@@ -113,6 +113,92 @@ let postBookAppointment = (data) => {
     });
 };
 
+// patientService.js
+
+let updateBookingSchedule = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const { bookingId, newDate, newTimeType } = data;
+
+            if (!bookingId || !newDate || !newTimeType) {
+                return resolve({
+                    errCode: 1,
+                    errMessage: 'Missing parameter'
+                });
+            }
+
+            let booking = await db.Booking.findOne({
+                where: { id: bookingId },
+            });
+
+            if (!booking) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Booking not found'
+                });
+            }
+
+            const doctorId = booking.doctorId;
+            const oldDate = booking.date;
+            const oldTimeType = booking.timeType;
+
+            // Check if the new schedule exists and has not reached maxNumber
+            const newSchedule = await db.Schedule.findOne({
+                where: {
+                    doctorId,
+                    date: newDate,
+                    timeType: newTimeType
+                }
+            });
+
+            if (!newSchedule) {
+                return resolve({
+                    errCode: 3,
+                    errMessage: 'New schedule not available'
+                });
+            }
+
+            if (newSchedule.currentNumber >= newSchedule.maxNumber) {
+                return resolve({
+                    errCode: 4,
+                    errMessage: 'New schedule is full'
+                });
+            }
+
+            // Decrease old schedule's currentNumber (if found)
+            const oldSchedule = await db.Schedule.findOne({
+                where: {
+                    doctorId,
+                    date: oldDate,
+                    timeType: oldTimeType
+                }
+            });
+
+            if (oldSchedule && oldSchedule.currentNumber > 0) {
+                oldSchedule.currentNumber -= 1;
+                await oldSchedule.save();
+            }
+
+            // Update new schedule's currentNumber
+            newSchedule.currentNumber += 1;
+            await newSchedule.save();
+
+            // Update booking
+            booking.date = newDate;
+            booking.timeType = newTimeType;
+            await booking.save();
+
+            resolve({
+                errCode: 0,
+                errMessage: 'Reschedule success'
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+
 
 
 let postVerifyBookAppointment = (data) => {
@@ -398,5 +484,6 @@ module.exports = {
     postVerifyBookAppointment: postVerifyBookAppointment,
     postBookExamPackageAppointment: postBookExamPackageAppointment,
     postVerifyBookExamPackageAppointment: postVerifyBookExamPackageAppointment,
-    postVerifyDeposit: postVerifyDeposit
+    postVerifyDeposit: postVerifyDeposit,
+    updateBookingSchedule: updateBookingSchedule
 }

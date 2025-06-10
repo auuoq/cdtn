@@ -13,7 +13,7 @@ class About extends Component {
                 <div className='section-about-content'>
                     <div className='content-left'>
                         <iframe width="100%" height="400px"
-                            src="https://www.youtube.com/embed/a6r2ecSaup8"
+                            src="https://www.youtube.com/embed/vK6oRhio2Ek"
                             title="HỆ THỐNG ĐẶT LỊCH KHÁM TRỰC TUYẾN"
                             frameBorder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
