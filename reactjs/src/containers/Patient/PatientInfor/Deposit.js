@@ -86,34 +86,54 @@ class Deposit extends Component {
         return (
             <>
                 <HomeHeader />
+                <nav aria-label="breadcrumb bg-white breadrum">
+                    <ol className="breadcrumb bg-transparent shadow-sm">
+                        <li className="breadcrumb-item">
+                            <a href="/home" style={{ color: "#707070" }}>Trang chủ</a>
+                        </li>
+                        <li className="breadcrumb-item">
+                            <span style={{ color: "#707070" }}>Thông tin đặt cọc</span>
+                        </li>
+                    </ol>
+                </nav>
                 <div className="deposit-container">
-                    <header className="deposit-header">
-                        <h1>Thông tin đặt cọc</h1>
-                    </header>
+
                     <div className="deposit-content">
-                        <h2>Đặt cọc cho lịch hẹn #{appointmentId}</h2>
 
                         {packageData && (
-                            <div className="deposit-info">
-                                <p><strong>Thông tin gói khám:</strong></p>
+                            <div className="deposit-info" style={{
+                                display:"flex",
+
+                            }}>
                                 {packageData.image && (
                                     <div className="package-image">
-                                        <img src={packageData.image} alt={packageData.name} />
+                                        <img src={packageData.image} alt={packageData.name}
+                                        style={{
+                                            height:"100%"
+                                            // width:"800px"
+                                        }} />
                                     </div>
                                 )}
-                                <p><strong>Tên gói:</strong> {packageData.name}</p>
-                                <p><strong>Phòng khám:</strong> {packageData.clinicInfo.name}</p>
-                                <p><strong>Địa chỉ:</strong> {packageData.clinicInfo.address}</p>
-                                <p><strong>Giá gói:</strong> {adjustedPrice.toLocaleString()} VND</p>
-                                <p><strong>Số tiền đặt cọc ({packageData.depositPercent}%):</strong> {depositAmount} VND</p>
+                                <div className='infor'>
+                                    <h5 style={{
+                                        textAlign:"center",
+                                        marginBottom:"8px"
+                                    }}>Thông tin đặt cọc</h5>
+                                    <p><strong>Tên gói:</strong> {packageData?.name}</p>
+                                    <p><strong>Phòng khám:</strong> {packageData.clinicInfo.name}</p>
+                                    <p><strong>Địa chỉ:</strong> {packageData.clinicInfo.address}</p>
+                                    <p><strong>Giá gói:</strong> <span style={{fontSize:"16px"}}>{new Intl.NumberFormat('fr-FR').format(adjustedPrice)}VND</span></p>
+                                    <form onSubmit={this.handleSubmit} className="deposit-form">
+                                    <p><strong>Số tiền đặt cọc: </strong> <span style={{color:"#017aff",fontWeight:500}}>{new Intl.NumberFormat('fr-FR').format(depositAmount)} VND</span></p>
+
+                                    <button type="submit">Xác nhận đặt cọc</button>
+                                    </form>
+                                </div>
+
                             </div>
                         )}
 
-                        <form onSubmit={this.handleSubmit} className="deposit-form">
-                            <label>Số tiền đặt cọc:</label>
-                            <p>{depositAmount} VND</p>
-                            <button type="submit">Xác nhận đặt cọc</button>
-                        </form>
+
 
                         {successMessage && (
                             <div className="success-message">
