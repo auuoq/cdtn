@@ -47,6 +47,7 @@ module.exports = (sequelize, DataTypes) => {
         diagnosis: DataTypes.STRING,
         isDisplayed: DataTypes.BOOLEAN,
         remedyImage: DataTypes.TEXT,
+        qrCode: DataTypes.TEXT
     }, {
         sequelize,
         modelName: 'Booking',

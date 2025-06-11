@@ -37,6 +37,7 @@ module.exports = (sequelize, DataTypes) => {
     remedyImage: DataTypes.TEXT,
     depositStatus: DataTypes.STRING,
     depositAmount: DataTypes.INTEGER,
+    qrCode: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'BookingPackage',

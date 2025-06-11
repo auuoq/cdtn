@@ -2,6 +2,8 @@ import db from "../models/index"
 require('dotenv').config();
 import emailService from './emailService'
 import { v4 as uuidv4 } from 'uuid';
+const QRCode = require('qrcode');
+
 
 let buildUrlEmail = (doctorId, token) => {
     let result = `${process.env.URL_REACT}/verify-booking?token=${token}&doctorId=${doctorId}`
@@ -11,102 +13,105 @@ let buildUrlEmail = (doctorId, token) => {
 let postBookAppointment = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
+            // Kiểm tra thiếu trường
             if (!data.email || !data.doctorId || !data.timeType
                 || !data.date || !data.fullName || !data.selectedGender
-                || !data.address || !data.reason) {  // Check for the reason
-                resolve({
+                || !data.address || !data.reason) {
+                return resolve({
                     errCode: 1,
                     errMessage: 'Missing parameter'
                 });
-            } else {
-                let token = uuidv4();
-                await emailService.sendSimpleEmail({
-                    type: 'doctor',
-                    receiverEmail: data.email,
-                    patientName: data.fullName,
-                    time: data.timeString,
-                    doctorName: data.doctorName,
-                    language: data.language,
-                    redirectLink: buildUrlEmail(data.doctorId, token)
-                  });
-                  
-
-                // Upsert patient    
-                let user = await db.User.findOrCreate({
-                    where: { email: data.email },
-                    defaults: {
-                        email: data.email,
-                        roleId: 'R3',
-                        gender: data.selectedGender,
-                        address: data.address,
-                        firstName: data.fullName
-                    }
-                });
-
-                // Create a booking record
-                if (user && user[0]) {
-                    let booking = await db.Booking.findOrCreate({
-                        where: {
-                            patientId: user[0].id,
-                            doctorId: data.doctorId,
-                            token: token
-                        },
-                        defaults: {
-                            statusId: 'S1',
-                            doctorId: data.doctorId,
-                            patientId: user[0].id,
-                            date: data.date,
-                            timeType: data.timeType,
-                            token: token,
-                            reason: data.reason   // Save the reason in the booking record
-                        }
-                    });
-
-                    // Nếu booking thành công, tăng currentNumber trong bảng Schedule
-                    if (booking && booking[1] === true) {  // Check if a new booking was created
-                        let schedule = await db.Schedule.findOne({
-                            where: {
-                                doctorId: data.doctorId,
-                                date: data.date,
-                                timeType: data.timeType
-                            }
-                        });
-
-                        if (schedule) {
-                            schedule.currentNumber += 1; // Tăng currentNumber
-                            await schedule.save(); // Lưu thay đổi vào database
-                        }
-                    }
-                }
-
-                // Gửi tin nhắn xác nhận đặt lịch bác sĩ cho bệnh nhân
-                const doctorInfo = await db.Doctor_Infor.findOne({
-                    where: { doctorId: data.doctorId },
-                    attributes: ['nameClinic', 'addressClinic']
-                });
-
-                let clinicInfo = '';
-                if (doctorInfo) {
-                    clinicInfo = ` tại ${doctorInfo.nameClinic}, địa chỉ: ${doctorInfo.addressClinic}`;
-                }
-
-                // Gửi tin nhắn nội bộ cho bệnh nhân
-                const systemUser = await db.User.findOne({ where: { email: 'system@yourapp.com' } });
-                const systemId = systemUser ? systemUser.id : 1;
-
-                await db.Message.create({
-                    senderId: systemId,
-                    receiverId:  user[0].id,
-                    message: `Bạn đã đặt lịch khám với bác sĩ ${data.doctorName} vào lúc ${data.timeString}${clinicInfo}. Vui lòng kiểm tra email để xác nhận lịch hẹn.`,
-                    status: 'sent'
-                });
-
-
-                resolve({
-                    errCode: 0,
-                    errMessage: 'Save infor patient succeed!'
-                });
             }
+
+            // Tạo token và gửi email xác nhận
+            const token = uuidv4();
+            await emailService.sendSimpleEmail({
+                type: 'doctor',
+                receiverEmail: data.email,
+                patientName: data.fullName,
+                time: data.timeString,
+                doctorName: data.doctorName,
+                language: data.language,
+                redirectLink: buildUrlEmail(data.doctorId, token)
+            });
+
+            // Tìm hoặc tạo user
+            const [user] = await db.User.findOrCreate({
+                where: { email: data.email },
+                defaults: {
+                    email: data.email,
+                    roleId: 'R3',
+                    gender: data.selectedGender,
+                    address: data.address,
+                    firstName: data.fullName
+                }
+            });
+
+            // Tạo booking
+            const [booking, created] = await db.Booking.findOrCreate({
+                where: {
+                    patientId: user.id,
+                    doctorId: data.doctorId,
+                    token: token
+                },
+                defaults: {
+                    statusId: 'S1',
+                    doctorId: data.doctorId,
+                    patientId: user.id,
+                    date: data.date,
+                    timeType: data.timeType,
+                    token: token,
+                    reason: data.reason
+                }
+            });
+
+            // Nếu booking vừa được tạo, thêm QR và tăng currentNumber
+            if (created) {
+                const qrContent = `BOOKING|${data.doctorId}|${user.id}|${data.date}|${data.timeType}|${token}`;
+                const qrImage = await QRCode.toDataURL(qrContent);
+                booking.qrCode = qrImage;
+                await booking.save();
+
+                const schedule = await db.Schedule.findOne({
+                    where: {
+                        doctorId: data.doctorId,
+                        date: data.date,
+                        timeType: data.timeType
+                    }
+                });
+
+                if (schedule) {
+                    schedule.currentNumber += 1;
+                    await schedule.save();
+                }
+            }
+
+            // Gửi tin nhắn nội bộ xác nhận đặt lịch
+            const doctorInfo = await db.Doctor_Infor.findOne({
+                where: { doctorId: data.doctorId },
+                attributes: ['nameClinic', 'addressClinic']
+            });
+
+            let clinicInfo = '';
+            if (doctorInfo) {
+                clinicInfo = ` tại ${doctorInfo.nameClinic}, địa chỉ: ${doctorInfo.addressClinic}`;
+            }
+
+            const systemUser = await db.User.findOne({ where: { email: 'system@yourapp.com' } });
+            const systemId = systemUser ? systemUser.id : 1;
+
+            await db.Message.create({
+                senderId: systemId,
+                receiverId: user.id,
+                message: `Bạn đã đặt lịch khám với bác sĩ ${data.doctorName} vào lúc ${data.timeString}${clinicInfo}. Vui lòng kiểm tra email để xác nhận lịch hẹn.`,
+                status: 'sent'
+            });
+
+            return resolve({
+                errCode: 0,
+                errMessage: 'Save info patient succeed!'
+            });
+
         } catch (e) {
             reject(e);
         }
@@ -186,6 +191,10 @@ let updateBookingSchedule = (data) => {
             // Update booking
             booking.date = newDate;
             booking.timeType = newTimeType;
+            const qrContent = `BOOKING|${doctorId}|${booking.patientId}|${newDate}|${newTimeType}|${booking.token}`;
+            const newQrImage = await QRCode.toDataURL(qrContent);
+            booking.qrCode = newQrImage;
+
             await booking.save();
 
             resolve({
@@ -319,6 +328,20 @@ let postBookExamPackageAppointment = (data) => {
                     schedule.currentNumber += 1;
                     await schedule.save();
                 }
+
+                // ✅ Tạo mã QR chứa thông tin định danh (token, patientId, packageId)
+                const qrData = JSON.stringify({
+                    type: 'package',
+                    token: token,
+                    packageId: data.packageId,
+                    patientId: user.id
+                });
+
+                const qrCodeBase64 = await QRCode.toDataURL(qrData); // QR dưới dạng base64
+
+                // ✅ Lưu mã QR vào bảng BookingPackage
+                booking.qrCode = qrCodeBase64;
+                await booking.save();
             }
 
             // Gửi email nếu không yêu cầu đặt cọc
@@ -335,15 +358,11 @@ let postBookExamPackageAppointment = (data) => {
             }
 
             // Gửi tin nhắn thông báo cho bệnh nhân
-            // Format thời gian (ví dụ ghép từ data.timeString và data.date)
             const appointmentInfo = `🩺 Gói khám: ${packageData.name}\n📅 Thời gian: ${data.timeString}`;
 
             const messageText = packageData.isDepositRequired
-                ? `${appointmentInfo}\n
-                💵 Đặt cọc: ${depositAmount.toLocaleString('vi-VN')}đ
-                \n✅ Vui lòng thanh toán đặt cọc để xác nhận lịch hẹn!`
+                ? `${appointmentInfo}\n\n💵 Đặt cọc: ${depositAmount.toLocaleString('vi-VN')}đ\n✅ Vui lòng thanh toán đặt cọc để xác nhận lịch hẹn!`
                 : `${appointmentInfo}\n✅ Vui lòng kiểm tra email để xác nhận lịch hẹn!`;
-
 
             await db.Message.create({
                 senderId: 1,
@@ -352,12 +371,12 @@ let postBookExamPackageAppointment = (data) => {
                 status: 'sent'
             });
 
-
             return resolve({
                 errCode: 0,
                 errMessage: packageData.isDepositRequired
                     ? 'Booking created. Please proceed with deposit payment.'
-                    : 'Save exam package booking succeed!'
+                    : 'Save exam package booking succeed!',
+                qrCode: booking.qrCode // optional: trả về nếu frontend cần hiển thị
             });
         } catch (e) {
             console.error(e);

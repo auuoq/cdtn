@@ -333,6 +333,7 @@ class Appointments extends Component {
       showChatbox,
     } = this.state;
     const filtered = this.getFilteredAppointments();
+    console.log('Filtered appointments:', filtered);
 
     return (
       <>
@@ -407,6 +408,18 @@ class Appointments extends Component {
                   {filtered.map((app, idx) => (
                     <div key={idx} className="appointment-card card mb-4">
                       <div className="card-body row">
+                        {/* QR Code section */}
+                        <div className="qr-section mt-2">
+                          <p className="text-gray-500 text-sm mb-1">Mã xác nhận:</p>
+                          <img
+                            src={app.type === 'doctor'
+                              ? app.qrCode
+                              : app.qrCode
+                            }
+                            alt="QR Code"
+                            className="w-28 h-28 border rounded shadow-sm"
+                          />
+                        </div>
                         {/* Ảnh + info */}
                         <div className="col-md-8 d-flex">
                           <img

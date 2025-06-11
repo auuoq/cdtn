@@ -345,6 +345,9 @@ let getUserBookings = (userId) => {
                     if (booking && booking.remedyImage) {
                         booking.remedyImage = Buffer.from(booking.remedyImage, 'base64').toString('binary');
                     }
+                    if (booking && booking.qrCode) {
+                        booking.qrCode = Buffer.from(booking.qrCode, 'base64').toString('binary');
+                    }
                     // Nếu muốn chuyển ảnh chuyên khoa hoặc phòng khám (nếu có), cũng có thể xử lý tương tự
                     return booking;
                 });
@@ -578,6 +581,10 @@ let getUserPackageBookings = (userId) => {
           //remedyImage
          if (booking && booking.remedyImage) {
              booking.remedyImage = Buffer.from(booking.remedyImage, 'base64').toString('binary');
+         }
+
+         if (booking && booking.qrCode) {
+             booking.qrCode = Buffer.from(booking.qrCode, 'base64').toString('binary');
          }
           return booking;
         });
