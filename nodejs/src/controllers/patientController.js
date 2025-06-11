@@ -85,6 +85,19 @@ let postVerifyDeposit = async (req, res) => {
     }
 }
 
+const checkBookingByQRCode = async (req, res) => {
+    try {
+        const data = await patientService.checkBookingByQRCode(req.query.type, req.query.token);
+        return res.status(200).json(data);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
 
 module.exports = {
     postBookAppointment: postBookAppointment,
@@ -93,4 +106,5 @@ module.exports = {
     postBookExamPackageAppointment: postBookExamPackageAppointment,
     postVerifyBookExamPackageAppointment: postVerifyBookExamPackageAppointment,
     postVerifyDeposit: postVerifyDeposit,
+    checkBookingByQRCode: checkBookingByQRCode
 }

@@ -67,7 +67,8 @@ let postBookAppointment = (data) => {
 
             // Nếu booking vừa được tạo, thêm QR và tăng currentNumber
             if (created) {
-                const qrContent = `BOOKING|${data.doctorId}|${user.id}|${data.date}|${data.timeType}|${token}`;
+                const type = 'doctor';
+                const qrContent = `http://192.168.0.101:3002/qrcode-booking?type=${type}&token=${token}`;
                 const qrImage = await QRCode.toDataURL(qrContent);
                 booking.qrCode = qrImage;
                 await booking.save();
@@ -329,18 +330,10 @@ let postBookExamPackageAppointment = (data) => {
                     await schedule.save();
                 }
 
-                // ✅ Tạo mã QR chứa thông tin định danh (token, patientId, packageId)
-                const qrData = JSON.stringify({
-                    type: 'package',
-                    token: token,
-                    packageId: data.packageId,
-                    patientId: user.id
-                });
-
-                const qrCodeBase64 = await QRCode.toDataURL(qrData); // QR dưới dạng base64
-
-                // ✅ Lưu mã QR vào bảng BookingPackage
-                booking.qrCode = qrCodeBase64;
+                const type = 'package';
+                const qrContent = `http://192.168.0.101:3002/qrcode-booking?type=${type}&token=${token}`;
+                const qrImage = await QRCode.toDataURL(qrContent);
+                booking.qrCode = qrImage;
                 await booking.save();
             }
 
@@ -497,6 +490,158 @@ let postVerifyDeposit = (data) => {
     });
 };
 
+const checkBookingByQRCode = (type, token) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!type || !token) {
+                return resolve({
+                    errCode: 1,
+                    errMessage: 'Missing QR code type or token',
+                });
+            }
+
+            let booking = null;
+
+            if (type === 'doctor') {
+                booking = await db.Booking.findOne({
+                    where: { token },
+                    attributes: ['id', 'date', 'timeType', 'statusId', 'reason'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'patientData',
+                            attributes: ['email', 'firstName', 'lastName', 'address'],
+                            include: [
+                                {
+                                    model: db.Allcode,
+                                    as: 'genderData',
+                                    attributes: ['valueEn', 'valueVi'],
+                                },
+                            ],
+                        },
+                        {
+                            model: db.User,
+                            as: 'doctorData',
+                            attributes: ['email', 'firstName', 'address', 'gender', 'phonenumber', 'image', 'lastName'],
+                            include: [
+                                {
+                                    model: db.Allcode,
+                                    as: 'genderData',
+                                    attributes: ['valueEn', 'valueVi'],
+                                },
+                            ],
+                        },
+                        {
+                            model: db.Allcode,
+                            as: 'timeTypeDataPatient',
+                            attributes: ['valueEn', 'valueVi'],
+                        },
+                        {
+                            model: db.Allcode,
+                            as: 'statusIdDataPatient',
+                            attributes: ['valueEn', 'valueVi'],
+                        },
+                        {
+                            model: db.Doctor_Infor,
+                            as: 'doctorBooking',
+                            include: [
+                                {
+                                    model: db.Specialty,
+                                    as: 'specialtyData',
+                                    attributes: ['id', 'name', 'descriptionMarkdown', 'descriptionHTML', 'image'],
+                                },
+                                {
+                                    model: db.Clinic,
+                                    as: 'clinicData',
+                                    attributes: ['id', 'name', 'address', 'descriptionMarkdown', 'descriptionHTML', 'image'],
+                                },
+                            ],
+                            attributes: ['doctorId', 'specialtyId', 'clinicId', 'priceId', 'provinceId', 'paymentId', 'addressClinic', 'nameClinic', 'note'],
+                        },
+                    ],
+                });
+
+                // Xử lý ảnh bác sĩ
+                if (booking?.doctorData?.image) {
+                    booking.doctorData.image = Buffer.from(booking.doctorData.image, 'base64').toString('binary');
+                }
+
+            } else if (type === 'package') {
+                booking = await db.BookingPackage.findOne({
+                    where: { token },
+                    attributes: ['id', 'date', 'timeType', 'statusId', 'reason', 'depositStatus', 'depositAmount'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'patientData',
+                            attributes: ['email', 'firstName', 'lastName', 'address'],
+                            include: [
+                                {
+                                    model: db.Allcode,
+                                    as: 'genderData',
+                                    attributes: ['valueEn', 'valueVi'],
+                                },
+                            ],
+                        },
+                        {
+                            model: db.ExamPackage,
+                            as: 'packageData',
+                            attributes: ['id', 'name', 'price', 'description', 'image', 'note', 'isDepositRequired', 'depositPercent'],
+                            include: [
+                                {
+                                    model: db.Clinic,
+                                    as: 'clinicInfo',
+                                    attributes: ['name', 'address'],
+                                },
+                            ],
+                        },
+                        {
+                            model: db.Allcode,
+                            as: 'timeTypeDataPatient',
+                            attributes: ['valueEn', 'valueVi'],
+                        },
+                        {
+                            model: db.Allcode,
+                            as: 'statusIdDataPatient',
+                            attributes: ['valueEn', 'valueVi'],
+                        },
+                    ],
+                });
+
+                // Xử lý ảnh gói khám và QR code
+                if (booking?.packageData?.image) {
+                    booking.packageData.image = Buffer.from(booking.packageData.image, 'base64').toString('binary');
+                }
+                if (booking?.qrCode) {
+                    booking.qrCode = Buffer.from(booking.qrCode, 'base64').toString('binary');
+                }
+            } else {
+                return resolve({
+                    errCode: 3,
+                    errMessage: 'Unknown booking type',
+                });
+            }
+
+            if (booking) {
+                return resolve({
+                    errCode: 0,
+                    errMessage: 'Booking found',
+                    bookingData: booking,
+                });
+            } else {
+                return resolve({
+                    errCode: 4,
+                    errMessage: 'Booking not found',
+                });
+            }
+        } catch (error) {
+            return reject(error);
+        }
+    });
+};
+
+
+
 
 module.exports = {
     postBookAppointment: postBookAppointment,
@@ -504,5 +649,6 @@ module.exports = {
     postBookExamPackageAppointment: postBookExamPackageAppointment,
     postVerifyBookExamPackageAppointment: postVerifyBookExamPackageAppointment,
     postVerifyDeposit: postVerifyDeposit,
-    updateBookingSchedule: updateBookingSchedule
+    updateBookingSchedule: updateBookingSchedule,
+    checkBookingByQRCode: checkBookingByQRCode
 }

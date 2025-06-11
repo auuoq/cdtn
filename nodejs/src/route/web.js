@@ -77,6 +77,7 @@ let initWebRoutes = (app) => {
     router.post('/api/patient-book-exam-package-appointment', patientController.postBookExamPackageAppointment); // Đặt lịch khám cho gói khám
     router.post('/api/verify-book-exam-package-appointment', patientController.postVerifyBookExamPackageAppointment); // Xác nhận lịch khám cho gói khám
     router.post('/api/patient-verify-deposit', patientController.postVerifyDeposit); // Xác nhận đặt cọc
+    router.get('/api/check-booking-by-qr-code', patientController.checkBookingByQRCode); // Kiểm tra lịch hẹn bằng mã QR
 
     //specialty
     router.post('/api/create-new-specialty', specialtyController.createSpecialty);
