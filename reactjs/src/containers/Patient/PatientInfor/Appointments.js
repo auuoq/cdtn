@@ -408,70 +408,80 @@ class Appointments extends Component {
                   {filtered.map((app, idx) => (
                     <div key={idx} className="appointment-card card mb-4">
                       <div className="card-body row">
-                        {/* QR Code section */}
-                        <div className="qr-section mt-2">
-                          <p className="text-gray-500 text-sm mb-1">Mã xác nhận:</p>
-                          <img
-                            src={app.type === 'doctor'
-                              ? app.qrCode
-                              : app.qrCode
-                            }
-                            alt="QR Code"
-                            className="w-28 h-28 border rounded shadow-sm"
-                          />
-                        </div>
                         {/* Ảnh + info */}
-                        <div className="col-md-8 d-flex">
-                          <img
-                            src={
-                              app.type === 'doctor'
-                                ? app.doctorData?.image
-                                : app.packageData?.image
-                            }
-                            alt=""
-                            style={{
-                              width: 100,
-                              height: 100,
-                              objectFit: 'cover',
-                              borderRadius: 8,
-                              marginRight: 15,
-                            }}
-                          />
-                          <div className="appointment-info">
-                            <h4 className="card-title">
-                              {app.type === 'doctor'
-                                ? `${app.doctorData.firstName} ${app.doctorData.lastName}`
-                                : app.packageData?.name}
-                            </h4>
-                            {app.type === 'doctor' && (
+                      <div className="col-md-8">
+                        <div className="row">
+                          <div className="col-12 col-md-9 d-flex align-items-center mb-3 mb-md-0">
+                            <img
+                              src={
+                                app.type === 'doctor'
+                                  ? app.doctorData?.image
+                                  : app.packageData?.image
+                              }
+                              alt=""
+                              style={{
+                                width: 130,
+                                height: 100,
+                                objectFit: 'cover',
+                                borderRadius: 8,
+                                marginRight: 15,
+                              }}
+                            />
+                            <div className="appointment-info flex-grow-1">
+                              <h4 className="card-title">
+                                {app.type === 'doctor'
+                                  ? `${app.doctorData.firstName} ${app.doctorData.lastName}`
+                                  : app.packageData?.name}
+                              </h4>
+                              {app.type === 'doctor' && (
+                                <p className="mb-1 text-muted">
+                                  <i className="fas fa-stethoscope mr-1" />
+                                  {app.doctorBooking?.specialtyData?.name}
+                                </p>
+                              )}
                               <p className="mb-1 text-muted">
-                                <i className="fas fa-stethoscope mr-1" />
-                                {app.doctorBooking?.specialtyData?.name}
+                                <i className="fas fa-map-marker-alt mr-1" />
+                                {app.type === 'doctor'
+                                  ? app.doctorBooking?.clinicData?.address
+                                  : app.packageData?.clinicInfo?.address}
                               </p>
-                            )}
-                            <p className="mb-1 text-muted">
-                              <i className="fas fa-map-marker-alt mr-1" />
-                              {app.type === 'doctor'
-                                ? app.doctorBooking?.clinicData?.address
-                                : app.packageData?.clinicInfo?.address}
-                            </p>
-                            <div className="appointment-meta mb-2">
-                              <div className="meta-item">
-                                <i className="fas fa-calendar-alt mr-2" />
-                                {this.formatDate(app.date)}
+                              <div className="appointment-meta mb-2">
+                                <div className="meta-item">
+                                  <i className="fas fa-calendar-alt mr-2" />
+                                  {this.formatDate(app.date)}
+                                </div>
+                                <div className="meta-item">
+                                  <i className="fas fa-clock mr-2" />
+                                  {app.timeTypeDataPatient?.valueVi}
+                                </div>
                               </div>
-                              <div className="meta-item">
-                                <i className="fas fa-clock mr-2" />
-                                {app.timeTypeDataPatient?.valueVi}
+                              <div className="status-container mb-2">
+                                {this.renderStatusBadge(app.statusIdDataPatient?.valueVi)}
                               </div>
                             </div>
-                            <div className="status-container mb-2">
-                              {this.renderStatusBadge(
-                                app.statusIdDataPatient?.valueVi
-                              )}
+                          </div>
+
+                          <div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
+                            <div className="qr-section text-center">
+                              <img
+                                src={app.qrCode}
+                                alt="QR Code"
+                                className="border rounded shadow-sm"
+                                style={{
+                                  width: 120,
+                                  height: 120,
+                                  objectFit: 'contain',
+                                  border:"2px solid #fff"
+                                }}
+                              />
+                              <div className="mt-2 small text-muted" style={{ fontWeight: 500 }}>
+                                Mã xác nhận
+                              </div>
                             </div>
                           </div>
                         </div>
+                      </div>
+
 
                         {/* Actions */}
                         <div className="col-md-4">
@@ -592,29 +602,6 @@ class Appointments extends Component {
           </div>
         </div>
 
-        {/* Nút chatbox */}
-        <div
-          onClick={this.toggleChatbox}
-          style={{
-            position: 'fixed',
-            bottom: 20,
-            right: 20,
-            backgroundColor: '#007bff',
-            color: '#fff',
-            borderRadius: '50%',
-            width: 60,
-            height: 60,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-          }}
-          title="Chat với bác sĩ"
-        >
-          <i className="fas fa-comments fa-lg" />
-        </div>
-        {showChatbox && <ChatBox />}
       </>
     );
   }
