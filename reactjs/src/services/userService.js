@@ -133,6 +133,10 @@ const postVerifyDeposit = (data) => {
     return axios.post('/api/patient-verify-deposit', data);
 }
 
+const checkBookingByQRCode = (type, token) => {
+    return axios.get(`/api/check-booking-by-qr-code?type=${type}&token=${token}`);      
+}
+
 const getDoctorFeedbacks = (doctorId) => {
     return axios.get(`/api/get-doctor-feedbacks?doctorId=${doctorId}`);
 }
@@ -366,5 +370,5 @@ export {
     submitFeedbackPackage,searchClinic,searchSpecialty,searchExamPackage,
     paymentMomo, callbackMomo, transactionStatusMomo, getDepositReport, 
     getDepositReportByManager, getDepositReportByClinic,toggleTransactionStatus,
-    toggleStatusForClinic, updateBookingSchedule
+    toggleStatusForClinic, updateBookingSchedule,checkBookingByQRCode
 }

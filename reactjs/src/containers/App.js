@@ -43,6 +43,8 @@ import SearhPacket from '../components/Search/SearchPacket.js'
 import AllDortor from './HomePage/AllDortor.js';
 import VerifyPackageEmail from './Patient/VerifyPackageEmail.js';
 import VerifyDeposit from './Patient/VerifyDeposit.js';
+import qrCheck from './Patient/qrCheck.js';
+import QrCheck from './Patient/qrCheck.js';
 class App extends Component {
 
     handlePersistorState = () => {
@@ -102,6 +104,7 @@ class App extends Component {
                                     <Route path="/search-clinic" component={SearchClinic} />
                                     <Route path="/search-service" component={SearchSpecility} />
                                     <Route path="/search-packet" component={SearhPacket} />
+                                    <Route path={"/qrcode-booking"} component={QrCheck} />
                                 </Switch>
                                 <ChatButtons />
                             </CustomScrollbars>

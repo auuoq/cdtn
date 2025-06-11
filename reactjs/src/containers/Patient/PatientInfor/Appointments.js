@@ -222,35 +222,16 @@ class Appointments extends Component {
   handleRescheduleChange = e => {
     this.setState({ [e.target.name]: e.target.value });
   };
-  submitReschedule = async () => {
-    const { rescheduleBooking, newDate, newTimeType } = this.state;
-    const payload = {
-      bookingId: rescheduleBooking.id,
-      newDate,
-      newTimeType,
-    };
-    const res = await updateBookingSchedule(payload);
-    if (res.errCode === 0) {
-      toast.success('Thay đổi giờ hẹn thành công');
-      this.closeReschedule();
-      await this.fetchAppointments();
-    } else {
-      toast.error(res.errMessage || 'Thay đổi thất bại');
-    }
-  };
   renderRescheduleModal() {
     const {
       showRescheduleModal,
       rescheduleBooking,
-      newDate,
-      newTimeType,
     } = this.state;
     if (!showRescheduleModal || !rescheduleBooking) return null;
     return (
       <div className="reschedule-modal">
         <div className="reschedule-content card p-4">
           <h5>Thay đổi lịch hẹn</h5>
-
           {/* Thông tin bác sĩ + lịch cũ */}
           <ProfileDoctor
             doctorId={rescheduleBooking.doctorId}
@@ -276,12 +257,6 @@ class Appointments extends Component {
               onClick={this.closeReschedule}
             >
               Hủy
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={this.submitReschedule}
-            >
-              Lưu thay đổi
             </button>
           </div>
         </div>
