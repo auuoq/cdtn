@@ -8,12 +8,14 @@ import { withRouter } from 'react-router';
 import { changeLanguageApp } from "../../store/actions";
 import * as actions from "../../store/actions";
 import { Link } from 'react-router-dom/cjs/react-router-dom.min';
+import { getUserBookings, getUserPackageBookings } from '../../services/userService'; 
 
 class HomeHeader extends Component {
     constructor(props) {
         super(props);
         this.state = {
             isMenuOpen: false, // Trạng thái mở/đóng menu
+            appointmentTomorrowCount: 0,
         };
         this.state = {
             isMenuOpen: false,
@@ -21,6 +23,44 @@ class HomeHeader extends Component {
             searchType: "doctor", // Mặc định là tìm bác sĩ
         };
     }
+
+    async componentDidMount() {
+    // Chỉ fetch khi đã login và có userInfo
+    const { isLoggedIn, userInfo } = this.props;
+    if (isLoggedIn && userInfo?.id) {
+        await this.fetchTomorrowAppointments(userInfo.id);
+    }
+    }
+
+    fetchTomorrowAppointments = async userId => {
+    try {
+        const [res1, res2] = await Promise.all([
+        getUserBookings(userId),
+        getUserPackageBookings(userId),
+        ]);
+        const all = [
+        ...(res1?.data || []),
+        ...(res2?.data || []),
+        ];
+
+        const now = new Date();
+        const startTomorrow = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1, 0, 0, 0
+        ).getTime();
+        const endTomorrow = startTomorrow + 24*60*60*1000;
+
+        const count = all.filter(a => {
+        const t = +a.date;
+        return t >= startTomorrow && t < endTomorrow;
+        }).length;
+
+        this.setState({ appointmentTomorrowCount: count });
+    } catch (e) {
+        console.error('Fetch tomorrow appts error', e);
+    }
+    };
     
 
     changeLanguage = (language) => {
@@ -109,7 +149,7 @@ class HomeHeader extends Component {
 
     render() {
         const { language, isLoggedIn,processLogout } = this.props;
-        const { isMenuOpen } = this.state;
+        const { isMenuOpen, appointmentTomorrowCount } = this.state;
 
 
 
@@ -118,13 +158,27 @@ class HomeHeader extends Component {
                 <div className="home-header-container">
                     <div className='home-header-content'>
                         <div className="left-content">
-                            <i className="fas fa-bars" onClick={this.toggleMenu}></i>
+                            <div className="menu-icon-wrapper" onClick={this.toggleMenu}>
+                                <i className="fas fa-bars"></i>
+                                {appointmentTomorrowCount > 0 && (
+                                    <>
+                                    <span className="badge-icon">{appointmentTomorrowCount}</span>
+                                    <span className="date-notify">
+                                        Bạn có {appointmentTomorrowCount} lịch hẹn vào ngày mai
+                                    </span>
+                                    </>
+                                )}
+                            </div>
                             <img className="header-logo" src={logo} onClick={() => this.returnToHome()} />
                         </div>
                         <div className="center-content">
                             <div className='child-content' onClick={() => this.scrollToSection('specialty-section')}>
                                 <div><b><FormattedMessage id="homeheader.speciality" /> </b></div>
                                 <div className='subs-title'><FormattedMessage id="homeheader.searchdoctor" /></div>
+                            </div>
+                             <div className='child-content' onClick={() => this.scrollToSection('health-facility-section')}>
+                                <div><b><FormattedMessage id="homeheader.health-facility" /> </b></div>
+                                <div className='subs-title'><FormattedMessage id="homeheader.select-room" /></div>
                             </div>
                             <Link to="/AllPacket"className='child-content' style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}> 
                                 <div><b>Gói khám</b></div>
@@ -153,7 +207,13 @@ class HomeHeader extends Component {
                             {isLoggedIn ? (
                                 <>
                                     <div className="menu-item1" onClick={() => this.handleMenuClick('profile')}>Hồ sơ</div>
-                                    <div className="menu-item1" onClick={() => this.handleMenuClick('appointment')}>Lịch khám</div>
+                                    <div className="menu-item1" onClick={() => this.handleMenuClick('appointment')}>Lịch khám
+                                        {appointmentTomorrowCount > 0 && (
+                                        <span className="badge-menu">
+                                            {appointmentTomorrowCount}
+                                        </span>
+                                        )}
+                                    </div>
                                     <div className="menu-item1" onClick={processLogout}>Đăng xuất</div>
                                     
                                 </>

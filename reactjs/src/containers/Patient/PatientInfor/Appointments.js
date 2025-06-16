@@ -18,6 +18,8 @@ import ProfileDoctor from '../Doctor/ProfileDoctor';
 import DoctorSchedule from '../Doctor/DoctorSchedule';
 import DoctorExtraInfor from '../Doctor/DoctorExtraInfor';
 import UpdateSchedule from '../Doctor/UpdateSchedule';
+import PackageSchedule from '../ExamPackage/PackageSchedule';
+import UpdateBookingPackage from '../ExamPackage/updateBookingPackage';
 
 class Appointments extends Component {
   state = {
@@ -80,6 +82,45 @@ class Appointments extends Component {
       this.setState({ loading: false });
     }
   };
+
+  getNextAppointmentId(filtered) {
+    const now = Date.now();
+
+    const timeOrder = {
+      T1: 1, T2: 2, T3: 3, T4: 4, T5: 5, T6: 6, T7: 7,
+      T8: 8, T9: 9, T10: 10, T11: 11, T12: 12, T13: 13
+    };
+
+    const upcoming = filtered.filter(a => {
+      const appointmentTime = +a.date; // timestamp for the day
+      const today = new Date();
+      const isToday = new Date(appointmentTime).toDateString() === today.toDateString();
+      if (appointmentTime > now) return true;
+      if (isToday) {
+        const timeTypeValue = timeOrder[a.timeType] || 99;
+        const currentHour = today.getHours();
+        // Approx logic: map current hour to timeType ~ 1 slot/hour
+        return timeTypeValue > currentHour; 
+      }
+      return false;
+    });
+
+    if (!upcoming.length) return null;
+
+    return upcoming.reduce((next, a) => {
+      const aDate = +a.date;
+      const bDate = +next.date;
+
+      if (aDate < bDate) return a;
+      if (aDate > bDate) return next;
+
+      const aTime = timeOrder[a.timeType] || 99;
+      const bTime = timeOrder[next.timeType] || 99;
+
+      return aTime < bTime ? a : next;
+    }).id;
+  }
+
 
   // Filter handlers
   handleStatusChange = selectedStatus => {
@@ -175,13 +216,7 @@ class Appointments extends Component {
   // Sắp xếp và lọc
   getFilteredAppointments = () => {
     const { appointments, selectedStatus, typeFilter } = this.state;
-    const order = {
-      'Lịch hẹn mới': 1,
-      'Đã xác nhận': 2,
-      'Đã khám xong': 3,
-      'Đã hủy': 4,
-    };
-    return appointments
+    let filtered = appointments
       .filter(a => {
         const s = a.statusIdDataPatient?.valueVi || '';
         return (
@@ -190,10 +225,23 @@ class Appointments extends Component {
         );
       })
       .sort((a, b) => {
+        const order = {
+          'Lịch hẹn mới': 1,
+          'Đã xác nhận': 2,
+          'Đã khám xong': 3,
+          'Đã hủy': 4,
+        };
         const sa = order[a.statusIdDataPatient?.valueVi] || 99;
         const sb = order[b.statusIdDataPatient?.valueVi] || 99;
         return sa - sb;
       });
+
+    const nextId = this.getNextAppointmentId(filtered);
+    if (nextId) {
+      const next = filtered.find(a => a.id === nextId);
+      filtered = [ next, ...filtered.filter(a => a.id !== nextId) ];
+    }
+    return filtered;
   };
 
   renderStatusBadge = status => {
@@ -263,6 +311,74 @@ class Appointments extends Component {
       </div>
     );
   }
+
+  
+  openReschedulePackage = appointment => {
+    this.setState({
+      showRescheduleModal: true,
+      rescheduleBooking: appointment,
+      newDate: appointment.date,
+      newTimeType: appointment.timeType,
+    });
+    console.log('Opening reschedule for exam package:', appointment);
+  };
+
+  closeReschedulePackage = () => {
+    this.setState({ showRescheduleModal: false, rescheduleBooking: null });
+  };
+  handleReschedulePackageChange = e => {
+    this.setState({ [e.target.name]: e.target.value });
+  };
+  renderReschedulePackageModal() {
+    const { showRescheduleModal, rescheduleBooking } = this.state;
+    if (!showRescheduleModal || !rescheduleBooking) return null;
+
+    return (
+      <div className="reschedule-modal">
+        <div className="reschedule-content card p-4">
+          <h5>Thay đổi lịch hẹn gói khám</h5>
+
+          {/* Hiển thị thông tin gói khám */}
+          <div className="package-info mb-3">
+            {/* Hiển thị ảnh gói */}
+            <div>
+              {rescheduleBooking.packageData?.image && (
+              <img
+                src={rescheduleBooking.packageData.image}
+                alt={rescheduleBooking.packageData.name}
+                className="img-fluid mb-3"
+                style={{ maxWidth: '200px', height: 'auto', borderRadius: 8 }}
+              />
+            )}
+            </div>
+            
+            <strong>Gói khám:</strong> {rescheduleBooking.packageData?.name}<br />
+            <strong>Ngày hiện tại:</strong> {this.formatDate(rescheduleBooking.date)}<br />
+            <strong>Khung giờ hiện tại:</strong> {rescheduleBooking.timeTypeDataPatient?.valueVi}
+          </div>
+
+          {/* Cho phép chọn lại lịch mới */}
+          <UpdateBookingPackage
+            packageIdFromParent={rescheduleBooking.packageId}
+            detailPackage={rescheduleBooking.packageData}
+            isReschedule={true}
+            bookingId={rescheduleBooking.id}
+          />
+
+          <hr />
+          <div className="text-right">
+            <button
+              className="btn btn-secondary mr-2"
+              onClick={this.closeReschedulePackage}
+            >
+              Hủy
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ==== End Reschedule ====
 
 
@@ -297,6 +413,16 @@ class Appointments extends Component {
     );
   }
 
+  isTomorrow = timestamp => {
+    const date = new Date(+timestamp);
+    const t = new Date();
+    t.setDate(t.getDate() + 1);
+    return (
+      date.getFullYear() === t.getFullYear() &&
+      date.getMonth() === t.getMonth() &&
+      date.getDate() === t.getDate()
+    );
+  };
 
   render() {
     const {
@@ -308,7 +434,7 @@ class Appointments extends Component {
       showChatbox,
     } = this.state;
     const filtered = this.getFilteredAppointments();
-    console.log('Filtered appointments:', filtered);
+    const nextId = filtered.length ? filtered[0].id : null;
 
     return (
       <>
@@ -316,7 +442,9 @@ class Appointments extends Component {
 
         {/* Modals */}
         {this.renderRatingModal()}
-        {this.renderRescheduleModal()}
+        {this.state.rescheduleBooking?.packageId
+          ? this.renderReschedulePackageModal()
+          : this.renderRescheduleModal()}
 
         <div className="appointments-page container-fluid py-4">
           <div className="row">
@@ -381,7 +509,23 @@ class Appointments extends Component {
               ) : (
                 <div className="appointments-list">
                   {filtered.map((app, idx) => (
-                    <div key={idx} className="appointment-card card mb-4">
+                    <div
+                      key={app.id}
+                      className={`appointment-card card mb-4${app.id === nextId ? ' next-appointment' : ''}`}
+                    >
+                      {/* —————— BANNER NGÀY MAI —————— */}
+                      {this.isTomorrow(app.date) && (
+                        <div className="tomorrow-banner">
+                          Lịch hẹn vào ngày mai
+                        </div>
+                      )}
+                  
+                      {/* Label chỉ cho lịch gần nhất */}
+                      {app.id === nextId && (
+                        <div className="next-label">
+                          Lịch hẹn gần nhất
+                        </div>
+                      )}
                       <div className="card-body row">
                         {/* Ảnh + info */}
                       <div className="col-md-8">
@@ -538,11 +682,14 @@ class Appointments extends Component {
                             )}
 
                             {/* Thay đổi giờ hẹn */}
-                            {app.statusIdDataPatient?.valueVi ===
-                              'Đã xác nhận' && (
+                            {app.statusIdDataPatient?.valueVi === 'Đã xác nhận' && (
                               <button
                                 className="btn btn-warning btn-sm mb-2"
-                                onClick={() => this.openReschedule(app)}
+                                onClick={() =>
+                                  app.type === 'doctor'
+                                    ? this.openReschedule(app)
+                                    : this.openReschedulePackage(app)
+                                }
                               >
                                 <i className="fas fa-edit mr-1" />
                                 Thay đổi giờ hẹn

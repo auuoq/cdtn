@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import { getDepositReportByManager } from '../../../services/userService';
 import './DepositReportPage.scss';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 class DepositReportManagerPage extends Component {
   constructor(props) {
@@ -47,6 +49,39 @@ class DepositReportManagerPage extends Component {
     } finally {
       this.setState({ loading: false });
     }
+  }
+
+  exportToExcel = () => {
+    const { reportData } = this.state;
+    if (!reportData || !reportData.clinicReport) return;
+
+    const clinic = reportData.clinicReport;
+
+    const summary = [
+      {
+        'Tên phòng khám': clinic.clinicInfo?.name || 'Không rõ',
+        'Địa chỉ': clinic.clinicInfo?.address || 'Không rõ',
+        'Tổng tiền CHƯA chuyển (VND)': clinic.totalAmount || 0,
+      },
+    ];
+
+    const transactions = clinic.detailedTransactions.map(tx => ({
+      'ID': tx.momoTransId,
+      'Số tiền (VND)': tx.amount,
+      'Trạng thái': tx.status,
+      'Thời gian thanh toán': new Date(tx.paymentTime).toLocaleString(),
+    }));
+
+    const wb = XLSX.utils.book_new();
+    const wsSummary = XLSX.utils.json_to_sheet(summary);
+    const wsTransactions = XLSX.utils.json_to_sheet(transactions);
+
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'Tổng Quan');
+    XLSX.utils.book_append_sheet(wb, wsTransactions, 'Chi Tiết Giao Dịch');
+
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const file = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(file, `BaoCaoDatCoc_${clinic.clinicInfo?.name || 'phongkham'}.xlsx`);
   }
 
   render() {
@@ -119,7 +154,7 @@ class DepositReportManagerPage extends Component {
                 {clinicReport.detailedTransactions.length > 0 ? (
                   clinicReport.detailedTransactions.map(tx => (
                     <tr key={tx.id}>
-                      <td>{tx.id}</td>
+                      <td>{tx.momoTransId}</td>
                       <td>{Number(tx.amount).toLocaleString()}</td>
                       <td>{tx.status}</td>
                       <td>{new Date(tx.paymentTime).toLocaleString()}</td>
@@ -130,6 +165,10 @@ class DepositReportManagerPage extends Component {
                 )}
               </tbody>
             </table>
+
+            <div style={{ marginTop: '20px' }}>
+              <button onClick={this.exportToExcel}>Xuất Excel</button>
+            </div>
           </div>
         )}
       </div>

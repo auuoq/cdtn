@@ -28,6 +28,18 @@ let updateBookingSchedule = async (req, res) => {
     }
 };
 
+let updateBookingPackageSchedule = async (req, res) => {
+    try {
+        let result = await patientService.updateBookingPackageSchedule(req.body);
+        return res.status(200).json(result);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+}
 
 let postVerifyBookAppointment = async (req, res) => {
     try {
@@ -106,5 +118,6 @@ module.exports = {
     postBookExamPackageAppointment: postBookExamPackageAppointment,
     postVerifyBookExamPackageAppointment: postVerifyBookExamPackageAppointment,
     postVerifyDeposit: postVerifyDeposit,
-    checkBookingByQRCode: checkBookingByQRCode
+    checkBookingByQRCode: checkBookingByQRCode,
+    updateBookingPackageSchedule: updateBookingPackageSchedule,
 }

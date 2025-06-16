@@ -68,7 +68,7 @@ let postBookAppointment = (data) => {
             // Nếu booking vừa được tạo, thêm QR và tăng currentNumber
             if (created) {
                 const type = 'doctor';
-                const qrContent = `http://192.168.0.101:3002/qrcode-booking?type=${type}&token=${token}`;
+                const qrContent = `http://192.168.0.103:3002/qrcode-booking?type=${type}&token=${token}`;
                 const qrImage = await QRCode.toDataURL(qrContent);
                 booking.qrCode = qrImage;
                 await booking.save();
@@ -84,6 +84,13 @@ let postBookAppointment = (data) => {
                 if (schedule) {
                     schedule.currentNumber += 1;
                     await schedule.save();
+                }
+                const doctorInfor = await db.Doctor_Infor.findOne({
+                     where: { doctorId: data.doctorId }
+                });
+                if (doctorInfor) {
+                    doctorInfor.count = (doctorInfor.count || 0) + 1;
+                    await doctorInfor.save();
                 }
             }
 
@@ -148,7 +155,6 @@ let updateBookingSchedule = (data) => {
             const oldDate = booking.date;
             const oldTimeType = booking.timeType;
 
-            // Check if the new schedule exists and has not reached maxNumber
             const newSchedule = await db.Schedule.findOne({
                 where: {
                     doctorId,
@@ -171,7 +177,7 @@ let updateBookingSchedule = (data) => {
                 });
             }
 
-            // Decrease old schedule's currentNumber (if found)
+            // Giảm số lượng ở lịch cũ
             const oldSchedule = await db.Schedule.findOne({
                 where: {
                     doctorId,
@@ -185,17 +191,13 @@ let updateBookingSchedule = (data) => {
                 await oldSchedule.save();
             }
 
-            // Update new schedule's currentNumber
+            // Tăng số lượng ở lịch mới
             newSchedule.currentNumber += 1;
             await newSchedule.save();
 
-            // Update booking
+            // Cập nhật booking
             booking.date = newDate;
             booking.timeType = newTimeType;
-            const qrContent = `BOOKING|${doctorId}|${booking.patientId}|${newDate}|${newTimeType}|${booking.token}`;
-            const newQrImage = await QRCode.toDataURL(qrContent);
-            booking.qrCode = newQrImage;
-
             await booking.save();
 
             resolve({
@@ -208,6 +210,86 @@ let updateBookingSchedule = (data) => {
     });
 };
 
+
+let updateBookingPackageSchedule = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { bookingId, newDate, newTimeType } = data;
+
+      if (!bookingId || !newDate || !newTimeType) {
+        return resolve({
+          errCode: 1,
+          errMessage: 'Missing parameter'
+        });
+      }
+
+      let booking = await db.BookingPackage.findOne({
+        where: { id: bookingId }
+      });
+
+      if (!booking) {
+        return resolve({
+          errCode: 2,
+          errMessage: 'Booking not found'
+        });
+      }
+
+      const packageId = booking.packageId;
+      const oldDate = booking.date;
+      const oldTimeType = booking.timeType;
+
+      const newSchedule = await db.SchedulePackage.findOne({
+        where: {
+          packageId,
+          date: newDate,
+          timeType: newTimeType
+        }
+      });
+
+      if (!newSchedule) {
+        return resolve({
+          errCode: 3,
+          errMessage: 'New schedule not available'
+        });
+      }
+
+      if (newSchedule.currentNumber >= newSchedule.maxNumber) {
+        return resolve({
+          errCode: 4,
+          errMessage: 'New schedule is full'
+        });
+      }
+
+      const oldSchedule = await db.SchedulePackage.findOne({
+        where: {
+          packageId,
+          date: oldDate,
+          timeType: oldTimeType
+        }
+      });
+
+      if (oldSchedule && oldSchedule.currentNumber > 0) {
+        oldSchedule.currentNumber -= 1;
+        await oldSchedule.save();
+      }
+
+      newSchedule.currentNumber += 1;
+      await newSchedule.save();
+
+      // Cập nhật booking
+      booking.date = newDate;
+      booking.timeType = newTimeType;
+      await booking.save();
+
+      resolve({
+        errCode: 0,
+        errMessage: 'Reschedule success'
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
 
 
@@ -331,7 +413,7 @@ let postBookExamPackageAppointment = (data) => {
                 }
 
                 const type = 'package';
-                const qrContent = `http://192.168.0.101:3002/qrcode-booking?type=${type}&token=${token}`;
+                const qrContent = `http://192.168.0.103:3002/qrcode-booking?type=${type}&token=${token}`;
                 const qrImage = await QRCode.toDataURL(qrContent);
                 booking.qrCode = qrImage;
                 await booking.save();
@@ -650,5 +732,6 @@ module.exports = {
     postVerifyBookExamPackageAppointment: postVerifyBookExamPackageAppointment,
     postVerifyDeposit: postVerifyDeposit,
     updateBookingSchedule: updateBookingSchedule,
-    checkBookingByQRCode: checkBookingByQRCode
+    checkBookingByQRCode: checkBookingByQRCode,
+    updateBookingPackageSchedule: updateBookingPackageSchedule
 }

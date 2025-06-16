@@ -116,6 +116,10 @@ const updateBookingSchedule = (data) => {
     return axios.put('/api/update-booking-schedule', data);
 }
 
+const updateBookingPackageSchedule = (data) => {
+    return axios.put('/api/update-booking-package-schedule', data);
+}
+
 
 const postVerifyBookAppointment = (data) => {
     return axios.post('/api/verify-book-appointment', data);
@@ -370,5 +374,5 @@ export {
     submitFeedbackPackage,searchClinic,searchSpecialty,searchExamPackage,
     paymentMomo, callbackMomo, transactionStatusMomo, getDepositReport, 
     getDepositReportByManager, getDepositReportByClinic,toggleTransactionStatus,
-    toggleStatusForClinic, updateBookingSchedule,checkBookingByQRCode
+    toggleStatusForClinic, updateBookingSchedule,checkBookingByQRCode,updateBookingPackageSchedule
 }

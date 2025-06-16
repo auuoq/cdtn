@@ -270,3 +270,61 @@
 }
 
 
+.menu-icon-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+
+  .badge-icon {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #dc3545;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 50%;
+    z-index: 2;
+  }
+
+  .date-notify {
+    display: none;           /* ẩn mặc định */
+    position: absolute;
+    top: calc(94% + 8px);
+    left: 263%;
+    transform: translateX(-46%);
+    background: #fff;
+    color: #bd3838;
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 21px;
+    box-shadow: 0 2px 6px #810c17;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    z-index: 1;
+  }
+
+  &:hover .date-notify,
+  &:focus-within .date-notify {
+    display: block;          /* show khi hover hoặc focus */    
+  }
+}
+
+.menu-item1 {
+  position: relative;
+  padding-right: 2.5rem; /* chừa chỗ cho badge */
+}
+
+.badge-menu {
+  position: absolute;
+  top: 50%;
+  right: 0rem;
+  transform: translateY(-50%);
+  background: #dc3545;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
+}

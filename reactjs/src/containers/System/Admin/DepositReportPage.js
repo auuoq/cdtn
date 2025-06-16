@@ -1,6 +1,16 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { getDepositReport, getDepositReportByClinic, getAllClinic,toggleStatusForClinic,toggleTransactionStatus } from '../../../services/userService';
+import {
+  getDepositReport,
+  getDepositReportByClinic,
+  getAllClinic,
+  toggleStatusForClinic,
+  toggleTransactionStatus
+} from '../../../services/userService';
+
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
 import './DepositReportPage.scss';
 
 class DepositReportPage extends Component {
@@ -92,6 +102,64 @@ class DepositReportPage extends Component {
     this.fetchReport();
   }
 
+  exportToExcel = () => {
+    const { reportData, selectedClinicId } = this.state;
+
+    if (!reportData) return;
+
+    let wb = XLSX.utils.book_new();
+
+    if (selectedClinicId === 'ALL') {
+      // Sheet tổng hợp
+      const clinicSummary = reportData.clinicReports?.map(item => ({
+        'Tên phòng khám': item.clinicInfo?.name || '',
+        'Địa chỉ': item.clinicInfo?.address || '',
+        'Tổng tiền (VND)': item.totalAmount || 0
+      })) || [];
+
+      const summarySheet = XLSX.utils.json_to_sheet(clinicSummary);
+      XLSX.utils.book_append_sheet(wb, summarySheet, 'Tổng hợp phòng khám');
+
+      reportData.clinicReports?.forEach(item => {
+        const txs = item.detailedTransactions?.map(tx => ({
+          'TransID': tx.momoTransId,
+          'Số tiền (VND)': tx.amount,
+          'Trạng thái': tx.status,
+          'Thời gian thanh toán': new Date(tx.paymentTime).toLocaleString()
+        })) || [];
+
+        if (txs.length > 0) {
+          const sheet = XLSX.utils.json_to_sheet(txs);
+          const sheetName = item.clinicInfo?.name?.substring(0, 31) || `Clinic ${item.clinicId}`;
+          XLSX.utils.book_append_sheet(wb, sheet, sheetName);
+        }
+      });
+    } else {
+      const clinicInfoSheet = XLSX.utils.json_to_sheet([
+        {
+          'Tên phòng khám': reportData.clinicInfo?.name || '',
+          'Địa chỉ': reportData.clinicInfo?.address || '',
+          'Tổng tiền (VND)': reportData.totalAmount || 0
+        }
+      ]);
+      XLSX.utils.book_append_sheet(wb, clinicInfoSheet, 'Thông tin tổng hợp');
+
+      const txs = reportData.detailedTransactions?.map(tx => ({
+        'TransID': tx.momoTransId,
+        'Số tiền (VND)': tx.amount,
+        'Trạng thái': tx.status,
+        'Thời gian thanh toán': new Date(tx.paymentTime).toLocaleString()
+      })) || [];
+
+      const detailSheet = XLSX.utils.json_to_sheet(txs);
+      XLSX.utils.book_append_sheet(wb, detailSheet, 'Chi tiết giao dịch');
+    }
+
+    const fileName = `Deposit_Report_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    saveAs(new Blob([wbout], { type: 'application/octet-stream' }), fileName);
+  }
+
   render() {
     const { from, to, selectedClinicId, loading, errorMessage, reportData, clinics, expandedClinicIds } = this.state;
 
@@ -119,6 +187,9 @@ class DepositReportPage extends Component {
           </label>
           <button onClick={this.fetchReport} disabled={loading}>
             {loading ? 'Đang tải...' : 'Xem báo cáo'}
+          </button>
+          <button onClick={this.exportToExcel} disabled={!reportData || loading}>
+            Xuất Excel
           </button>
         </div>
 
@@ -150,7 +221,7 @@ class DepositReportPage extends Component {
                             <td>{Number(item.totalAmount).toLocaleString()}</td>
                             <td>
                               <button onClick={() => this.toggleExpandClinic(item.clinicId)}>
-                                {expandedClinicIds.includes(item.clinicId) ? 'Ẩn chi tiết' : 'chi tiết'}
+                                {expandedClinicIds.includes(item.clinicId) ? 'Ẩn chi tiết' : 'Chi tiết'}
                               </button>
                               <button onClick={() => this.handleToggleClinicStatus(item.clinicId)} style={{ marginLeft: 10 }}>
                                 Đã hoàn trả
@@ -164,7 +235,7 @@ class DepositReportPage extends Component {
                                 <table className="report-table">
                                   <thead>
                                     <tr>
-                                      <th>ID</th>
+                                      <th>TransId</th>
                                       <th>Số tiền (VND)</th>
                                       <th>Trạng thái</th>
                                       <th>Thời gian thanh toán</th>
@@ -175,13 +246,13 @@ class DepositReportPage extends Component {
                                     {item.detailedTransactions?.length > 0 ? (
                                       item.detailedTransactions.map(tx => (
                                         <tr key={tx.id}>
-                                          <td>{tx.id}</td>
+                                          <td>{tx.momoTransId}</td>
                                           <td>{Number(tx.amount).toLocaleString()}</td>
                                           <td>{tx.status}</td>
                                           <td>{new Date(tx.paymentTime).toLocaleString()}</td>
                                           <td>
                                             <button onClick={() => this.handleToggleTransactionStatus(tx.id)}>
-                                              xác nhận đã hoàn trả
+                                              Xác nhận đã hoàn trả
                                             </button>
                                           </td>
                                         </tr>

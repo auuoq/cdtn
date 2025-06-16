@@ -297,6 +297,7 @@ let getUserBookings = (userId) => {
         try {
             let bookings = await db.Booking.findAll({
                 where: { patientId: userId },
+                order: [['date', 'ASC']],
                 include: [
                     {
                         model: db.User,
