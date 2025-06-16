@@ -3,11 +3,26 @@ import { FaRobot } from "react-icons/fa";
 import { BsChatDotsFill } from "react-icons/bs";
 import ChatBox from '../chatbox';
 import ChatBot from '../ChatBot/ChatBot';
+import { useLocation } from 'react-router-dom';
 
+const HIDE_CHAT_ROUTES = [       
+    '/doctor/manage',
+    '/doctor/chat',
+    '/register',
+    '/login',
+    '/forgot-password',
+    '/reset-password',
+    '/system',
+    '/user-login',
+    '/manage/'   
+];
 const ChatButtons = () => {
     const [showChatbox, setShowChatbox] = useState(false);
     const [showGeminiBot, setShowGeminiBot] = useState(false);
 
+    const { pathname } = useLocation();                
+    const isHidden = HIDE_CHAT_ROUTES.some(r => pathname.startsWith(r));
+    if (isHidden) return null;  
     const toggleChatbox = () => {
         setShowChatbox(!showChatbox);
     };
