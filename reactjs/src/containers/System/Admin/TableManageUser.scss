@@ -9,6 +9,43 @@
     &:hover {
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
+    .search-bar {
+        margin-bottom: 20px;
+    .search-input-wrapper {
+        position: relative;
+        width: 250px;
+
+        input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            transition: 0.3s ease;
+
+            &::placeholder {
+                color: #bbb;
+            }
+
+            &:focus {
+                outline: none;
+                border-color: #1ca7ec;
+                box-shadow: 0 0 3px rgba(28, 167, 236, 0.3);
+            }
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #1ca7ec;
+            font-size: 16px;
+        }
+    }
+}
+
 
     .user-table-wrapper {
         overflow-x: auto;

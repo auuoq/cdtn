@@ -30,7 +30,8 @@ class ManageSpecialty extends Component {
                 descriptionMarkdown: '',
             },
             isOpenDeleteModal: false,
-            specialtyToDelete: null
+            specialtyToDelete: null,
+            searchKeyword: ''
         }
     }
 
@@ -50,7 +51,9 @@ class ManageSpecialty extends Component {
             console.error('Error fetching specialties:', e);
         }
     }
-
+    handleSearchChange = (event) => {
+        this.setState({ searchKeyword: event.target.value });
+    }
     handleOnChangeInput = (event, id) => {
         let stateCopy = { ...this.state.currentSpecialty };
         stateCopy[id] = event.target.value;
@@ -168,6 +171,10 @@ class ManageSpecialty extends Component {
 
     render() {
         let { specialties, currentSpecialty, isCreateMode, specialtyToDelete } = this.state;
+        let filteredSpecialties = specialties.filter((item) =>
+            item.name.toLowerCase().includes(this.state.searchKeyword.toLowerCase())
+        );
+
         return (
             <div className="managa-specialty-container" style={{
                 maxWidth: "1200px",
@@ -200,6 +207,18 @@ class ManageSpecialty extends Component {
                         </button>
                     </div>
                 </div>
+                <div className="search-bar">
+                <div className="search-input-wrapper">
+                    <i className="fas fa-search search-icon"></i>
+                    <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Nhập tên chuyên khoa..."
+                    value={this.state.searchKeyword}
+                    onChange={this.handleSearchChange}
+                    />
+                </div>
+                </div>
                 
                 {/* Specialty List Table */}
                 <div className="mt-3">
@@ -214,8 +233,8 @@ class ManageSpecialty extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {specialties && specialties.length > 0 ?
-                                    specialties.map((item, index) => (
+                                {filteredSpecialties && filteredSpecialties.length > 0 ?
+                                    filteredSpecialties.map((item, index) => (
                                         <tr key={index}>
                                             <td>{index + 1}</td>
                                             <td>{item.name}</td>

@@ -7,7 +7,8 @@ class TableManageUser extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            usersRedux: []
+            usersRedux: [],
+            searchKeyword: ''
         }
     }
 
@@ -22,9 +23,12 @@ class TableManageUser extends Component {
             });
         }
     }
-
+    handleSearchChange = (event) => {
+        this.setState({ searchKeyword: event.target.value });
+    }
+    
     handleDeleteUser = (user) => {
-        if (window.confirm(`Are you sure you want to delete user ${user.email}?`)) {
+        if (window.confirm(`Bạn có chắc muốn xóa tài khoản ${user.email}?`)) {
             this.props.deleteAUserRedux(user.id);
         }
     }
@@ -35,9 +39,35 @@ class TableManageUser extends Component {
 
     render() {
         let arrUsers = this.state.usersRedux;
+        let { usersRedux, searchKeyword } = this.state;
+
+        let filteredUsers = usersRedux.filter((user) => {
+            let keyword = searchKeyword.toLowerCase();
+            return (
+                user.email?.toLowerCase().includes(keyword) ||
+                user.firstName?.toLowerCase().includes(keyword) ||
+                user.phonenumber?.toLowerCase().includes(keyword)
+            );
+        });
+
 
         return (
             <div className="user-management-container">
+            <div className="search-bar">
+                <div className="search-input-wrapper">
+                    <span className="search-icon">
+                        <i className="fas fa-search"></i>
+                    </span>
+                    <input
+                        type="text"
+                        placeholder="Nhập tìm kiếm"
+                        value={this.state.searchKeyword}
+                        onChange={this.handleSearchChange}
+                    />
+                </div>
+            </div>
+
+
                 <div className="user-table-wrapper">
                     <table className="user-management-table">
                         <thead>
@@ -51,8 +81,8 @@ class TableManageUser extends Component {
                             </tr>
                         </thead>
                         <tbody>
-                            {arrUsers && arrUsers.length > 0 ? (
-                                arrUsers.map((item, index) => (
+                            {filteredUsers  && filteredUsers .length > 0 ? (
+                                filteredUsers .map((item, index) => (
                                     <tr key={index}>
                                         <td data-label="Email">{item.email}</td>
                                         <td data-label="First Name">{item.firstName}</td>

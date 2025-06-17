@@ -77,3 +77,40 @@
         }
     }
 }
+.search-bar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+
+  .search-input-wrapper {
+    position: relative;
+    width: 250px;
+
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #1ca7ec;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px 12px 8px 36px; // chừa khoảng bên trái cho icon
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+
+      &::placeholder {
+        color: #bbb;
+      }
+
+      &:focus {
+        border-color: #1ca7ec;
+        box-shadow: 0 0 0 2px rgba(28, 167, 236, 0.15);
+        outline: none;
+      }
+    }
+  }
+}
