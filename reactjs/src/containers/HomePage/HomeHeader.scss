@@ -328,3 +328,31 @@
   padding: 2px 6px;
   border-radius: 50%;
 }
+@media (max-width: 768px) {
+    .home-header-banner {
+        .content-up {
+            .search { // nếu muốn dọc thay vì ngang
+                width: 90%;             // chiếm 90% chiều ngang màn hình
+                padding: 8px;
+
+                input {
+                    width: 100% !important;
+                    font-size: 14px;
+                }
+
+                select {
+                    width: 100%;
+                    font-size: 14px;
+                }
+
+                .vertical-line {
+                    display: none;
+                }
+
+                .select-wrapper {
+                    width: 80%;
+                }
+            }
+        }
+    }
+}

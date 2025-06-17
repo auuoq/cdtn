@@ -290,6 +290,7 @@ class HomeHeader extends Component {
                                 position: 'relative',
                                 display: 'flex',
                                 alignItems: 'center',
+                                
                                 }}
                             >
                                 <select
