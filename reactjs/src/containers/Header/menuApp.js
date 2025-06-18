@@ -75,10 +75,10 @@ export const doctorMenu = [
 
     },
     {
-        name: 'chat',
+        name: 'Tin nhắn',
         menus: [
             {
-                name: 'chat', link: '/doctor/chat',
+                name: 'Tin nhắn', link: '/doctor/chat',
             },
         ]
     

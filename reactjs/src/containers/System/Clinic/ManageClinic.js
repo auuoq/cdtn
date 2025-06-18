@@ -33,7 +33,8 @@ class ManageClinic extends Component {
             },
             // Thêm state cho modal xác nhận xóa
             isOpenDeleteModal: false,
-            clinicToDelete: null
+            clinicToDelete: null,
+            searchKeyword: ''
         }
     }
 
@@ -61,7 +62,9 @@ class ManageClinic extends Component {
             currentClinic: stateCopy
         })
     }
-
+    handleSearchChange = (event) => {
+        this.setState({ searchKeyword: event.target.value });
+    }
     handleEditorChange = ({ html, text }) => {
         this.setState({
             currentClinic: {
@@ -173,6 +176,9 @@ class ManageClinic extends Component {
 
     render() {
         let { clinics, currentClinic, isCreateMode, clinicToDelete } = this.state;
+        let filteredClinics = clinics.filter(clinic =>
+            clinic.name.toLowerCase().includes(this.state.searchKeyword.toLowerCase())
+        );
         return (
             <div className="managa-specialty-container" style={{
                 maxWidth: "1200px",
@@ -206,6 +212,20 @@ class ManageClinic extends Component {
 
                     </div>
                 </div>
+                <div className="search-bar">
+                <div className="search-input-wrapper">
+                    <i className="fas fa-search search-icon"></i>
+                    <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Nhập tên phòng khám..."
+                    value={this.state.searchKeyword}
+                    onChange={this.handleSearchChange}
+                    />
+                </div>
+                </div>
+
+
                 
                 {/* Clinic List Table */}
                 <div className="mt-3">
@@ -221,8 +241,8 @@ class ManageClinic extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {clinics && clinics.length > 0 ?
-                                    clinics.map((item, index) => (
+                                {filteredClinics && filteredClinics.length > 0 ?
+                                    filteredClinics.map((item, index) => (
                                         <tr key={index}>
                                             <td>{index + 1}</td>
                                             <td>{item.name}</td>
