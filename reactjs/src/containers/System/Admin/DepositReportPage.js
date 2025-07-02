@@ -251,9 +251,13 @@ class DepositReportPage extends Component {
                                           <td>{tx.status}</td>
                                           <td>{new Date(tx.paymentTime).toLocaleString()}</td>
                                           <td>
-                                            <button onClick={() => this.handleToggleTransactionStatus(tx.id)}>
-                                              Xác nhận đã hoàn trả
-                                            </button>
+                                            {tx.status === 'PENDING' ? (
+                                              <button onClick={() => this.handleToggleTransactionStatus(tx.id)}>
+                                                Xác nhận đã hoàn trả
+                                              </button>
+                                            ) : (
+                                              <button onClick={() => this.handleToggleTransactionStatus(tx.id)}>Đã hoàn trả</button>
+                                            )}
                                           </td>
                                         </tr>
                                       ))

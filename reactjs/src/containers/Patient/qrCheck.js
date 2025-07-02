@@ -30,7 +30,7 @@ class QrCheck extends Component {
             this.setState({ qrContent, type });
 
             try {
-                const res = await axios.get(`http://192.168.0.103:8080/api/check-booking-by-qr-code?type=${type}&token=${token}`);
+                const res = await axios.get(`http://192.168.4.171:8080/api/check-booking-by-qr-code?type=${type}&token=${token}`);
                 if (res.data?.errCode === 0) {
                     this.setState({ bookingData: res.data.bookingData });
                 } else {

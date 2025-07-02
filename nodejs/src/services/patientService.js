@@ -68,7 +68,7 @@ let postBookAppointment = (data) => {
             // Nếu booking vừa được tạo, thêm QR và tăng currentNumber
             if (created) {
                 const type = 'doctor';
-                const qrContent = `http://192.168.0.103:3002/qrcode-booking?type=${type}&token=${token}`;
+                const qrContent = `http://192.168.4.171:3002/qrcode-booking?type=${type}&token=${token}`;
                 const qrImage = await QRCode.toDataURL(qrContent);
                 booking.qrCode = qrImage;
                 await booking.save();
@@ -413,7 +413,7 @@ let postBookExamPackageAppointment = (data) => {
                 }
 
                 const type = 'package';
-                const qrContent = `http://192.168.0.103:3002/qrcode-booking?type=${type}&token=${token}`;
+                const qrContent = `http://192.168.4.171:3002/qrcode-booking?type=${type}&token=${token}`;
                 const qrImage = await QRCode.toDataURL(qrContent);
                 booking.qrCode = qrImage;
                 await booking.save();

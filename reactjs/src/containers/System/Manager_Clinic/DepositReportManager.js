@@ -135,7 +135,7 @@ class DepositReportManagerPage extends Component {
                 <tr>
                   <td>{clinicReport.clinicInfo?.name || 'Không rõ'}</td>
                   <td>{clinicReport.clinicInfo?.address || 'Không rõ'}</td>
-                  <td>{Number(clinicReport.totalAmount || 0).toLocaleString()}</td>
+                  <td>{Number(clinicReport.totalAmount-clinicReport.totalAmount*20/100 || 0).toLocaleString()}</td>
                 </tr>
               </tbody>
             </table>
@@ -155,7 +155,7 @@ class DepositReportManagerPage extends Component {
                   clinicReport.detailedTransactions.map(tx => (
                     <tr key={tx.id}>
                       <td>{tx.momoTransId}</td>
-                      <td>{Number(tx.amount).toLocaleString()}</td>
+                      <td>{Number(tx.amount-(tx.amount*20/100)).toLocaleString()}</td>
                       <td>{tx.status}</td>
                       <td>{new Date(tx.paymentTime).toLocaleString()}</td>
                     </tr>
