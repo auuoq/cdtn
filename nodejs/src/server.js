@@ -58,7 +58,7 @@ io.on('connection', (socket) => {
 });
 
 // Chạy server
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 6969;
 server.listen(port, () => {
   console.log("🚀 Backend Nodejs is running on port " + port);
 });
