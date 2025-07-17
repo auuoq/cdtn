@@ -1,8 +1,19 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
+// Tạo dialectOptions tùy theo DB_SSL
+const dialectOptions = {
+    family: 4
+};
 
-// Option 2: Passing parameters separately (other dialects)
+if (process.env.DB_SSL === 'true') {
+    dialectOptions.ssl = {
+        require: true,
+        rejectUnauthorized: false
+    };
+}
+
+// Tạo Sequelize instance
 const sequelize = new Sequelize(
     process.env.DB_DATABASE_NAME,
     process.env.DB_USERNAME,
@@ -11,31 +22,23 @@ const sequelize = new Sequelize(
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,
         dialect: 'postgres',
-        dialectOptions: {
-            family: 4 // Force IPv4
-        },
         logging: false,
-        dialectOptions:
-            process.env.DB_SSL === 'true' ?
-                {
-                    ssl: {
-                        require: true,
-                        rejectUnauthorized: false
-                    }
-                } : {}
-        ,
+        dialectOptions: dialectOptions,
         query: {
-            "raw": true
+            raw: true
         },
         timezone: "+07:00"
-    });
+    }
+);
 
+// Kết nối DB
 let connectDB = async () => {
     try {
         await sequelize.authenticate();
-        console.log('Connection has been established successfully.');
+        console.log('✅ Connection has been established successfully.');
     } catch (error) {
-        console.error('Unable to connect to the database:', error);
+        console.error('❌ Unable to connect to the database:', error);
     }
-}
+};
+
 module.exports = connectDB;
