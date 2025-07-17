@@ -11,6 +11,9 @@ const sequelize = new Sequelize(
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,
         dialect: 'postgres',
+        dialectOptions: {
+            family: 4 // Force IPv4
+        },
         logging: false,
         dialectOptions:
             process.env.DB_SSL === 'true' ?
