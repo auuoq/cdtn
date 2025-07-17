@@ -45,52 +45,77 @@ let getOnlineDoctors = () => {
                     roleId: 'R2'
                 },
                 attributes: {
-                        exclude: ['password']
+                    exclude: ['password']
+                },
+                include: [
+                    {
+                        model: db.Markdown,
+                        as: 'doctorMarkdown',
+                        attributes: ['description', 'contentHTML', 'contentMarkdown'],
+                        required: false
                     },
-                    include: [
-                        {
-                            model: db.Markdown,
-                            attributes: ['description', 'contentHTML', 'contentMarkdown']
+                    {
+                        model: db.Allcode,
+                        as: 'positionData',
+                        attributes: ['valueEn', 'valueVi'],
+                        required: false
+                    },
+                    {
+                        model: db.Doctor_Infor,
+                        as: 'doctorInfo',
+                        attributes: {
+                            exclude: ['id', 'doctorId']
                         },
-                        {
-                            model: db.Allcode, as: 'positionData',
-                            attributes: ['valueEn', 'valueVi']
-                        },
-                        {
-                            model: db.Doctor_Infor,
-                            attributes: {
-                                exclude: ['id', 'doctorId']
+                        required: false,
+                        include: [
+                            {
+                                model: db.Allcode,
+                                as: 'priceTypeData',
+                                attributes: ['valueEn', 'valueVi'],
+                                required: false
                             },
-                            include: [
-                                { model: db.Allcode, as: 'priceTypeData', attributes: ['valueEn', 'valueVi'] },
-                                { model: db.Allcode, as: 'provinceTypeData', attributes: ['valueEn', 'valueVi'] },
-                                { model: db.Allcode, as: 'paymentTypeData', attributes: ['valueEn', 'valueVi'] },
-                                {
-                                    model: db.Specialty,
-                                    as: 'specialtyData',
-                                    attributes: ['id', 'name', 'image'],
-                                    required: false
-                                }
-                            ]
-                        },
-
-                    ],
+                            {
+                                model: db.Allcode,
+                                as: 'provinceTypeData',
+                                attributes: ['valueEn', 'valueVi'],
+                                required: false
+                            },
+                            {
+                                model: db.Allcode,
+                                as: 'paymentTypeData',
+                                attributes: ['valueEn', 'valueVi'],
+                                required: false
+                            },
+                            {
+                                model: db.Specialty,
+                                as: 'specialtyData',
+                                attributes: ['id', 'name', 'image'],
+                                required: false
+                            }
+                        ]
+                    }
+                ]
             });
 
             if (!onlineDoctors || onlineDoctors.length === 0) {
                 return resolve({
                     errCode: 1,
-                    errMessage: 'No online doctors found',
+                    errMessage: 'No online doctors found'
                 });
             }
 
             const formattedDoctors = onlineDoctors.map(doctor => {
-                const doc = doctor.toJSON(); // convert Sequelize instance to plain object
-                if (doc.image) {
-                    doc.image = new Buffer(doc.image, 'base64').toString('binary');; 
+                try {
+                    const doc = doctor?.toJSON?.() || doctor;
+                    if (doc.image) {
+                        doc.image = Buffer.from(doc.image, 'base64').toString('binary');
+                    }
+                    return doc;
+                } catch (err) {
+                    console.error('Error converting doctor to plain object:', err);
+                    return null;
                 }
-                return doc;
-            });
+            }).filter(Boolean); // lọc bỏ các phần tử null nếu lỗi chuyển đổi
 
             return resolve({
                 errCode: 0,
@@ -103,6 +128,7 @@ let getOnlineDoctors = () => {
         }
     });
 };
+
 
 
 let sendMessage = async (data) => {

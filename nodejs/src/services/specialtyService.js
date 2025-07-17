@@ -121,7 +121,7 @@ let getDetailSpecialtyById = (inputId, location) => {
                     }
 
                     // Create a plain object and append doctorSpecialty
-                    let dataPlain = data.get({ plain: true }); // Chuyển đổi đối tượng Sequelize
+                     let dataPlain = typeof data.toJSON === 'function' ? data.toJSON() : data;
                     dataPlain.doctorSpecialty = doctorSpecialty; // Thêm doctorSpecialty vào
                     resolve({
                         errCode: 0,
