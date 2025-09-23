@@ -2,6 +2,10 @@
   "name": "bon",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "16.20.2",
+    "npm": "8.x"
+  },
   "dependencies": {
     "@chatscope/chat-ui-kit-react": "^2.1.1",
     "@chatscope/chat-ui-kit-styles": "^1.4.0",
