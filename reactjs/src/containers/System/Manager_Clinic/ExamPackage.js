@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
 import { toast } from 'react-toastify';
-import { getExamPackagesDetailByManager, createExamPackage, updateExamPackage, deleteExamPackage, getAllClinic,getAllCodeService } from '../../../services/userService';
+import { getExamPackagesDetailByManager, createExamPackage, updateExamPackage, deleteExamPackage, getAllClinic,getAllcodesService } from '../../../services/userService';
 import './ExamPackage.scss';
 import CommonUtils from '../../../utils/CommonUtils';
 import MarkdownIt from 'markdown-it';
@@ -54,9 +54,9 @@ class ManageExamPackage extends Component {
     fetchAllDropdownData = async () => {
         try {
             const [categoryRes, provinceRes, paymentRes] = await Promise.all([
-                getAllCodeService("CATEGORY"),
-                getAllCodeService("PROVINCE"),
-                getAllCodeService("PAYMENT")
+                getAllcodesService("CATEGORY"),
+                getAllcodesService("PROVINCE"),
+                getAllcodesService("PAYMENT")
             ]);
     
             if (categoryRes.errCode === 0 && provinceRes.errCode === 0 && paymentRes.errCode === 0) {

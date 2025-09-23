@@ -56,7 +56,7 @@ class AllDoctor extends Component {
 
                                             let nameVi = `${item.positionData?.valueVi || ''}, ${item.lastName} ${item.firstName}`;
                                             let nameEn = `${item.positionData?.valueEn || ''}, ${item.firstName} ${item.lastName}`;
-                                            let specialtyName = item.Doctor_Infor?.specialtyData?.name || '';
+                                            let specialtyName = item.DoctorInfor?.specialtyData?.name || '';
 
                                             return (
                                                 <div className="col-3 section-customize" key={index} onClick={() => this.handleViewDetailDoctor(item)}>

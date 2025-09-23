@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Profile.scss';
 import HomeHeader from '../../HomePage/HomeHeader';
-import { getUserInfoByEmail, editUserService, getAllCodeService } from '../../../services/userService';
+import { getUserInfoByEmail, editUserService, getAllcodesService } from '../../../services/userService';
 import { withRouter } from 'react-router';
 import { FormattedMessage } from 'react-intl';
 import { toast } from 'react-toastify';
@@ -42,7 +42,7 @@ class Profile extends Component {
             try {
                 let [userResponse, genderResponse] = await Promise.all([
                     getUserInfoByEmail(userInfo.email),
-                    getAllCodeService('GENDER')
+                    getAllcodesService('GENDER')
                 ]);
 
                 if (userResponse?.errCode === 0 && genderResponse?.errCode === 0) {

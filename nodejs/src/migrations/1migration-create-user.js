@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Users', {
+    await queryInterface.createTable('User', {
 
       id: {
         allowNull: false,
@@ -37,7 +37,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       image: {
-        type: Sequelize.STRING
+        type: Sequelize.BLOB('long')
       },
       resetPasswordToken: {
         type: Sequelize.STRING,   // Token dùng để reset mật khẩu
@@ -46,6 +46,27 @@ module.exports = {
       resetPasswordExpires: {
         type: Sequelize.BIGINT,   // Thời gian hết hạn của token
         allowNull: true
+      },
+      insuranceCode: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      idCardNumber: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      occupation: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      birthDate: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      isActive: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true, // Mặc định là true, nghĩa là người dùng đang hoạt động
       },
       createdAt: {
         allowNull: false,
@@ -58,7 +79,7 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Users');
+    await queryInterface.dropTable('User');
   }
 };
 

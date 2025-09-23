@@ -1,20 +1,21 @@
 'use strict';
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Clinic_Manager extends Model {
+  class ClinicManager extends Model {
     static associate(models) {
-      Clinic_Manager.belongsTo(models.User, { foreignKey: 'userId', as: 'manager' });
-      Clinic_Manager.belongsTo(models.Clinic, { foreignKey: 'clinicId', as: 'clinic' });
+      ClinicManager.belongsTo(models.User, { foreignKey: 'userId', as: 'manager' });
+      ClinicManager.belongsTo(models.Clinic, { foreignKey: 'clinicId', as: 'clinic' });
     }
   }
 
-  Clinic_Manager.init({
+  ClinicManager.init({
     userId: DataTypes.INTEGER,
     clinicId: DataTypes.INTEGER,
   }, {
     sequelize,
-    modelName: 'Clinic_Manager',
+    modelName: 'ClinicManager',
+    freezeTableName: true
   });
 
-  return Clinic_Manager;
+  return ClinicManager;
 };

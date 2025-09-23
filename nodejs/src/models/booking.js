@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
                 {
                     foreignKey: 'patientId', targetKey: 'id', as: 'patientData'
                 })
-            Booking.belongsTo(models.Allcode,
+            Booking.belongsTo(models.Allcodes,
                 {
                     foreignKey: 'timeType', targetKey: 'keyMap',
                     as: 'timeTypeDataPatient'
@@ -24,11 +24,11 @@ module.exports = (sequelize, DataTypes) => {
                 {
                     foreignKey: 'doctorId', targetKey: 'id', as: 'doctorData'
                 }) 
-            Booking.belongsTo(models.Allcode,
+            Booking.belongsTo(models.Allcodes,
                 {
                     foreignKey: 'statusId', targetKey: 'keyMap', as: 'statusIdDataPatient'
                 })  
-            Booking.belongsTo(models.Doctor_Infor,
+            Booking.belongsTo(models.DoctorInfor,
                 {
                     foreignKey: 'doctorId', targetKey: 'doctorId', as: 'doctorBooking'
                 })
@@ -51,6 +51,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'Booking',
+        freezeTableName: true
     });
     return Booking;
 };

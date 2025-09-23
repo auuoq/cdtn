@@ -4,9 +4,9 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class ExamPackage extends Model {
         static associate(models) {
-            ExamPackage.belongsTo(models.Allcode, { foreignKey: 'provinceId', targetKey: 'keyMap', as: 'provinceTypeData' });
-            ExamPackage.belongsTo(models.Allcode, { foreignKey: 'paymentId', targetKey: 'keyMap', as: 'paymentTypeData' });
-            ExamPackage.belongsTo(models.Allcode, { foreignKey: 'categoryId', targetKey: 'keyMap', as: 'categoryTypeData' });
+            ExamPackage.belongsTo(models.Allcodes, { foreignKey: 'provinceId', targetKey: 'keyMap', as: 'provinceTypeData' });
+            ExamPackage.belongsTo(models.Allcodes, { foreignKey: 'paymentId', targetKey: 'keyMap', as: 'paymentTypeData' });
+            ExamPackage.belongsTo(models.Allcodes, { foreignKey: 'categoryId', targetKey: 'keyMap', as: 'categoryTypeData' });
             ExamPackage.belongsTo(models.Clinic, { foreignKey: 'clinicId', as: 'clinicInfo' });
         }
     };

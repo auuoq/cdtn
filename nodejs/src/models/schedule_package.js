@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'packageId',
         as: 'packageInfo'
       });
-      SchedulePackage.belongsTo(models.Allcode, {
+      SchedulePackage.belongsTo(models.Allcodes, {
         foreignKey: 'timeType',
         targetKey: 'keyMap',
         as: 'timeTypeData'

@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            Schedule.belongsTo(models.Allcode,
+            Schedule.belongsTo(models.Allcodes,
                 {
                     foreignKey: 'timeType', targetKey: 'keyMap', as: 'timeTypeData'
                 })
@@ -31,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'Schedule',
+        freezeTableName: true
     });
     return Schedule;
 };

@@ -182,6 +182,7 @@ let getDetailClinicById = (inputId) => {
                 let data = await db.Clinic.findOne({
                     where: { id: inputId },
                     attributes: ['name', 'address', 'descriptionHTML', 'descriptionMarkdown', 'image'],
+                    raw: false,
                 });
 
                 if (data) {
@@ -191,7 +192,7 @@ let getDetailClinicById = (inputId) => {
                     }
 
                     // Tìm tất cả các bác sĩ liên kết với phòng khám
-                    let doctorClinic = await db.Doctor_Infor.findAll({
+                    let doctorClinic = await db.DoctorInfor.findAll({
                         where: { clinicId: inputId },
                         attributes: ['doctorId', 'provinceId'],
                     });

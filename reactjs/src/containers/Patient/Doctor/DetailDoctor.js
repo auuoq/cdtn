@@ -38,7 +38,7 @@ class DetailDoctor extends Component {
       if (res && res.errCode === 0) {
         this.setState({
           detailDoctor: res.data,
-          address: res.data.Doctor_Infor.addressClinic || '',
+          address: res.data.DoctorInfor.addressClinic || '',
           loadingMap: false,
         });
       } else {

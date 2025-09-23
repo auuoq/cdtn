@@ -17,7 +17,7 @@ let getDetailClinicByManagerUserId = async (query) => {
             }
 
             // B1: Tìm clinicId mà manager này phụ trách
-            const clinicManagerRecord = await db.Clinic_Manager.findOne({
+            const clinicManagerRecord = await db.ClinicManager.findOne({
                 where: { userId: userId },
                 attributes: ['clinicId']
             });
@@ -35,7 +35,8 @@ let getDetailClinicByManagerUserId = async (query) => {
             // B2: Lấy thông tin phòng khám
             const clinicData = await db.Clinic.findOne({
                 where: { id: clinicId },
-                attributes: ['id', 'name', 'address', 'descriptionHTML', 'descriptionMarkdown', 'image']
+                attributes: ['id', 'name', 'address', 'descriptionHTML', 'descriptionMarkdown', 'image'],
+                raw: false,
             });
 
             if (!clinicData) {
@@ -56,7 +57,7 @@ let getDetailClinicByManagerUserId = async (query) => {
                 doctorFilter.specialtyId = specialtyId;
             }
 
-            let doctorInfors = await db.Doctor_Infor.findAll({
+            let doctorInfors = await db.DoctorInfor.findAll({
                 where: doctorFilter,
                 attributes: ['doctorId', 'provinceId', 'specialtyId'],
             });
@@ -111,7 +112,7 @@ let getClinicByManager = async (userId) => {
             }
 
             // Tìm clinicId mà manager này phụ trách
-            const clinicManagerRecord = await db.Clinic_Manager.findOne({
+            const clinicManagerRecord = await db.ClinicManager.findOne({
                 where: { userId: userId },
                 attributes: ['clinicId']
             });
@@ -169,7 +170,7 @@ let getAllDoctorsByMagager = (userId) => {
             }
 
             // Tìm clinicId mà manager này phụ trách
-            const clinicManagerRecord = await db.Clinic_Manager.findOne({
+            const clinicManagerRecord = await db.ClinicManager.findOne({
                 where: { userId: userId },
                 attributes: ['clinicId']
             });
@@ -185,7 +186,7 @@ let getAllDoctorsByMagager = (userId) => {
             const clinicId = clinicManagerRecord.clinicId;
 
             // Lấy thông tin phòng khám
-            const doctorData = await db.Doctor_Infor.findAll({
+            const doctorData = await db.DoctorInfor.findAll({
                 where: { clinicId },
             });
 
@@ -225,7 +226,7 @@ let getUserBookingsByManager = (userId) => {
                 });
             }
 
-            const clinicManagerRecord = await db.Clinic_Manager.findOne({
+            const clinicManagerRecord = await db.ClinicManager.findOne({
                 where: { userId: userId },
                 attributes: ['clinicId']
             });
@@ -238,7 +239,7 @@ let getUserBookingsByManager = (userId) => {
                 });
             }
 
-            const doctorRecords = await db.Doctor_Infor.findAll({
+            const doctorRecords = await db.DoctorInfor.findAll({
                 where: { clinicId: clinicManagerRecord.clinicId },
                 attributes: ['doctorId']
             });
@@ -271,7 +272,7 @@ let getUserBookingsByManager = (userId) => {
                         attributes: ['email', 'firstName', 'lastName', 'address', 'gender', 'image'],
                         include: [
                             {
-                                model: db.Allcode, as: 'genderData', attributes: ['valueEn', 'valueVi']
+                                model: db.Allcodes, as: 'genderData', attributes: ['valueEn', 'valueVi']
                             }
                         ],
                     },
@@ -281,17 +282,17 @@ let getUserBookingsByManager = (userId) => {
                         attributes: ['email', 'firstName', 'lastName', 'address', 'gender', 'image'],
                         include: [
                             {
-                                model: db.Allcode,
+                                model: db.Allcodes,
                                 as: 'genderData',
                                 attributes: ['valueEn', 'valueVi']
                             }
                         ]
                     },
                     {
-                        model: db.Allcode, as: 'timeTypeDataPatient', attributes: ['valueEn', 'valueVi']
+                        model: db.Allcodes, as: 'timeTypeDataPatient', attributes: ['valueEn', 'valueVi']
                     },
                     {
-                        model: db.Allcode, as: 'statusIdDataPatient', attributes: ['valueEn', 'valueVi']
+                        model: db.Allcodes, as: 'statusIdDataPatient', attributes: ['valueEn', 'valueVi']
                     },
                 ],
                 raw: false,
@@ -333,7 +334,7 @@ let getPackageBookingsByManager = (userId) => {
                 });
             }
 
-            const clinicManager = await db.Clinic_Manager.findOne({
+            const clinicManager = await db.ClinicManager.findOne({
                 where: { userId },
                 attributes: ['clinicId']
             });
@@ -382,7 +383,7 @@ let getPackageBookingsByManager = (userId) => {
                                 attributes: ['name', 'address']
                             },
                             {
-                                model: db.Allcode,
+                                model: db.Allcodes,
                                 as: 'provinceTypeData',
                                 attributes: ['valueVi', 'valueEn']
                             }
@@ -394,19 +395,19 @@ let getPackageBookingsByManager = (userId) => {
                         attributes: ['email', 'firstName', 'lastName', 'gender', 'address', 'image'],
                         include: [
                             {
-                                model: db.Allcode,
+                                model: db.Allcodes,
                                 as: 'genderData',
                                 attributes: ['valueVi', 'valueEn']
                             }
                         ]
                     },
                     {
-                        model: db.Allcode,
+                        model: db.Allcodes,
                         as: 'timeTypeDataPatient',
                         attributes: ['valueVi', 'valueEn']
                     },
                     {
-                        model: db.Allcode,
+                        model: db.Allcodes,
                         as: 'statusIdDataPatient',
                         attributes: ['valueVi', 'valueEn']
                     }
@@ -449,9 +450,9 @@ let getAllClinicManager = () => {
                 },
                 include: [
                     {
-                        model: db.Clinic_Manager,
+                        model: db.ClinicManager,
                         as: 'managedClinics',
-                        attributes: ['clinicId'], // Lấy clinicId từ bảng Clinic_Manager
+                        attributes: ['clinicId'], // Lấy clinicId từ bảng ClinicManager
                         include: [
                             {
                                 model: db.Clinic,
@@ -485,7 +486,7 @@ let assignClinicToManager = (data) => {
             }
 
             // Kiểm tra xem quản lý này đã được gán phòng khám chưa
-            let existingManager = await db.Clinic_Manager.findOne({
+            let existingManager = await db.ClinicManager.findOne({
                 where: { userId: data.userId }
             });
 
@@ -501,7 +502,7 @@ let assignClinicToManager = (data) => {
             }
 
             // Nếu chưa có người quản lý, tạo mới bản ghi
-            await db.Clinic_Manager.create({
+            await db.ClinicManager.create({
                 userId: data.userId,
                 clinicId: data.clinicId
             });
@@ -527,7 +528,7 @@ let getListPatientForPackageManager = async (managerId, date) => {
             }
 
             // Tìm phòng khám mà user này quản lý
-            let clinicManager = await db.Clinic_Manager.findOne({
+            let clinicManager = await db.ClinicManager.findOne({
                 where: { userId: managerId },
             });
             if (!clinicManager) {
@@ -566,7 +567,7 @@ let getListPatientForPackageManager = async (managerId, date) => {
                         attributes: ['id', 'name', 'price', 'image',],
                     },
                     {
-                        model: db.Allcode,
+                        model: db.Allcodes,
                         as: 'timeTypeDataPatient',
                         attributes: ['valueEn', 'valueVi'],
                     }
@@ -664,7 +665,7 @@ let getDepositReportByManager = async (userId, from, to) => {
       }
 
       // Tìm clinicId mà user quản lý
-      const managedClinic = await db.Clinic_Manager.findOne({
+      const managedClinic = await db.ClinicManager.findOne({
         where: { userId },
         attributes: ['clinicId']
       });

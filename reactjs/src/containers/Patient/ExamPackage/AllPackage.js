@@ -45,8 +45,8 @@ const AllPackage = () => {
     try {
       const [clinicRes, categoryRes, provinceRes] = await Promise.all([
         fetch('http://localhost:8080/api/get-clinic'),
-        fetch('http://localhost:8080/api/allcode?type=CATEGORY'),
-        fetch('http://localhost:8080/api/allcode?type=PROVINCE')
+        fetch('http://localhost:8080/api/Allcodes?type=CATEGORY'),
+        fetch('http://localhost:8080/api/Allcodes?type=PROVINCE')
       ]);
 
       const clinicData = await clinicRes.json();

@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
     up: async (queryInterface, Sequelize) => {
-        await queryInterface.createTable('bookings', {
+        await queryInterface.createTable('Booking', {
 
             id: {
                 allowNull: false,
@@ -41,6 +41,18 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: true,  // Được phép null nếu bác sĩ chưa điền chẩn đoán
             },
+            qrCode: {
+                type: Sequelize.BLOB('long'),
+                allowNull: true,
+            },
+            isDisplayed: {
+                type: Sequelize.BOOLEAN,
+                defaultValue: false,
+            },
+            remedyImage: {
+                type: Sequelize.BLOB('long'),
+                allowNull: true,
+            },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE
@@ -52,6 +64,6 @@ module.exports = {
         });
     },
     down: async (queryInterface, Sequelize) => {
-        await queryInterface.dropTable('bookings');
+        await queryInterface.dropTable('Booking');
     }
 };

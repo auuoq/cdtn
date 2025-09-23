@@ -69,8 +69,8 @@ class OutStandingDoctor extends Component {
                                     let nameEn = `${item.positionData?.valueEn || ''}, ${item.firstName} ${item.lastName}`;
 
                                     // Lấy tên chuyên khoa theo language, phòng trường hợp không có specialtyData
-                                    let specialtyNameVi = item.Doctor_Infor?.specialtyData?.name || '';
-                                    let specialtyNameEn = item.Doctor_Infor?.specialtyData?.name || ''; 
+                                    let specialtyNameVi = item.DoctorInfor?.specialtyData?.name || '';
+                                    let specialtyNameEn = item.DoctorInfor?.specialtyData?.name || ''; 
                                     // Nếu bạn có 2 ngôn ngữ cho specialty thì nên chỉnh lại, còn nếu chỉ có 1 tên thì dùng chung
 
                                     return (

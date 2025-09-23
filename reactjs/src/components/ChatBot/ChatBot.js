@@ -31,15 +31,15 @@ function ChatBot() {
           const mapped = json.data
             .filter(
               (doc) =>
-                doc.Doctor_Infor &&
-                doc.Doctor_Infor.specialtyData &&
-                doc.Doctor_Infor.specialtyData.name
+                doc.DoctorInfor &&
+                doc.DoctorInfor.specialtyData &&
+                doc.DoctorInfor.specialtyData.name
             )
             .map((doc) => ({
               name: `${doc.firstName} ${doc.lastName}`,
-              specialty: doc.Doctor_Infor.specialtyData.name.trim().toLowerCase(),
-              clinic: doc.Doctor_Infor.nameClinic || "chưa có phòng khám",
-              advice: `Bạn có thể tham khảo Bác sĩ ${doc.firstName} ${doc.lastName} chuyên khoa ${doc.Doctor_Infor.specialtyData.name.trim()} tại ${doc.Doctor_Infor.nameClinic || "phòng khám chưa rõ"}.`,
+              specialty: doc.DoctorInfor.specialtyData.name.trim().toLowerCase(),
+              clinic: doc.DoctorInfor.nameClinic || "chưa có phòng khám",
+              advice: `Bạn có thể tham khảo Bác sĩ ${doc.firstName} ${doc.lastName} chuyên khoa ${doc.DoctorInfor.specialtyData.name.trim()} tại ${doc.DoctorInfor.nameClinic || "phòng khám chưa rõ"}.`,
             }));
           setDoctorsData(mapped);
         }

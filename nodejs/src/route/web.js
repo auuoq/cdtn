@@ -32,7 +32,7 @@ let initWebRoutes = (app) => {
     router.post('/api/create-new-user', userController.handleCreateNewUser);
     router.put('/api/edit-user', userController.handleEditUser);
     router.delete('/api/delete-user', userController.handleDeleteUser);
-    router.get('/api/allcode', userController.getAllCode);
+    router.get('/api/Allcodes', userController.getAllcodes);
     router.get('/api/get-user-booking', userController.getUserBookings);
     router.delete('/api/delete-appointment', userController.deleteAppointment);
     router.get('/api/get-deposit-info', userController.getDepositInfo);
@@ -99,7 +99,7 @@ let initWebRoutes = (app) => {
     router.get('/api/search-clinic', clinicController.searchClinicByName);
 
 
-    //Clinic_Manager
+    //ClinicManager
     router.get('/api/get-clinic-manager', clinicManagerController.getDetailClinicByManagerUserId);
     router.get('/api/get-clinic-by-manager', clinicManagerController.getClinicByManager);
     router.get('/api/get-all-doctors-by-manager', clinicManagerController.getAllDoctorsByMagager);

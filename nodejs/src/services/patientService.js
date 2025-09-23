@@ -85,7 +85,7 @@ let postBookAppointment = (data) => {
                     schedule.currentNumber += 1;
                     await schedule.save();
                 }
-                const doctorInfor = await db.Doctor_Infor.findOne({
+                const doctorInfor = await db.DoctorInfor.findOne({
                      where: { doctorId: data.doctorId }
                 });
                 if (doctorInfor) {
@@ -95,7 +95,7 @@ let postBookAppointment = (data) => {
             }
 
             // Gửi tin nhắn nội bộ xác nhận đặt lịch
-            const doctorInfo = await db.Doctor_Infor.findOne({
+            const doctorInfo = await db.DoctorInfor.findOne({
                 where: { doctorId: data.doctorId },
                 attributes: ['nameClinic', 'addressClinic']
             });
@@ -595,7 +595,7 @@ const checkBookingByQRCode = (type, token) => {
                             attributes: ['email', 'firstName', 'lastName', 'address'],
                             include: [
                                 {
-                                    model: db.Allcode,
+                                    model: db.Allcodes,
                                     as: 'genderData',
                                     attributes: ['valueEn', 'valueVi'],
                                 },
@@ -607,24 +607,24 @@ const checkBookingByQRCode = (type, token) => {
                             attributes: ['email', 'firstName', 'address', 'gender', 'phonenumber', 'image', 'lastName'],
                             include: [
                                 {
-                                    model: db.Allcode,
+                                    model: db.Allcodes,
                                     as: 'genderData',
                                     attributes: ['valueEn', 'valueVi'],
                                 },
                             ],
                         },
                         {
-                            model: db.Allcode,
+                            model: db.Allcodes,
                             as: 'timeTypeDataPatient',
                             attributes: ['valueEn', 'valueVi'],
                         },
                         {
-                            model: db.Allcode,
+                            model: db.Allcodes,
                             as: 'statusIdDataPatient',
                             attributes: ['valueEn', 'valueVi'],
                         },
                         {
-                            model: db.Doctor_Infor,
+                            model: db.DoctorInfor,
                             as: 'doctorBooking',
                             include: [
                                 {
@@ -659,7 +659,7 @@ const checkBookingByQRCode = (type, token) => {
                             attributes: ['email', 'firstName', 'lastName', 'address'],
                             include: [
                                 {
-                                    model: db.Allcode,
+                                    model: db.Allcodes,
                                     as: 'genderData',
                                     attributes: ['valueEn', 'valueVi'],
                                 },
@@ -678,12 +678,12 @@ const checkBookingByQRCode = (type, token) => {
                             ],
                         },
                         {
-                            model: db.Allcode,
+                            model: db.Allcodes,
                             as: 'timeTypeDataPatient',
                             attributes: ['valueEn', 'valueVi'],
                         },
                         {
-                            model: db.Allcode,
+                            model: db.Allcodes,
                             as: 'statusIdDataPatient',
                             attributes: ['valueEn', 'valueVi'],
                         },

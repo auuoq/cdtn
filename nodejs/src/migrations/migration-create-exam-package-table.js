@@ -52,6 +52,18 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      isDepositRequired: {  
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
+      depositPercent: {  
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        validate: {
+          min: 0,
+          max: 100,
+        },
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

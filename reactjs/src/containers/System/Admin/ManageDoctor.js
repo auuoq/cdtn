@@ -25,7 +25,7 @@ class ManageDoctor extends Component {
             listDoctors: [],
             hasOldData: false,
 
-            //save to doctor_infor table
+            //save to DoctorInfor table
             listPrice: [],
             listPayment: [],
             listProvince: [],
@@ -194,15 +194,15 @@ class ManageDoctor extends Component {
                 selectedSpecialty = ''
                 ;
 
-            if (res.data.Doctor_Infor) {
-                addressClinic = res.data.Doctor_Infor.addressClinic;
-                nameClinic = res.data.Doctor_Infor.nameClinic;
-                note = res.data.Doctor_Infor.note;
-                paymentId = res.data.Doctor_Infor.paymentId;
-                priceId = res.data.Doctor_Infor.priceId;
-                provinceId = res.data.Doctor_Infor.provinceId;
-                specialtyId = res.data.Doctor_Infor.specialtyId;
-                clinicId = res.data.Doctor_Infor.clinicId;
+            if (res.data.DoctorInfor) {
+                addressClinic = res.data.DoctorInfor.addressClinic;
+                nameClinic = res.data.DoctorInfor.nameClinic;
+                note = res.data.DoctorInfor.note;
+                paymentId = res.data.DoctorInfor.paymentId;
+                priceId = res.data.DoctorInfor.priceId;
+                provinceId = res.data.DoctorInfor.provinceId;
+                specialtyId = res.data.DoctorInfor.specialtyId;
+                clinicId = res.data.DoctorInfor.clinicId;
 
                 selectedPayment = listPayment.find(item => {
                     return item && item.value === paymentId;

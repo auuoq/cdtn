@@ -125,8 +125,8 @@ const getUserInfoByEmail = async (email) => {
             };
         }
 
-        // Lấy giá trị giới tính từ bảng allcode
-        let genderCode = await db.Allcode.findOne({
+        // Lấy giá trị giới tính từ bảng Allcodes
+        let genderCode = await db.Allcodes.findOne({
             where: { keyMap: user.gender, type: 'GENDER' }
         });
 
@@ -266,7 +266,7 @@ let updateUserData = (data) => {
 };
 
 
-let getAllCodeService = (typeInput) => {
+let getAllcodesService = (typeInput) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!typeInput) {
@@ -276,11 +276,11 @@ let getAllCodeService = (typeInput) => {
                 })
             } else {
                 let res = {};
-                let allcode = await db.Allcode.findAll({
+                let Allcodes = await db.Allcodes.findAll({
                     where: { type: typeInput }
                 });
                 res.errCode = 0;
-                res.data = allcode;
+                res.data = Allcodes;
                 resolve(res);
             }
 
@@ -305,18 +305,18 @@ let getUserBookings = (userId) => {
                         attributes: ['email', 'firstName', 'address', 'gender', 'phonenumber', 'image', 'lastName'],
                         include: [
                             {
-                                model: db.Allcode, as: 'genderData', attributes: ['valueEn', 'valueVi']
+                                model: db.Allcodes, as: 'genderData', attributes: ['valueEn', 'valueVi']
                             }
                         ],
                     },
                     {
-                        model: db.Allcode, as: 'timeTypeDataPatient', attributes: ['valueEn', 'valueVi']
+                        model: db.Allcodes, as: 'timeTypeDataPatient', attributes: ['valueEn', 'valueVi']
                     },
                     {
-                        model: db.Allcode, as: 'statusIdDataPatient', attributes: ['valueEn', 'valueVi']
+                        model: db.Allcodes, as: 'statusIdDataPatient', attributes: ['valueEn', 'valueVi']
                     },
                     {
-                        model: db.Doctor_Infor,
+                        model: db.DoctorInfor,
                         as: 'doctorBooking',
                         include: [
                             {
@@ -421,12 +421,12 @@ const getDepositInfo = async (appointmentId) => {
             where: { id: appointmentId },
             include: [
                 {
-                    model: db.Doctor_Infor,
+                    model: db.DoctorInfor,
                     as: 'doctorBooking',
                     attributes: ['priceId', 'paymentId', 'addressClinic', 'nameClinic'],
                     include: [
                         {
-                            model: db.Allcode,
+                            model: db.Allcodes,
                             as: 'priceTypeData',
                             attributes: ['valueEn', 'valueVi']
                         }
@@ -564,10 +564,10 @@ let getUserPackageBookings = (userId) => {
             ]
           },
           {
-              model: db.Allcode, as: 'timeTypeDataPatient', attributes: ['valueEn', 'valueVi']
+              model: db.Allcodes, as: 'timeTypeDataPatient', attributes: ['valueEn', 'valueVi']
           },
           {
-              model: db.Allcode, as: 'statusIdDataPatient', attributes: ['valueEn', 'valueVi']
+              model: db.Allcodes, as: 'statusIdDataPatient', attributes: ['valueEn', 'valueVi']
           },
         ],
         raw: false,
@@ -656,7 +656,7 @@ let getDepositInfoPackage = async (appointmentId) => {
           attributes: ['id', 'name', 'price', 'note','isDepositRequired', 'depositPercent','image'],
           include: [
             {
-              model: db.Allcode,
+              model: db.Allcodes,
               as: 'paymentTypeData',    
               attributes: ['valueEn', 'valueVi']
             },
@@ -1071,7 +1071,7 @@ module.exports = {
     createNewUser: createNewUser,
     deleteUser: deleteUser,
     updateUserData: updateUserData,
-    getAllCodeService: getAllCodeService,
+    getAllcodesService: getAllcodesService,
     getUserInfoByEmail: getUserInfoByEmail,
     getUserBookings: getUserBookings,
     deleteAppointment: deleteAppointment,

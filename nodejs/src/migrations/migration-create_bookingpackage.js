@@ -47,6 +47,27 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true
       },
+      qrCode: {
+        type: Sequelize.BLOB('long'),
+        allowNull: true,
+      },
+      depositAmount: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      depositStatus: {
+        type: Sequelize.STRING,
+        allowNull: true, // Hoặc false nếu bạn muốn bắt buộc
+        defaultValue: 'UNPAID', // Có thể là 'PAID' hoặc 'UNPAID'
+      },
+      isDisplayed: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
+      remedyImage: {
+        type: Sequelize.BLOB('long'),
+        allowNull: true,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

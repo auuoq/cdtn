@@ -3,7 +3,7 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class Allcode extends Model {
+    class Allcodes extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
@@ -11,27 +11,28 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            Allcode.hasMany(models.User, { foreignKey: 'positionId', as: 'positionData' })
-            Allcode.hasMany(models.User, { foreignKey: 'gender', as: 'genderData' })
-            Allcode.hasMany(models.Schedule, { foreignKey: 'timeType', as: 'timeTypeData' })
+            Allcodes.hasMany(models.User, { foreignKey: 'positionId', as: 'positionData' })
+            Allcodes.hasMany(models.User, { foreignKey: 'gender', as: 'genderData' })
+            Allcodes.hasMany(models.Schedule, { foreignKey: 'timeType', as: 'timeTypeData' })
 
-            Allcode.hasMany(models.Doctor_Infor, { foreignKey: 'priceId', as: 'priceTypeData' })
-            Allcode.hasMany(models.Doctor_Infor, { foreignKey: 'provinceId', as: 'provinceTypeData' })
-            Allcode.hasMany(models.Doctor_Infor, { foreignKey: 'paymentId', as: 'paymentTypeData' })
+            Allcodes.hasMany(models.DoctorInfor, { foreignKey: 'priceId', as: 'priceTypeData' })
+            Allcodes.hasMany(models.DoctorInfor, { foreignKey: 'provinceId', as: 'provinceTypeData' })
+            Allcodes.hasMany(models.DoctorInfor, { foreignKey: 'paymentId', as: 'paymentTypeData' })
 
-            Allcode.hasMany(models.Booking, { foreignKey: 'timeType', as: 'timeTypeDataPatient' })
+            Allcodes.hasMany(models.Booking, { foreignKey: 'timeType', as: 'timeTypeDataPatient' })
 
         }
     };
 
-    Allcode.init({
+    Allcodes.init({
         keyMap: DataTypes.STRING,
         type: DataTypes.STRING,
         valueEn: DataTypes.STRING,
         valueVi: DataTypes.STRING
     }, {
         sequelize,
-        modelName: 'Allcode',
+        modelName: 'Allcodes', 
+        freezeTableName: true 
     });
-    return Allcode;
+    return Allcodes;
 };

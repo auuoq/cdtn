@@ -11,13 +11,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      User.belongsTo(models.Allcode, { foreignKey: 'positionId', targetKey: 'keyMap', as: 'positionData' })
-      User.belongsTo(models.Allcode, { foreignKey: 'gender', targetKey: 'keyMap', as: 'genderData' })
+      User.belongsTo(models.Allcodes, { foreignKey: 'positionId', targetKey: 'keyMap', as: 'positionData' })
+      User.belongsTo(models.Allcodes, { foreignKey: 'gender', targetKey: 'keyMap', as: 'genderData' })
       User.hasOne(models.Markdown, { foreignKey: 'doctorId' })
-      User.hasOne(models.Doctor_Infor, { foreignKey: 'doctorId' }, { as: 'doctorInfo' })
+      User.hasOne(models.DoctorInfor, { foreignKey: 'doctorId' }, { as: 'doctorInfo' })
       User.hasMany(models.Schedule, { foreignKey: 'doctorId', as: 'doctorData' })
       User.hasMany(models.Booking, { foreignKey: 'patientId', as: 'patientData' })
-      User.hasMany(models.Clinic_Manager, { foreignKey: 'userId', as: 'managedClinics' })
+      User.hasMany(models.ClinicManager, { foreignKey: 'userId', as: 'managedClinics' })
       User.hasMany(models.Message, { foreignKey: 'senderId', as: 'sentMessages' });
       User.hasMany(models.Message, { foreignKey: 'receiverId', as: 'receivedMessages' });
 
@@ -46,6 +46,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
+    freezeTableName: true
   });
   return User;
 };

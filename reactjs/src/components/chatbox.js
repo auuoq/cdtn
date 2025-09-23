@@ -162,7 +162,7 @@ class ChatBox extends Component {
                     alt="doctor"
                   />
                   <span>{`${doc.firstName} ${doc.lastName}`}</span>
-                  <span>{doc.Doctor_Infor.specialtyData.name}</span>
+                  {/* <span>{doc.DoctorInfor.specialtyData.name}</span> */}
                 </button>
               ))}
             </div>

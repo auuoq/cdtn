@@ -7,13 +7,13 @@ const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
 let createExamPackage = (data, userId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const Clinic_Manager = await db.Clinic_Manager.findOne({
+            const ClinicManager = await db.ClinicManager.findOne({
                 where: { userId },
                 attributes: ['clinicId']
             });
 
             if (
-                !Clinic_Manager ||
+                !ClinicManager ||
                 !data.name ||
                 !data.categoryId ||
                 !data.price ||
@@ -31,7 +31,7 @@ let createExamPackage = (data, userId) => {
             let examPackage = await db.ExamPackage.create({
                 name: data.name,
                 categoryId: data.categoryId,
-                clinicId: Clinic_Manager.clinicId,
+                clinicId: ClinicManager.clinicId,
                 price: data.price,
                 provinceId: data.provinceId,
                 paymentId: data.paymentId,
@@ -192,9 +192,9 @@ let searchExamPackageByName = (keyword) => {
                 },
                 include: [
                     { model: db.Clinic, as: 'clinicInfo' },
-                    { model: db.Allcode, as: 'provinceTypeData' },
-                    { model: db.Allcode, as: 'paymentTypeData' },
-                    { model: db.Allcode, as: 'categoryTypeData' }
+                    { model: db.Allcodes, as: 'provinceTypeData' },
+                    { model: db.Allcodes, as: 'paymentTypeData' },
+                    { model: db.Allcodes, as: 'categoryTypeData' }
                 ]
             });
 
@@ -231,7 +231,7 @@ let getExamPackagesDetailByManager = (userId) => {
             }
 
             // Lấy clinicId mà user đang quản lý
-            let manager = await db.Clinic_Manager.findOne({
+            let manager = await db.ClinicManager.findOne({
                 where: { userId },
                 attributes: ['clinicId']
             });
@@ -358,17 +358,17 @@ let getDetailExamPackageById = (packageId) => {
                 where: { id: packageId },
                 include: [
                     {
-                        model: db.Allcode,
+                        model: db.Allcodes,
                         as: 'provinceTypeData',
                         attributes: ['valueEn', 'valueVi'],
                     },
                     {
-                        model: db.Allcode,
+                        model: db.Allcodes,
                         as: 'paymentTypeData',
                         attributes: ['valueEn', 'valueVi'],
                     },
                     {
-                        model: db.Allcode,
+                        model: db.Allcodes,
                         as: 'categoryTypeData',
                         attributes: ['valueEn', 'valueVi'],
                     },
@@ -420,7 +420,7 @@ let getSchedulePackageByDate = (packageId, date) => {
                     },
                     include: [
                         {
-                            model: db.Allcode,
+                            model: db.Allcodes,
                             as: 'timeTypeData',
                             attributes: ['valueEn', 'valueVi']
                         },
@@ -459,7 +459,7 @@ let getListAllExamPackagePatientWithStatusS3 = (managerId) => {
       }
 
       // 1. Lấy danh sách clinicId mà manager quản lý
-      let clinicsManaged = await db.Clinic_Manager.findAll({
+      let clinicsManaged = await db.ClinicManager.findAll({
         where: { userId: managerId },
         attributes: ['clinicId']
       });
@@ -504,14 +504,14 @@ let getListAllExamPackagePatientWithStatusS3 = (managerId) => {
             
             include: [
               {
-                model: db.Allcode,
+                model: db.Allcodes,
                 as: 'genderData',
                 attributes: ['valueVi', 'valueEn']
               }
             ]
           },
           {
-            model: db.Allcode,
+            model: db.Allcodes,
             as: 'timeTypeDataPatient',  // chú ý sửa theo alias model bạn đã định nghĩa
             attributes: ['valueVi', 'valueEn']
           },

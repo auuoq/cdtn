@@ -6,7 +6,7 @@ import HomeHeader from '../../HomePage/HomeHeader';
 import DoctorSchedule from '../Doctor/DoctorSchedule';
 import DoctorExtraInfor from '../Doctor/DoctorExtraInfor';
 import ProfileDoctor from '../Doctor/ProfileDoctor';
-import { getAllDetailSpecialtyById, getAllCodeService } from '../../../services/userService';
+import { getAllDetailSpecialtyById, getAllcodesService } from '../../../services/userService';
 import _ from 'lodash';
 import { LANGUAGES } from '../../../utils';
 import ChatBox from '../../../components/chatbox';
@@ -43,7 +43,7 @@ class DetailSpecialty extends Component {
             location: 'ALL'
         });
 
-        let resProvince = await getAllCodeService('PROVINCE');
+        let resProvince = await getAllcodesService('PROVINCE');
 
         if (res && res.errCode === 0 && resProvince && resProvince.errCode === 0) {
             let data = res.data;

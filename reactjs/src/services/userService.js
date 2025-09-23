@@ -62,8 +62,8 @@ const editUserService = (inputData) => {
     return axios.put('/api/edit-user', inputData);
 }
 
-const getAllCodeService = (inputType) => {
-    return axios.get(`/api/allcode?type=${inputType}`)
+const getAllcodesService = (inputType) => {
+    return axios.get(`/api/Allcodes?type=${inputType}`)
 }
 
 export const changePassword = (data) => {
@@ -352,7 +352,7 @@ const toggleStatusForClinic = (clinicId, from, to) => {
 export {
     handleLoginApi, getAllUsers,
     createNewUserService, deleteUserService,
-    editUserService, getAllCodeService, getTopDoctorHomeService,
+    editUserService, getAllcodesService, getTopDoctorHomeService,
     getAllDoctors, saveDetailDoctorService,
     getDetailInforDoctor, saveBulkScheduleDoctor,
     getScheduleDoctorByDate, getExtraInforDoctorById,

@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            Clinic.hasMany(models.Clinic_Manager, { foreignKey: 'clinicId', as: 'managers' });
+            Clinic.hasMany(models.ClinicManager, { foreignKey: 'clinicId', as: 'managers' });
         }
     };
     Clinic.init({
@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'Clinic',
+        freezeTableName: true
     });
     return Clinic;
 };

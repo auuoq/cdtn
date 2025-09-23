@@ -5,7 +5,7 @@ import * as actions from "../../store/actions";
 import './Register.scss';
 import Lightbox from 'react-image-lightbox';
 import 'react-image-lightbox/style.css';
-import { getAllCodeService } from "../../services/userService";
+import { getAllcodesService } from "../../services/userService";
 import bg from '../../../src/assets/images/bg.jpg';
 class Register extends Component {
     constructor(props) {
@@ -33,7 +33,7 @@ class Register extends Component {
 
     getGenders = async () => {
         try {
-            let response = await getAllCodeService('GENDER');
+            let response = await getAllcodesService('GENDER');
             if (response && response.errCode === 0) {
                 this.setState({
                     genderArr: response.data

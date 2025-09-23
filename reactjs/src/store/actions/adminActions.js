@@ -1,6 +1,6 @@
 import actionTypes from './actionTypes';
 import {
-    getAllCodeService, createNewUserService, getAllUsers,
+    getAllcodesService, createNewUserService, getAllUsers,
     deleteUserService, editUserService, getTopDoctorHomeService,
     getAllDoctors, saveDetailDoctorService, getAllSpecialty,
     getAllClinic, getAllDoctorsByMagager,getAllClinicManager
@@ -15,7 +15,7 @@ export const fetchGenderStart = () => {
     return async (dispatch, getState) => {
         try {
             dispatch({ type: actionTypes.FETCH_GENDER_START })
-            let res = await getAllCodeService("GENDER");
+            let res = await getAllcodesService("GENDER");
             if (res && res.errCode === 0) {
                 dispatch(fetchGenderSuccess(res.data));
             } else {
@@ -59,7 +59,7 @@ export const fetchRoleFailed = () => ({
 export const fetchPositionStart = () => {
     return async (dispatch, getState) => {
         try {
-            let res = await getAllCodeService("POSITION");
+            let res = await getAllcodesService("POSITION");
             if (res && res.errCode === 0) {
                 dispatch(fetchPositionSuccess(res.data));
             } else {
@@ -76,7 +76,7 @@ export const fetchPositionStart = () => {
 export const fetchRoleStart = () => {
     return async (dispatch, getState) => {
         try {
-            let res = await getAllCodeService("ROLE");
+            let res = await getAllcodesService("ROLE");
             if (res && res.errCode === 0) {
                 dispatch(fetchRoleSuccess(res.data));
             } else {
@@ -322,21 +322,21 @@ export const saveDetailDoctor = (data) => {
 export const fetchAllScheduleTime = () => {
     return async (dispatch, getState) => {
         try {
-            let res = await getAllCodeService("TIME");
+            let res = await getAllcodesService("TIME");
             if (res && res.errCode === 0) {
                 dispatch({
-                    type: actionTypes.FETCH_ALLCODE_SCHEDULE_TIME_SUCCESS,
+                    type: actionTypes.FETCH_Allcodes_SCHEDULE_TIME_SUCCESS,
                     dataTime: res.data
                 })
             } else {
                 dispatch({
-                    type: actionTypes.FETCH_ALLCODE_SCHEDULE_TIME_FAILED,
+                    type: actionTypes.FETCH_Allcodes_SCHEDULE_TIME_FAILED,
                 })
             }
         } catch (e) {
-            console.log("FETCH_ALLCODE_SCHEDULE_TIME_FAILED: ", e);
+            console.log("FETCH_Allcodes_SCHEDULE_TIME_FAILED: ", e);
             dispatch({
-                type: actionTypes.FETCH_ALLCODE_SCHEDULE_TIME_FAILED,
+                type: actionTypes.FETCH_Allcodes_SCHEDULE_TIME_FAILED,
             })
         }
     }
@@ -345,10 +345,10 @@ export const fetchAllScheduleTime = () => {
 export const getRequiredDoctorInfo = () => {
     return async (dispatch, getState) => {
         try {
-            dispatch({ type: actionTypes.FETCH_REQUIRED_DOCTOR_INFOR_START })
-            let resPrice = await getAllCodeService("PRICE");
-            let resPayment = await getAllCodeService("PAYMENT");
-            let resProvince = await getAllCodeService("PROVINCE");
+            dispatch({ type: actionTypes.FETCH_REQUIRED_DoctorInfor_START })
+            let resPrice = await getAllcodesService("PRICE");
+            let resPayment = await getAllcodesService("PAYMENT");
+            let resProvince = await getAllcodesService("PROVINCE");
             let resSpecialty = await getAllSpecialty();
             let resClinic = await getAllClinic();
 
@@ -378,10 +378,10 @@ export const getRequiredDoctorInfo = () => {
 }
 
 export const fetchRequiredDoctorInforSuccess = (allRequiredData) => ({
-    type: actionTypes.FETCH_REQUIRED_DOCTOR_INFOR_SUCCESS,
+    type: actionTypes.FETCH_REQUIRED_DoctorInfor_SUCCESS,
     data: allRequiredData
 })
 
 export const fetchRequiredDoctorInforFailed = () => ({
-    type: actionTypes.FETCH_REQUIRED_DOCTOR_INFOR_FAILED
+    type: actionTypes.FETCH_REQUIRED_DoctorInfor_FAILED
 })

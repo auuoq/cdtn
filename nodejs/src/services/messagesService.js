@@ -44,37 +44,21 @@ let getOnlineDoctors = () => {
                     isActive: true,
                     roleId: 'R2'
                 },
-                attributes: {
-                        exclude: ['password']
-                    },
-                    include: [
-                        {
-                            model: db.Markdown,
-                            attributes: ['description', 'contentHTML', 'contentMarkdown']
-                        },
-                        {
-                            model: db.Allcode, as: 'positionData',
-                            attributes: ['valueEn', 'valueVi']
-                        },
-                        {
-                            model: db.Doctor_Infor,
-                            attributes: {
-                                exclude: ['id', 'doctorId']
-                            },
-                            include: [
-                                { model: db.Allcode, as: 'priceTypeData', attributes: ['valueEn', 'valueVi'] },
-                                { model: db.Allcode, as: 'provinceTypeData', attributes: ['valueEn', 'valueVi'] },
-                                { model: db.Allcode, as: 'paymentTypeData', attributes: ['valueEn', 'valueVi'] },
-                                {
-                                    model: db.Specialty,
-                                    as: 'specialtyData',
-                                    attributes: ['id', 'name', 'image'],
-                                    required: false
-                                }
-                            ]
-                        },
-
-                    ],
+                attributes: { exclude: ['password'] },
+                // include: [
+                //     {
+                //         model: db.DoctorInfor,
+                //         as: 'doctorInfo',
+                //         attributes: ['specialtyId'], // lấy thêm specialtyId nếu cần
+                //         include: [
+                //             {
+                //                 model: db.Specialty,
+                //                 as: 'specialtyData',
+                //                 attributes: ['id', 'name', 'image'] // chỉ lấy những field cần
+                //             }
+                //         ]
+                //     }
+                // ]
             });
 
             if (!onlineDoctors || onlineDoctors.length === 0) {
@@ -85,9 +69,11 @@ let getOnlineDoctors = () => {
             }
 
             const formattedDoctors = onlineDoctors.map(doctor => {
-                const doc = doctor.toJSON(); // convert Sequelize instance to plain object
+                // nếu là instance Sequelize thì convert
+                const doc = doctor.toJSON ? doctor.toJSON() : doctor;
+
                 if (doc.image) {
-                    doc.image = new Buffer(doc.image, 'base64').toString('binary');; 
+                    doc.image = Buffer.from(doc.image, 'base64').toString('binary');
                 }
                 return doc;
             });
@@ -103,6 +89,7 @@ let getOnlineDoctors = () => {
         }
     });
 };
+
 
 
 let sendMessage = async (data) => {
