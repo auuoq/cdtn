@@ -7,14 +7,15 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
   logging: false,
   dialectOptions: {
     ssl: {
-      require: true,
-      rejectUnauthorized: false, // Supabase yêu cầu SSL
+      require: true,          // Supabase yêu cầu SSL
+      rejectUnauthorized: false,
     },
+    family: 4,                 // Ép Node.js dùng IPv4
   },
   timezone: "+07:00",
 });
 
-let connectDB = async () => {
+const connectDB = async () => {
   try {
     await sequelize.authenticate();
     console.log('✅ Connection to Supabase has been established successfully.');
