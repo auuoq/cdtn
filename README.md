@@ -1,10 +1,3 @@
-Account (test)
-- admin: admin@gmail.com - password: 11111111
-- doctor: doctor1@gmail.com - password: 11111111
-- user: datbon1810@gmail.com - password: 11111111
-- clinic mangager: manager4@gmail.com - password: 11111111
-
-
 Medical Booking Web App
 
 A full-stack web application that allows patients to easily book doctor appointments and exam packages online. The system supports real-time chat, online/offline doctor availability, payments, and QR-based check-in.
