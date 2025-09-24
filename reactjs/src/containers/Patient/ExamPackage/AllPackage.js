@@ -51,9 +51,9 @@ const AllPackage = () => {
         getAllcodesService('PROVINCE')
       ]);
 
-      setClinics(clinicRes.data.data || []);
-      setCategories(categoryRes.data.data || []);
-      setProvinces(provinceRes.data.data || []);
+      setClinics(clinicRes.data || []);
+      setCategories(categoryRes.data || []);
+      setProvinces(provinceRes.data || []);
     } catch (err) {
       console.error('Lỗi fetch filter:', err);
     }
