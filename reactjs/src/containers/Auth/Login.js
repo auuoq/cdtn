@@ -181,8 +181,34 @@ class Login extends Component {
                   Đăng ký
               </span>
           </div>
+          <div
+            className="demo-account"
+            style={{
+              position: "fixed",
+              bottom: "20px",
+              right: "20px",
+              backgroundColor: "rgba(255,255,255,0.9)",
+              border: "1px solid #ddd",
+              borderRadius: "8px",
+              padding: "12px 16px",
+              fontSize: "14px",
+              boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+              maxWidth: "250px",
+              zIndex: 1000,
+            }}
+          >
+            <h6 style={{ marginBottom: "8px", color: "#75d5ca" }}>Demo Account</h6>
+            <p style={{ margin: 0 }}>- Admin: <b>admin@gmail.com</b><br />PW: 11111111</p>
+            <p style={{ margin: 0 }}>- Doctor: <b>doctor1@gmail.com</b><br />PW: 11111111</p>
+            <p style={{ margin: 0 }}>- User: <b>datbon1810@gmail.com</b><br />PW: 11111111</p>
+            <p style={{ margin: 0 }}>- clinic manager: <b>manager4@gmail.com</b><br />PW: 11111111</p>
+          </div>
+
         </div>
       </div>
+    
+     
+
     );
   }
 }
