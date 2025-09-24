@@ -3,7 +3,7 @@ import HomeHeader from '../../HomePage/HomeHeader';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Link } from 'react-router-dom';
 import './AllPackage.scss';
-import ChatBox from '../../../components/chatbox';
+import { getAllExamPackages, getAllClinic, getAllcodesService } from '../../../services/examPackageService';
 
 const AllPackage = () => {
   const [data, setData] = useState([]);
@@ -26,10 +26,12 @@ const AllPackage = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/get-all-exam-packages');
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const result = await response.json();
-      setData(result.data);
+      const response = await getAllExamPackages();
+      if (response && response.data) {
+        setData(response.data);
+      } else {
+        setError('Failed to fetch data');
+      }
     } catch (err) {
       console.error('Fetch error:', err);
       setError(err.message);
@@ -44,18 +46,14 @@ const AllPackage = () => {
   const fetchFilters = async () => {
     try {
       const [clinicRes, categoryRes, provinceRes] = await Promise.all([
-        fetch('http://localhost:8080/api/get-clinic'),
-        fetch('http://localhost:8080/api/Allcodes?type=CATEGORY'),
-        fetch('http://localhost:8080/api/Allcodes?type=PROVINCE')
+        getAllClinic(),
+        getAllcodesService('CATEGORY'),
+        getAllcodesService('PROVINCE')
       ]);
 
-      const clinicData = await clinicRes.json();
-      const categoryData = await categoryRes.json();
-      const provinceData = await provinceRes.json();
-
-      setClinics(clinicData.data || []);
-      setCategories(categoryData.data || []);
-      setProvinces(provinceData.data || []);
+      setClinics(clinicRes.data.data || []);
+      setCategories(categoryRes.data.data || []);
+      setProvinces(provinceRes.data.data || []);
     } catch (err) {
       console.error('Lỗi fetch filter:', err);
     }
