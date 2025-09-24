@@ -37,7 +37,8 @@ module.exports = {
         type: Sequelize.STRING
       },
       image: {
-        type: Sequelize.BLOB('long')
+        type: Sequelize.BLOB('long'),
+        allowNull: true
       },
       resetPasswordToken: {
         type: Sequelize.STRING,   // Token dùng để reset mật khẩu
