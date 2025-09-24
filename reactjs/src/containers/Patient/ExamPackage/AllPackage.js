@@ -3,7 +3,7 @@ import HomeHeader from '../../HomePage/HomeHeader';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Link } from 'react-router-dom';
 import './AllPackage.scss';
-import { getAllExamPackages, getAllClinic, getAllcodesService } from '../../../services/examPackageService';
+import { getAllExamPackages, getAllClinic, getAllcodesService } from '../../../services/userService';
 
 const AllPackage = () => {
   const [data, setData] = useState([]);
